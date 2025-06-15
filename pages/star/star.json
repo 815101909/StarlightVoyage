@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "星河",
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#0F1A38",
+  "backgroundTextStyle": "light",
+  "disableScroll": true,
+  "usingComponents": {}
+} 

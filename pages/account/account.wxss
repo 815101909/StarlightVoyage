@@ -1,0 +1,211 @@
+/* pages/account/account.wxss */
+
+.account-page {
+  padding-bottom: 40rpx;
+  background-color: #f7f9fc;
+}
+
+.page-header {
+  padding: 30rpx;
+  background-color: #fff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.page-title {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 500rpx;
+}
+
+.loading-icon {
+  width: 80rpx;
+  height: 80rpx;
+  border: 6rpx solid #e9ecef;
+  border-top: 6rpx solid #3778FF;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  margin-top: 20rpx;
+  font-size: 28rpx;
+  color: #666;
+}
+
+.section-title {
+  margin: 20rpx 0;
+  padding: 0 30rpx;
+  font-size: 28rpx;
+  color: #666;
+  font-weight: 500;
+}
+
+/* 基本信息区域 */
+.info-section {
+  margin: 20rpx 0;
+  background-color: #fff;
+  border-radius: 10rpx;
+  overflow: hidden;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.info-item:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.info-value {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.info-value-container {
+  display: flex;
+  align-items: center;
+}
+
+.action-text {
+  margin-left: 20rpx;
+  font-size: 26rpx;
+  color: #3778FF;
+}
+
+/* 安全设置区域 */
+.security-section {
+  margin: 20rpx 0;
+  background-color: #fff;
+  border-radius: 10rpx;
+  overflow: hidden;
+}
+
+.security-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.security-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.security-label {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 6rpx;
+}
+
+.security-desc {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.action-arrow {
+  font-size: 30rpx;
+  color: #ccc;
+}
+
+/* 登录设备区域 */
+.devices-section {
+  margin: 20rpx 0;
+  background-color: #fff;
+  border-radius: 10rpx;
+  overflow: hidden;
+}
+
+.devices-list {
+  padding: 0 20rpx;
+}
+
+.device-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx 10rpx;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.device-item:last-child {
+  border-bottom: none;
+}
+
+.device-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.device-name {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.device-time {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 6rpx;
+}
+
+.device-current {
+  font-size: 22rpx;
+  color: #3778FF;
+  background-color: rgba(55, 120, 255, 0.1);
+  padding: 4rpx 12rpx;
+  border-radius: 4rpx;
+  display: inline-block;
+}
+
+.device-logout {
+  font-size: 26rpx;
+  color: #f56c6c;
+}
+
+/* 账号注销区域 */
+.deactivate-section {
+  margin: 40rpx 0;
+  padding: 0 30rpx;
+  text-align: center;
+}
+
+.deactivate-button {
+  display: inline-block;
+  padding: 20rpx 40rpx;
+  font-size: 28rpx;
+  color: #f56c6c;
+  border: 1px solid #f56c6c;
+  border-radius: 8rpx;
+  background-color: #fff;
+}
+
+.deactivate-hint {
+  display: block;
+  margin-top: 20rpx;
+  font-size: 24rpx;
+  color: #999;
+} 

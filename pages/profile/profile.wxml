@@ -1,0 +1,158 @@
+<view class="container profile-page">
+  <!-- 星空背景 -->
+  <view class="profile-bg"></view>
+  
+  <!-- 用户信息卡片 -->
+  <view class="user-card">
+    <view class="avatar-section">
+      <view wx:if="{{!isLoggedIn || !userInfo.avatarUrl}}" class="default-avatar">
+        <text class="avatar-text">界</text>
+      </view>
+      <image wx:else class="avatar" src="{{userInfo.avatarUrl}}"></image>
+    </view>
+    <view class="user-info">
+      <!-- 已登录显示用户名 -->
+      <view wx:if="{{isLoggedIn}}" class="username">{{userInfo.nickName}}</view>
+      <!-- 未登录显示登录按钮 -->
+      <view wx:else class="login-btn" bindtap="navigateToLogin">注册/登录</view>
+      
+      <!-- 已登录显示标签 -->
+      <view wx:if="{{isLoggedIn}}" class="user-tags">
+        <view class="user-tag" wx:for="{{userInfo.tags}}" wx:key="*this">{{tagNames[item]}}</view>
+      </view>
+    </view>
+    <view class="edit-profile" bindtap="{{isLoggedIn ? 'editProfile' : 'showLoginTip'}}">编辑</view>
+  </view>
+  
+  <!-- 学习目标卡片 -->
+  <view class="goal-card">
+    <view class="goal-header">
+      <text class="goal-title">我的学习目标</text>
+    </view>
+    <!-- 已登录且有学习目标时显示 -->
+    <view wx:if="{{isLoggedIn && userInfo.learningGoal}}" class="goal-content">
+      <text class="goal-icon">🎯</text>
+      <text class="goal-content-text">{{userInfo.learningGoal}}</text>
+    </view>
+    <!-- 已登录但无学习目标 -->
+    <view wx:elif="{{isLoggedIn && !userInfo.learningGoal}}" class="goal-content goal-empty">
+      <text class="goal-content-text">您还没有设置学习目标，请前往编辑按钮设置～</text>
+    </view>
+    <!-- 未登录状态 -->
+    <view wx:else class="goal-content goal-empty">
+      <text class="goal-content-text">请前往编辑按钮中选择学习目标～</text>
+    </view>
+  </view>
+  
+  <!-- 功能按钮区域 -->
+  <view class="function-container">
+    <!-- 收藏按钮 -->
+    <view class="function-item" bindtap="showCollectionInfo">
+      <text class="function-emoji">⭐</text>
+      <text class="function-text">收藏</text>
+    </view>
+    
+    <!-- 客服按钮 -->
+    <view class="function-item" bindtap="contactCustomerService">
+      <text class="function-emoji">💬</text>
+      <text class="function-text">客服</text>
+    </view>
+    
+    <!-- 记录按钮 -->
+    <view class="function-item" bindtap="navigateTo" data-path="/pages/record/record">
+      <text class="function-emoji">📝</text>
+      <text class="function-text">记录</text>
+    </view>
+    
+    <!-- 系统按钮 -->
+    <view class="function-item" bindtap="aboutSystem">
+      <text class="function-emoji">📱</text>
+      <text class="function-text">系统</text>
+    </view>
+  </view>
+  
+  <!-- 会员和星球转盘按钮 -->
+  <view class="action-buttons">
+    <view class="action-button full-width membership-button" bindtap="openMemberCenter">
+      <image class="action-icon" src="/pages/profile/images/会员中心.jpg" mode="aspectFit"></image>
+      <view class="action-content">
+        <text class="action-text">会员中心</text>
+        <text class="action-desc">{{userInfo.memberLevel > 0 ? '已开通 · 有效期至 ' + userInfo.expireDate : '未开通 · 立即加入会员学习'}}</text>
+      </view>
+    </view>
+    
+    <view class="action-button full-width starcard-button" bindtap="openStarCheckin">
+      <image class="action-icon" src="/pages/profile/images/星空打卡.jpg" mode="aspectFit"></image>
+      <view class="action-content">
+        <text class="action-text">星空打卡</text>
+        <text class="action-desc">{{hasCheckedInToday ? '今日已打卡 · 已连续打卡' + userInfo.checkinDays + '天' : '今日未打卡 · 已连续打卡' + userInfo.checkinDays + '天'}}</text>
+      </view>
+      <view class="checkin-badge" wx:if="{{!hasCheckedInToday}}">今日未打卡</view>
+    </view>
+
+    <view class="action-button full-width planet-wheel-button" bindtap="navigateToPlanetWheel">
+      <image class="action-icon" src="/pages/profile/images/星球转盘.jpg" mode="aspectFit"></image>
+      <view class="action-content">
+        <text class="action-text">星球转盘</text>
+        <text class="action-desc">转动转盘，发现你的专属星球</text>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 近期活动记录 -->
+  <view class="activity-section">
+    <view class="section-header">
+      <text class="section-title">近期活动</text>
+      <text class="section-more" bindtap="navigateTo" data-path="/pages/activity-history/activity-history">查看全部</text>
+    </view>
+    
+    <view class="activity-list">
+      <block wx:if="{{activities.length > 0}}">
+        <view wx:for="{{activities}}" wx:key="id" class="activity-item">
+          <view class="activity-icon {{item.type === 'collection' ? 'activity-collection-icon' : item.type === 'community' ? 'activity-community-icon' : item.type + '-icon'}}"></view>
+          <view class="activity-content">
+            <view class="activity-title">{{item.title}}</view>
+            <view class="activity-time">{{item.time}}</view>
+          </view>
+        </view>
+      </block>
+      <view wx:else class="empty-activity">
+        <text>暂无活动记录</text>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 底部设置菜单 -->
+  <view class="setting-section">
+    <view class="setting-title">设置</view>
+    <view class="setting-menu">
+      <view wx:if="{{isLoggedIn}}" class="setting-item" bindtap="navigateTo" data-path="/pages/account/account">
+        <text class="setting-label">账号与安全</text>
+        <text class="setting-value">></text>
+      </view>
+      <view class="setting-item" bindtap="cleanCache">
+        <text class="setting-label">缓存管理</text>
+        <text class="setting-value">></text>
+      </view>
+      <view class="setting-item" bindtap="aboutApp">
+        <text class="setting-label">关于晓视界</text>
+        <text class="setting-value">></text>
+      </view>
+      <view wx:if="{{isLoggedIn}}" class="setting-item logout-item" bindtap="logout">
+        <text class="setting-label logout-label">退出登录</text>
+        <text class="setting-value">></text>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 底部 -->
+  <view class="footer">
+    <text class="footer-text">探索星空，记录星际之旅</text>
+  </view>
+  
+  <!-- 加载中状态 -->
+  <view class="loading-container" wx:if="{{isLoading}}">
+    <view class="loading-icon"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+</view>

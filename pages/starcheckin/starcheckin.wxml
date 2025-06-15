@@ -1,0 +1,131 @@
+<view class="container starcheckin-page">
+  <!-- 星空背景 -->
+  <view class="starry-bg"></view>
+  
+  <!-- 加载中 -->
+  <view class="loading-container" wx:if="{{isLoading}}">
+    <view class="loading-icon"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+  
+  <block wx:if="{{!isLoading}}">
+    <!-- 打卡信息栏 -->
+    <view class="checkin-info">
+      <view class="info-card">
+        <view class="info-item">
+          <text class="info-label">累计打卡</text>
+          <text class="info-value">{{checkinInfo.totalDays}}天</text>
+        </view>
+        <view class="info-item">
+          <text class="info-label">连续打卡</text>
+          <text class="info-value">{{checkinInfo.continuousDays}}天</text>
+        </view>
+      </view>
+      
+      <!-- 打卡按钮 -->
+      <view class="checkin-btn {{checkinInfo.todayChecked ? 'checked' : ''}}" bindtap="doCheckin">
+        <view class="btn-inner">
+          <text class="btn-text">{{checkinInfo.todayChecked ? '今日已打卡' : '今日打卡'}}</text>
+          <text class="btn-desc" wx:if="{{checkinInfo.todayChecked}}">每日打卡解锁星体</text>
+          <text class="btn-desc" wx:else>每日打卡解锁星体</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 日历区域 -->
+    <view class="calendar-container">
+      <view class="calendar-header">
+        <view class="header-left" bindtap="prevMonth">
+          <text class="arrow">←</text>
+        </view>
+        <view class="header-title">
+          <text>{{year}}年{{month}}月</text>
+        </view>
+        <view class="header-right" bindtap="nextMonth">
+          <text class="arrow">→</text>
+        </view>
+      </view>
+      
+      <!-- 星期标题 -->
+      <view class="week-header">
+        <view class="week-cell" wx:for="{{['日', '一', '二', '三', '四', '五', '六']}}" wx:key="*this">
+          <text>{{item}}</text>
+        </view>
+      </view>
+      
+      <!-- 日历主体 -->
+      <view class="calendar-body">
+        <block wx:for="{{weeks}}" wx:for-item="week" wx:for-index="weekIdx" wx:key="weekIdx">
+          <view class="week-row">
+            <block wx:for="{{week}}" wx:for-item="day" wx:key="day">
+              <view 
+                class="day-cell {{!day.isCurrentMonth ? 'day-other-month' : ''}} {{day.isToday ? 'day-today' : ''}} {{day.hasCheckin ? 'day-has-checkin' : ''}}"
+                bindtap="{{day.hasCheckin ? 'tapDayItem' : ''}}"
+                data-date="{{day.date}}"
+              >
+                <view class="day-number">{{day.day}}</view>
+                <view class="checkin-icon" wx:if="{{day.hasCheckin}}">
+                  <text class="icon-star">★</text>
+                </view>
+              </view>
+            </block>
+          </view>
+        </block>
+      </view>
+      
+      <!-- 日历说明 -->
+      <view class="calendar-legend">
+        <view class="legend-item">
+          <view class="legend-icon checked"></view>
+          <text class="legend-text">已打卡</text>
+        </view>
+        <view class="legend-item">
+          <text class="legend-text">点击打卡日期查看星体</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 每日正能量 -->
+    <view class="daily-quote">
+      <text class="quote-title">每日正能量</text>
+      <view class="quote-content">
+        <text class="quote-text">{{dailyQuote.content || '探索星空，发现未知的宇宙奥秘，每一次仰望都是心灵的旅行。'}}</text>
+        <text class="quote-author" wx:if="{{dailyQuote.author}}">——{{dailyQuote.author}}</text>
+      </view>
+    </view>
+  </block>
+  
+  <!-- 星体详情弹窗 -->
+  <view class="celestial-modal" wx:if="{{showCelestialDetail}}">
+    <view class="modal-mask" bindtap="closeCelestialDetail"></view>
+    <view class="modal-content">
+      <view class="modal-close" bindtap="closeCelestialDetail">×</view>
+      <view class="celestial-header">
+        <text class="celestial-name">{{currentCelestial.name}}</text>
+        <text class="celestial-type">{{currentCelestial.type === 'planet' ? '行星' : 
+                                      currentCelestial.type === 'star' ? '恒星' : 
+                                      currentCelestial.type === 'galaxy' ? '星系' : 
+                                      currentCelestial.type === 'nebula' ? '星云' : 
+                                      currentCelestial.type === 'satellite' ? '卫星' : 
+                                      currentCelestial.type === 'blackhole' ? '黑洞' : 
+                                      currentCelestial.type === 'constellation' ? '星座' : 
+                                      currentCelestial.type === 'comet' ? '彗星' : 
+                                      currentCelestial.type === 'meteor' ? '流星' : 
+                                      currentCelestial.type === 'cluster' ? '星团' : 
+                                      currentCelestial.type === 'dwarf' ? '矮行星' : 
+                                      currentCelestial.type === 'deepspace' ? '深空天体' : 
+                                      currentCelestial.type === 'artificial' ? '人造天体' : '天体'}}</text>
+      </view>
+      <view class="celestial-image-container">
+        <image class="celestial-image" src="{{currentCelestial.image}}" mode="aspectFit"></image>
+      </view>
+      <view class="celestial-info">
+        <text class="celestial-description">{{currentCelestial.description}}</text>
+        <view class="checkin-timestamp">
+          <text>打卡日期: {{currentCelestial.checkinDate}}</text>
+          <text>打卡时间: {{currentCelestial.checkinTime}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view> 

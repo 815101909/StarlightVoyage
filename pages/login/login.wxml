@@ -1,0 +1,50 @@
+<view class="container login-page">
+  <!-- 星空背景 -->
+  <view class="page-bg"></view>
+  
+  <!-- 头部Logo -->
+  <view class="header">
+    <view class="logo-container">
+      <view class="logo-avatar">
+        <text class="logo-text">界</text>
+      </view>
+    </view>
+    <view class="app-name">晓视界</view>
+    <view class="app-slogan">探索星空，记录星际之旅</view>
+  </view>
+  
+  <!-- 登录选项 -->
+  <view class="login-options">
+    <!-- 微信一键登录 -->
+    <button class="login-btn wechat-login" open-type="getUserInfo" bindgetuserinfo="getUserInfo">
+      <view style="display:flex; align-items:center; justify-content:center; margin-left:-25rpx;">
+        <image class="btn-icon" src="/assets/icons/wechat.png" mode="aspectFit"></image>
+        <text>微信登录</text>
+      </view>
+    </button>
+    
+    <!-- 手机号登录 -->
+    <button class="login-btn phone-login" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber">
+      <view style="display:flex; align-items:center; justify-content:center; margin-left:-25rpx;">
+        <image class="btn-icon" src="/assets/icons/phone.png" mode="aspectFit"></image>
+        <text>手机号登录</text>
+      </view>
+    </button>
+  </view>
+  
+  <!-- 隐私政策声明 -->
+  <view class="privacy-policy">
+    <checkbox checked="{{policyChecked}}" bindtap="togglePolicy" color="#7D9FF4" />
+    <view class="policy-text">
+      登录即代表您已阅读并同意
+      <text class="policy-link" bindtap="viewUserAgreement">《用户协议》</text>
+      和
+      <text class="policy-link" bindtap="viewPrivacyPolicy">《隐私政策》</text>
+    </view>
+  </view>
+  
+  <!-- 游客模式 -->
+  <view class="guest-login" bindtap="guestLogin">
+    <text>先逛逛，稍后再登录</text>
+  </view>
+</view> 

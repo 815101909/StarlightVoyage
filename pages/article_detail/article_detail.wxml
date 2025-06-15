@@ -1,0 +1,112 @@
+<!--pages/article_detail/article_detail.wxml-->
+<view class="article-container">
+  <!-- Star background animation -->
+  <view class="star-bg"></view>
+  
+  <!-- Article header with cover -->
+  <view class="article-header">
+    <view class="header-content">
+      <image class="article-cover" src="{{article.coverUrl}}" mode="aspectFill"></image>
+      <view class="article-info">
+        <view class="article-title">{{article.title}}</view>
+        <view class="article-meta">
+          <text class="article-date">{{article.date}}</text>
+          <text class="article-tag">{{article.tag}}</text>
+        </view>
+        <!-- Wavy line divider with 晓视界 text -->
+        <view class="wavy-divider">
+          <view class="wavy-line left"></view>
+          <text class="divider-text">晓视界</text>
+          <view class="wavy-line right"></view>
+        </view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- Control bar -->
+  <view class="control-bar">
+    <view class="button-row">
+      <view class="action-btn read-btn" bindtap="readArticle" hover-class="hover">
+        <text class="icon-read">🔊</text>
+        <text>朗读</text>
+      </view>
+      <view class="action-btn bookmark-btn" bindtap="bookmarkArticle" hover-class="hover">
+        <text class="icon-bookmark">{{isBookmarked ? '★' : '☆'}}</text>
+        <text>收藏</text>
+      </view>
+      <view class="action-btn print-btn" bindtap="printArticle" hover-class="hover">
+        <text class="icon-print">🖨️</text>
+        <text>打印</text>
+      </view>
+      <view class="action-btn exercise-btn" bindtap="showExercises" hover-class="hover">
+        <text class="icon-exercise">📝</text>
+        <text>习题</text>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 思考题框 -->
+  <view class="thinking-question-box">
+    <view class="thinking-question-header">
+      <text class="thinking-icon">💭</text>
+      <text class="thinking-title">思考</text>
+    </view>
+    <view class="thinking-question-content">
+      <text class="question-text">{{article.thinkingQuestion || '通过阅读本文，你认为人类探索宇宙的意义是什么？未来的太空探索会给我们带来哪些改变？'}}</text>
+    </view>
+    <view class="thinking-question-tips">
+      <text class="tips-text">小提示: 思考这个问题可以帮助你更深入地理解文章内容</text>
+    </view>
+  </view>
+  
+  <!-- Article content -->
+  <scroll-view scroll-y class="article-content" style="font-size: {{fontSize}}rpx">
+    <!-- Text box 1 -->
+    <view class="content-box intro-box">
+      <view class="indented-paragraph">
+        <text class="first-char">{{article.introFirstChar}}</text>
+        <text>{{article.introRest}}</text>
+      </view>
+    </view>
+    
+    <!-- First image between text box 1 and 2 -->
+    <view class="standalone-image-container">
+      <image 
+        src="{{article.firstContentImage}}" 
+        mode="widthFix" 
+        class="standalone-image"
+        bindtap="previewImage"
+        data-image="{{article.firstContentImage}}"></image>
+      <view class="image-caption">{{article.firstImageCaption}}</view>
+    </view>
+    
+    <!-- Text box 2 without image -->
+    <view class="content-box main-content-box">
+      <view class="content-section">
+        <view class="indented-paragraph">
+          <text class="first-char">{{article.contentPart1FirstChar}}</text>
+          <text>{{article.contentPart1Rest}}</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- Second image between text box 2 and 3 -->
+    <view class="standalone-image-container">
+      <image 
+        src="{{article.contentImage}}" 
+        mode="widthFix" 
+        class="standalone-image"
+        bindtap="previewImage"
+        data-image="{{article.contentImage}}"></image>
+      <view class="image-caption">{{article.imageCaption}}</view>
+    </view>
+    
+    <!-- Text box 3 -->
+    <view class="content-box conclusion-box">
+      <view class="indented-paragraph">
+        <text class="first-char">{{article.conclusionFirstChar}}</text>
+        <text>{{article.conclusionRest}}</text>
+      </view>
+    </view>
+  </scroll-view>
+</view> 

@@ -1,0 +1,58 @@
+{
+  "pages": [
+    "pages/welcome/welcome",
+    "pages/star/star",
+    "pages/observe/observe",
+    "pages/sky/sky",
+    "pages/explore/explore",
+    "pages/profile/profile",
+    "pages/profile_edit/profile_edit",
+    "pages/detail/detail",
+    "pages/article_detail/article_detail",
+    "pages/exercises/exercises",
+    "pages/print_page/print_page",
+    "pages/login/login"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#0F1A38",
+    "navigationBarTitleText": "晓视界",
+    "navigationBarTextStyle": "white"
+  },
+  "tabBar": {
+    "color": "#8a8a8a",
+    "selectedColor": "#7D9FF4",
+    "backgroundColor": "#0F1A38",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/star/star",
+        "text": "✨ 星河"
+      },
+      {
+        "pagePath": "pages/observe/observe",
+        "text": "✨ 观测"
+      },
+      {
+        "pagePath": "pages/sky/sky",
+        "text": "✨ 星空"
+      },
+      {
+        "pagePath": "pages/explore/explore",
+        "text": "✨ 探索"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "✨ 我的"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents",
+  "permission": {
+    "scope.userLocation": {
+      "desc": "您的位置信息将用于获取当地天文观测条件"
+    }
+  }
+} 

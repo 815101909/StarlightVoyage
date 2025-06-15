@@ -1,0 +1,281 @@
+/* pages/exercises/exercises.wxss */
+.exercises-container {
+  min-height: 100vh;
+  background-color: #0F1A38;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Star background */
+.star-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, #081020 0%, #0F1A38 50%, #1A2C57 100%);
+  z-index: -1;
+}
+
+.star-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(1px 1px at 25px 5px, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0)),
+    radial-gradient(1px 1px at 50px 25px, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0)),
+    radial-gradient(1px 1px at 125px 20px, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0)),
+    radial-gradient(2px 2px at 70px 90px, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0)),
+    radial-gradient(2px 2px at 175px 125px, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0));
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  z-index: -1;
+}
+
+/* Exercises header */
+.exercises-header {
+  padding: 30rpx;
+  text-align: center;
+}
+
+.exercises-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 16rpx;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Exercises content */
+.exercises-content {
+  flex: 1;
+  padding: 0 30rpx 40rpx;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.exercises-instruction {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 28rpx;
+  margin-bottom: 30rpx;
+  text-align: center;
+}
+
+.exercise-list {
+  display: flex;
+  flex-direction: column;
+  gap: 30rpx;
+  margin-bottom: 40rpx;
+  width: 100%;
+}
+
+.exercise-item {
+  background-color: rgba(20, 35, 65, 0.6);
+  border-radius: 16rpx;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  padding: 24rpx;
+  color: white;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.exercise-question {
+  font-size: 30rpx;
+  margin-bottom: 20rpx;
+  line-height: 1.5;
+  word-wrap: break-word;
+  word-break: break-all;
+  max-width: 100%;
+}
+
+/* Options list for multiple choice */
+.options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  width: 100%;
+}
+
+.option-item {
+  padding: 16rpx 20rpx;
+  border-radius: 8rpx;
+  background-color: rgba(65, 105, 225, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 28rpx;
+  transition: all 0.2s;
+  word-wrap: break-word;
+  word-break: break-all;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.option-item.selected {
+  background-color: rgba(65, 105, 225, 0.4);
+  border-color: rgba(125, 159, 244, 0.5);
+}
+
+.option-item:active {
+  transform: scale(0.98);
+}
+
+/* Blank fill-in input */
+.blank-answer {
+  display: none;
+}
+
+.blank-answer input {
+  display: none;
+}
+
+/* Submit button */
+.submit-area {
+  margin-top: 40rpx;
+  display: flex;
+  justify-content: center;
+}
+
+.submit-btn {
+  background: linear-gradient(135deg, #7D9FF4, #4169E1);
+  color: white;
+  border: none;
+  padding: 16rpx 60rpx;
+  border-radius: 50rpx;
+  font-size: 30rpx;
+  box-shadow: 0 4px 12px rgba(65, 105, 225, 0.3);
+  transition: all 0.3s;
+}
+
+.submit-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 6px rgba(65, 105, 225, 0.2);
+}
+
+/* Empty state */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 30rpx;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+}
+
+.empty-icon {
+  width: 100rpx;
+  height: 100rpx;
+  margin-bottom: 20rpx;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  margin-bottom: 10rpx;
+}
+
+.empty-subtext {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* 得分和鼓励语显示区域 */
+.result-area {
+  background-color: rgba(20, 35, 65, 0.7);
+  border-radius: 16rpx;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  text-align: center;
+  color: white;
+}
+
+.score-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.score-value {
+  font-size: 80rpx;
+  font-weight: bold;
+  color: #7D9FF4;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.score-label {
+  font-size: 24rpx;
+  opacity: 0.7;
+  margin-top: 8rpx;
+}
+
+.encouragement {
+  font-size: 28rpx;
+  line-height: 1.5;
+  padding: 0 20rpx;
+}
+
+/* 答案解析 */
+.answer-explanation {
+  margin-top: 24rpx;
+  padding-top: 20rpx;
+  border-top: 1px dashed rgba(255, 255, 255, 0.2);
+}
+
+.correct-answer {
+  font-size: 26rpx;
+  color: #7DFF94;
+  margin-bottom: 10rpx;
+  font-weight: 500;
+}
+
+.explanation-text {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.6;
+}
+
+/* 选项状态 */
+.option-item.correct {
+  background-color: rgba(125, 255, 148, 0.3);
+  border-color: rgba(125, 255, 148, 0.6);
+}
+
+.option-item.wrong {
+  background-color: rgba(255, 125, 125, 0.3);
+  border-color: rgba(255, 125, 125, 0.6);
+}
+
+/* 重试按钮 */
+.retry-btn {
+  background: linear-gradient(135deg, #8A9EAD, #5E738C);
+  color: white;
+  border: none;
+  padding: 16rpx 60rpx;
+  border-radius: 50rpx;
+  font-size: 30rpx;
+  box-shadow: 0 4px 12px rgba(94, 115, 140, 0.3);
+  transition: all 0.3s;
+}
+
+.retry-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 6px rgba(94, 115, 140, 0.2);
+} 

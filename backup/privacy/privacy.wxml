@@ -1,0 +1,68 @@
+<view class="container privacy-page">
+  <!-- 标签栏 -->
+  <view class="tab-container">
+    <view class="tab-item {{activeTab === 0 ? 'active' : ''}}" bindtap="switchTab" data-index="0">
+      <text class="tab-text">隐私政策</text>
+    </view>
+    <view class="tab-item {{activeTab === 1 ? 'active' : ''}}" bindtap="switchTab" data-index="1">
+      <text class="tab-text">用户协议</text>
+    </view>
+  </view>
+  
+  <!-- 加载中 -->
+  <view class="loading-container" wx:if="{{isLoading}}">
+    <view class="loading-icon"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+  
+  <!-- 隐私政策内容 -->
+  <scroll-view 
+    scroll-y="true" 
+    class="content-scroll" 
+    wx:if="{{!isLoading && activeTab === 0}}"
+    scroll-top="{{scrollTop}}">
+    <view class="content-container">
+      <view class="content-header">
+        <text class="content-title">{{privacyPolicy.title}}</text>
+        <text class="content-update">最后更新: {{privacyPolicy.lastUpdate}}</text>
+      </view>
+      
+      <view class="content-body">
+        <view wx:for="{{privacyPolicy.content}}" wx:key="title" class="content-section">
+          <view class="section-title">{{item.title}}</view>
+          <view wx:for="{{item.paragraphs}}" wx:for-item="paragraph" wx:key="*this" class="section-paragraph">
+            <text>{{paragraph}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+  
+  <!-- 用户协议内容 -->
+  <scroll-view 
+    scroll-y="true" 
+    class="content-scroll" 
+    wx:if="{{!isLoading && activeTab === 1}}"
+    scroll-top="{{scrollTop}}">
+    <view class="content-container">
+      <view class="content-header">
+        <text class="content-title">{{userAgreement.title}}</text>
+        <text class="content-update">最后更新: {{userAgreement.lastUpdate}}</text>
+      </view>
+      
+      <view class="content-body">
+        <view wx:for="{{userAgreement.content}}" wx:key="title" class="content-section">
+          <view class="section-title">{{item.title}}</view>
+          <view wx:for="{{item.paragraphs}}" wx:for-item="paragraph" wx:key="*this" class="section-paragraph">
+            <text>{{paragraph}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+  
+  <!-- 底部联系方式 -->
+  <view class="footer">
+    <text class="footer-text">如有问题，请联系我们: xiao_shi_jie@126.com</text>
+  </view>
+</view> 

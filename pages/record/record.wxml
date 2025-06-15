@@ -1,0 +1,59 @@
+<view class="container record-page">
+  <!-- 页面背景 -->
+  <view class="page-bg"></view>
+  
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">我的记录</text>
+  </view>
+  
+  <!-- 登录提示 -->
+  <view wx:if="{{!isLoggedIn}}" class="login-tip">
+    <view class="tip-icon">📝</view>
+    <view class="tip-text">登录后记录你的天文观测和学习笔记</view>
+    <button class="login-btn" bindtap="navigateToLogin">去登录</button>
+  </view>
+  
+  <!-- 记录列表 -->
+  <view wx:elif="{{records.length > 0}}" class="records-container">
+    <view 
+      wx:for="{{records}}" 
+      wx:key="id" 
+      class="record-card {{item.type}}-card"
+      bindtap="viewRecordDetail"
+      data-id="{{item.id}}"
+    >
+      <!-- 记录图片显示 -->
+      <view class="record-image-container">
+        <image 
+          wx:if="{{item.images && item.images.length > 0}}"
+          src="{{item.images[0]}}" 
+          mode="aspectFill" 
+          class="record-main-image"
+        ></image>
+        <view wx:else class="no-image">
+          <text class="no-image-text">无照片</text>
+        </view>
+      </view>
+      
+      <view class="record-info">
+        <view class="record-date">观测时间: {{item.date}}</view>
+        <view class="record-title">观测记录</view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 空记录提示 -->
+  <view wx:elif="{{isLoggedIn && !isLoading}}" class="empty-records">
+    <view class="empty-icon">📝</view>
+    <view class="empty-text">您还没有创建任何记录</view>
+    <view class="empty-subtext">去观测页面拍照并记录您的观星体验</view>
+    <button class="create-btn" bindtap="navigateToObserve">去观测</button>
+  </view>
+  
+  <!-- 加载中 -->
+  <view class="loading-container" wx:if="{{isLoading}}">
+    <view class="loading-icon"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+</view> 

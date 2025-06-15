@@ -1,0 +1,23 @@
+<!--pages/welcome/welcome.wxml-->
+<view class="welcome-container star-bg" bindtap="skipAnimation">
+  <!-- 流星效果 -->
+  <view class="meteor-container">
+    <view class="meteor meteor-1"></view>
+    <view class="meteor meteor-2"></view>
+    <view class="meteor meteor-3"></view>
+  </view>
+  
+  <!-- 行星动画 -->
+  <view class="planets-container">
+    <view class="planet planet-1 rotate-planet"></view>
+    <view class="planet planet-2 rotate-planet" style="animation-delay: 0.2s"></view>
+    <view class="planet planet-3 rotate-planet" style="animation-delay: 0.4s"></view>
+  </view>
+  
+  <!-- 欢迎文字 -->
+  <view class="welcome-text">
+    <view class="text-line line-1 visible">星汉灿烂，若出其里</view>
+    <view class="text-line line-2 visible">一起「<text class="gradient-text">晓</text>」视界</view>
+    <view class="text-line line-3 visible">探索无垠宇宙，从指尖开始</view>
+  </view>
+</view> 

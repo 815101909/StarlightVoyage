@@ -1,0 +1,63 @@
+<!--pages/detail/detail.wxml-->
+<view class="container">
+  <!-- 页面标题 -->
+  <view class="page-title">{{pageTitle}}</view>
+  
+  <!-- 内容展示区 -->
+  <scroll-view scroll-y class="content-wrapper">
+    <!-- A4内容区域 -->
+    <view class="a4-container">
+      <block wx:for="{{contentList}}" wx:key="id" wx:if="{{contentList.length > 0}}">
+        <!-- A4页面卡片 -->
+        <view class="a4-page">
+          <view class="a4-image-container">
+            <image 
+              src="{{item.mediaUrl}}" 
+              mode="aspectFit" 
+              class="a4-image"
+              bindtap="previewImage"
+              data-url="{{item.mediaUrl}}"></image>
+          </view>
+          
+          <!-- 图片索引（多张图片时显示） -->
+          <view class="image-index" wx:if="{{contentList.length > 1}}">{{index + 1}} / {{contentList.length}}</view>
+        </view>
+        
+        <!-- 朗读按钮（每张图片对应一个） -->
+        <view class="audio-section">
+          <button class="audio-button {{isPlaying && currentPlayingId === item.id ? 'playing' : ''}}" 
+            bindtap="playAudio" 
+            data-id="{{item.id}}" 
+            data-url="{{item.audioUrl}}">
+            <view class="audio-icon">{{isPlaying && currentPlayingId === item.id ? '■' : '▶'}}</view>
+            <text>{{isPlaying && currentPlayingId === item.id ? '停止朗读' : '开始朗读'}}</text>
+          </button>
+        </view>
+      </block>
+      
+      <!-- 默认A4页面（当contentList为空时显示） -->
+      <view class="a4-page" wx:if="{{!contentList || contentList.length === 0}}">
+        <view class="a4-image-container">
+          <image 
+            src="/pages/star/pic/北斗七星.jpg" 
+            mode="aspectFit" 
+            class="a4-image"></image>
+        </view>
+      </view>
+      
+      <!-- 默认朗读按钮（当contentList为空时显示） -->
+      <view class="audio-section" wx:if="{{!contentList || contentList.length === 0}}">
+        <button class="audio-button" bindtap="playAudio" data-id="default-audio" data-url="/audio/beidou/default.mp3">
+          <view class="audio-icon">▶</view>
+          <text>开始朗读</text>
+        </button>
+      </view>
+    </view>
+
+    <!-- 加载动画 -->
+    <view class="loading-container" wx:if="{{isLoading}}">
+      <view class="loading-star"></view>
+      <view class="loading-text">加载中...</view>
+    </view>
+  </scroll-view>
+</view> 

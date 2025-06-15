@@ -1,0 +1,59 @@
+<!--pages/exercises/exercises.wxml-->
+<view class="exercises-container">
+  <view class="star-bg"></view>
+  
+  <scroll-view scroll-y class="exercises-content">
+    <view class="exercises-instruction">请完成以下与文章相关的习题：</view>
+    
+    <block wx:if="{{exercises.length > 0}}">
+      <!-- 得分和鼓励语显示区域 -->
+      <view class="result-area" wx:if="{{showResult}}">
+        <view class="score-box">
+          <view class="score-value">{{score}}</view>
+          <view class="score-label">总分100分</view>
+        </view>
+        <view class="encouragement">{{encouragement}}</view>
+      </view>
+      
+      <view class="exercise-list">
+        <block wx:for="{{exercises}}" wx:key="id">
+          <view class="exercise-item">
+            <view class="exercise-question">{{index + 1}}. {{item.question}}</view>
+            
+            <!-- 选择题 -->
+            <view class="options-list">
+              <view 
+                wx:for="{{item.options}}" 
+                wx:for-item="option" 
+                wx:for-index="optionIndex" 
+                wx:key="optionIndex"
+                class="option-item {{userAnswers[item.id] === optionIndex ? 'selected' : ''}} {{showResult && item.correctAnswer === optionIndex ? 'correct' : ''}} {{showResult && userAnswers[item.id] === optionIndex && userAnswers[item.id] !== item.correctAnswer ? 'wrong' : ''}}"
+                bindtap="selectOption"
+                data-question-id="{{item.id}}"
+                data-option-index="{{optionIndex}}">
+                {{optionIndex === 0 ? 'A' : optionIndex === 1 ? 'B' : optionIndex === 2 ? 'C' : 'D'}}. {{option}}
+              </view>
+            </view>
+            
+            <!-- 答案解析 -->
+            <view class="answer-explanation" wx:if="{{showResult}}">
+              <view class="correct-answer">正确答案：{{item.correctAnswer === 0 ? 'A' : item.correctAnswer === 1 ? 'B' : item.correctAnswer === 2 ? 'C' : 'D'}}</view>
+              <view class="explanation-text">{{item.explanation}}</view>
+            </view>
+          </view>
+        </block>
+      </view>
+      
+      <view class="submit-area">
+        <button class="submit-btn" bindtap="submitAnswers" wx:if="{{!showResult}}">提交答案</button>
+        <button class="retry-btn" bindtap="retryExercises" wx:if="{{showResult}}">重新作答</button>
+      </view>
+    </block>
+    
+    <view wx:else class="empty-state">
+      <view class="empty-icon"></view>
+      <view class="empty-text">暂无习题</view>
+      <view class="empty-subtext">习题正在准备中...</view>
+    </view>
+  </scroll-view>
+</view> 

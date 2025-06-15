@@ -1,0 +1,61 @@
+<view class="container collection-page">
+  <!-- 页面背景 -->
+  <view class="page-bg"></view>
+  
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">我的收藏</text>
+  </view>
+  
+  <!-- 登录提示 -->
+  <view wx:if="{{!isLoggedIn}}" class="login-tip">
+    <view class="tip-icon">🔐</view>
+    <view class="tip-text">请登录后查看收藏内容</view>
+    <button class="login-btn" bindtap="navigateToLogin">去登录</button>
+  </view>
+  
+  <!-- 收藏列表 -->
+  <view wx:elif="{{bookmarkedArticles.length > 0}}" class="bookmarks-container">
+    <view 
+      wx:for="{{bookmarkedArticles}}" 
+      wx:key="id" 
+      class="article-card"
+      bindtap="navigateToArticle"
+      data-id="{{item.id}}"
+    >
+      <view class="article-cover-container">
+        <image class="article-cover" src="{{item.coverUrl || '/assets/images/default_cover.jpg'}}" mode="aspectFill"></image>
+      </view>
+      <view class="article-info">
+        <view class="article-title">{{item.title}}</view>
+        <view class="article-meta">
+          <text class="article-author">{{item.author}}</text>
+          <text class="article-date">{{item.date}}</text>
+        </view>
+        <view class="article-stats">
+          <text class="article-views">{{item.views}} 浏览</text>
+          <text class="article-likes">{{item.likes}} 喜欢</text>
+        </view>
+      </view>
+      <view class="article-actions" catchtap="stopPropagation">
+        <view class="remove-btn" catchtap="removeBookmark" data-id="{{item.id}}">
+          <text class="remove-icon">×</text>
+        </view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 空收藏提示 -->
+  <view wx:else class="empty-bookmarks">
+    <view class="empty-icon">📚</view>
+    <view class="empty-text">您还没有收藏任何文章</view>
+    <view class="empty-subtext">浏览文章时点击收藏按钮即可添加</view>
+    <button class="explore-btn" bindtap="navigateToExplore">去探索</button>
+  </view>
+  
+  <!-- 加载中 -->
+  <view class="loading-container" wx:if="{{isLoading}}">
+    <view class="loading-icon"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+</view>

@@ -1,0 +1,279 @@
+/* pages/about/about.wxss */
+
+.about-page {
+  padding-bottom: 40rpx;
+  background-color: #f7f9fc;
+}
+
+/* 应用信息 */
+.app-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx 0;
+  background-color: #fff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.app-logo {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.1);
+}
+
+.app-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.app-name {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.app-version {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 功能特点 */
+.features-section {
+  margin: 20rpx 0;
+  background-color: #fff;
+  padding: 30rpx;
+  border-radius: 10rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+.features-list {
+  margin-top: 20rpx;
+}
+
+.feature-item {
+  display: flex;
+  margin-bottom: 30rpx;
+}
+
+.feature-item:last-child {
+  margin-bottom: 0;
+}
+
+.feature-icon {
+  width: 80rpx;
+  height: 80rpx;
+  margin-right: 20rpx;
+}
+
+.feature-content {
+  flex: 1;
+}
+
+.feature-title {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 8rpx;
+  display: block;
+}
+
+.feature-desc {
+  font-size: 24rpx;
+  color: #666;
+  line-height: 1.5;
+  display: block;
+}
+
+/* 成就与荣誉 */
+.achievements-section {
+  margin: 20rpx 0;
+  background-color: #fff;
+  padding: 30rpx;
+  border-radius: 10rpx;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.toggle-icon {
+  font-size: 24rpx;
+  color: #999;
+  transition: transform 0.3s;
+}
+
+.toggle-icon.active {
+  transform: rotate(180deg);
+}
+
+.achievements-content {
+  margin-top: 20rpx;
+  transition: all 0.3s;
+}
+
+.achievement-item {
+  display: flex;
+  flex-direction: column;
+  padding: 15rpx 0;
+  border-bottom: 1px dashed #eee;
+}
+
+.achievement-item:last-child {
+  border-bottom: none;
+}
+
+.achievement-time {
+  font-size: 22rpx;
+  color: #999;
+  margin-bottom: 5rpx;
+}
+
+.achievement-title {
+  font-size: 26rpx;
+  color: #333;
+}
+
+/* 隐私与协议 */
+.policy-section {
+  margin: 20rpx 0;
+  background-color: #fff;
+  padding: 30rpx;
+  border-radius: 10rpx;
+}
+
+.policy-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1px solid #eee;
+}
+
+.policy-item:last-child {
+  border-bottom: none;
+}
+
+.policy-label {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.policy-arrow {
+  font-size: 28rpx;
+  color: #ccc;
+}
+
+/* 操作按钮 */
+.action-section {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin: 20rpx 0;
+  padding: 0 30rpx;
+}
+
+.action-button {
+  flex: 1;
+  margin: 0 10rpx;
+  font-size: 28rpx;
+  padding: 18rpx 0;
+  color: #fff;
+  border-radius: 10rpx;
+  border: none;
+  line-height: 1.5;
+}
+
+.action-button:first-child {
+  margin-left: 0;
+}
+
+.action-button:last-child {
+  margin-right: 0;
+}
+
+.check-update {
+  background-color: #3778FF;
+}
+
+.feedback {
+  background-color: #4CAF50;
+}
+
+.share {
+  background-color: #FF7043;
+}
+
+/* 开发者信息 */
+.developer-section {
+  margin: 20rpx 0;
+  background-color: #fff;
+  padding: 30rpx;
+  border-radius: 10rpx;
+  text-align: center;
+}
+
+.developer-title {
+  font-size: 26rpx;
+  color: #999;
+  margin-bottom: 10rpx;
+}
+
+.developer-name {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+.developer-contact {
+  display: flex;
+  justify-content: center;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  margin: 0 20rpx;
+}
+
+.contact-icon {
+  font-size: 32rpx;
+  margin-right: 8rpx;
+}
+
+.contact-text {
+  font-size: 26rpx;
+  color: #3778FF;
+}
+
+/* 底部版权 */
+.footer {
+  text-align: center;
+  margin-top: 40rpx;
+  padding: 0 30rpx;
+}
+
+.copyright {
+  font-size: 24rpx;
+  color: #999;
+  display: block;
+  margin-bottom: 10rpx;
+}
+
+.update-date {
+  font-size: 22rpx;
+  color: #ccc;
+} 

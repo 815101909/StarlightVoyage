@@ -1,0 +1,398 @@
+const app = getApp();
+
+Page({
+  data: {
+    pageTitle: '详情内容',  // 页面标题，根据球体类型设置
+    section: '',       // 当前查看的区域，对应球体类型
+    mediaType: 'image', // 媒体类型：image或video
+    isAdmin: false,    // 是否为管理员
+    isPlaying: false,  // 音频是否正在播放
+    audioUrl: '',      // 音频URL
+    
+    // 当前展示的媒体内容
+    media: {
+      url: '',
+      poster: '',
+      title: '',
+      description: '',
+      uploadTime: '',
+      category: ''
+    }
+  },
+  
+  // 页面加载
+  onLoad: function(options) {
+    // 获取页面参数
+    if (options.section) {
+      const section = options.section;
+      this.setData({
+        section: section,
+        pageTitle: this.getSectionTitle(section)
+      });
+      
+      // 获取内容数据
+      this.fetchContent(section);
+    }
+    
+    // 创建音频上下文
+    this.audioContext = wx.createInnerAudioContext();
+    
+    // 设置音频事件监听
+    this.audioContext.onPlay(() => {
+      this.setData({ isPlaying: true });
+    });
+    
+    this.audioContext.onPause(() => {
+      this.setData({ isPlaying: false });
+    });
+    
+    this.audioContext.onStop(() => {
+      this.setData({ isPlaying: false });
+    });
+    
+    this.audioContext.onEnded(() => {
+      this.setData({ isPlaying: false });
+    });
+    
+    this.audioContext.onError((err) => {
+      console.error('音频播放错误:', err);
+      wx.showToast({
+        title: '音频播放出错',
+        icon: 'none'
+      });
+      this.setData({ isPlaying: false });
+    });
+    
+    // 判断是否为管理员
+    // 实际项目中应该通过登录状态或服务器验证
+    // 这里仅作示例
+    wx.getStorage({
+      key: 'userRole',
+      success: (res) => {
+        if (res.data === 'admin') {
+          this.setData({ isAdmin: true });
+        }
+      }
+    });
+  },
+  
+  // 获取标题
+  getSectionTitle: function(section) {
+    const sectionTitles = {
+      'tools': '观测工具',
+      'phenomena': '天文现象',
+      'astrology': '星座占星',
+      'organizations': '天文机构',
+      'calendar': '天文历法',
+      'literature': '天文文学',
+      'people': '天文人物'
+    };
+    
+    return sectionTitles[section] || '详情内容';
+  },
+  
+  // 获取内容数据
+  fetchContent: function(section) {
+    // 实际项目中应该调用API获取数据
+    // 这里使用模拟数据
+    
+    // 模拟API请求延迟
+    wx.showLoading({
+      title: '加载中...'
+    });
+    
+    setTimeout(() => {
+      // 模拟数据
+      const mockData = this.getMockData(section);
+      
+      // 设置页面数据
+      this.setData({
+        mediaType: mockData.type,
+        media: {
+          url: mockData.mediaUrl,
+          poster: mockData.poster || '',
+          title: mockData.title,
+          description: mockData.description,
+          uploadTime: mockData.uploadTime,
+          category: mockData.category
+        },
+        audioUrl: mockData.audioUrl || ''
+      });
+      
+      // 如果有音频，设置音频URL
+      if (mockData.audioUrl) {
+        this.audioContext.src = mockData.audioUrl;
+      }
+      
+      wx.hideLoading();
+    }, 800);
+  },
+  
+  // 获取模拟数据
+  getMockData: function(section) {
+    // 模拟不同区域的内容数据
+    const mockDataMap = {
+      'tools': {
+        type: 'image',
+        mediaUrl: 'https://mmbiz.qpic.cn/mmbiz_jpg/Sa4vicbJR0aZG1fibcuHgdlYrJicV2rD8ySlwic1EQAV9gumU8wZUic11eG0Q6QUH3lxIuADnVyibOHKGDjRe7Y2tfJw/0',
+        title: '天文望远镜使用指南',
+        description: '望远镜是天文观测的基本工具，不同类型的望远镜适合观测不同天体。折射式望远镜适合观测月球和行星，反射式望远镜则更适合观测星系和星云等暗天体。本文介绍各类天文望远镜的基本使用方法和观测技巧。',
+        uploadTime: '2023-12-15',
+        category: '观测工具',
+        audioUrl: 'https://example.com/audio/telescope_guide.mp3'
+      },
+      'phenomena': {
+        type: 'video',
+        mediaUrl: 'https://vd4.bdstatic.com/mda-km6py6rjnvyx3rq5/sc/cae_h264/1607344905/mda-km6py6rjnvyx3rq5.mp4',
+        poster: 'https://mmbiz.qpic.cn/mmbiz_jpg/Sa4vicbJR0aZG1fibcuHgdlYrJicV2rD8ySb2E6Ln9Uk1HBTLt7bJfMfqDzVZUiaq9VxpEmuq0gtEFiaOtP1ZrFJ3gw/0',
+        title: '2024年天琴座流星雨',
+        description: '天琴座流星雨是每年4月中旬出现的流星雨，最大时每小时可见约15颗流星。2024年的天琴座流星雨极大期预计在4月22日，届时月相条件较为有利，是一次不错的观测机会。',
+        uploadTime: '2024-04-10',
+        category: '天文现象'
+      },
+      'astrology': {
+        type: 'image',
+        mediaUrl: 'https://mmbiz.qpic.cn/mmbiz_jpg/Sa4vicbJR0aZG1fibcuHgdlYrJicV2rD8ySAzF0Lw2bRnz5YCxKjXiclCJKZXwcTOKhXmVfrLnXQ0xicHKgZPmNNO1A/0',
+        title: '十二星座与天文学',
+        description: '十二星座源自古代巴比伦的观星传统，现代占星学中的星座与实际天文学中的星座存在差异。本文介绍十二星座的天文学起源、对应的星群特点以及历史演变过程。',
+        uploadTime: '2023-11-20',
+        category: '星座占星'
+      },
+      'organizations': {
+        type: 'image',
+        mediaUrl: 'https://mmbiz.qpic.cn/mmbiz_jpg/Sa4vicbJR0aZG1fibcuHgdlYrJicV2rD8yS5fO4NCHUL5yMz5cKuosdSu4ibefzYjZMBEicLCbHichib2vPAzicGpKXdGg/0',
+        title: '全球重要的天文机构',
+        description: '介绍世界上主要的天文研究机构，包括欧洲南方天文台(ESO)、美国国家航空航天局(NASA)、中国国家天文台(NAOC)等。这些机构在天文观测、太空探索和天体物理研究方面扮演着重要角色。',
+        uploadTime: '2024-01-05',
+        category: '天文机构'
+      },
+      'calendar': {
+        type: 'image',
+        mediaUrl: 'https://mmbiz.qpic.cn/mmbiz_jpg/Sa4vicbJR0aZG1fibcuHgdlYrJicV2rD8ySYFoibpibpgtPQxeX0uMqGrggYL46QW2l9g8JRgHibQXLKHHbfaYmNz2Ow/0',
+        title: '古代天文历法',
+        description: '古代文明发展了多种天文历法，用于农业、宗教仪式和日常生活。中国古代的历法体系非常精确，通过观测太阳、月亮和恒星运动来制定历法。本文探讨不同文明的天文历法及其科学价值。',
+        uploadTime: '2023-09-18',
+        category: '天文历法'
+      },
+      'literature': {
+        type: 'image',
+        mediaUrl: 'https://mmbiz.qpic.cn/mmbiz_jpg/Sa4vicbJR0aZG1fibcuHgdlYrJicV2rD8ySypicBGPGibQMsyUUzOdm1Py5tQBseSZMCuJEEzK0wT03c8hdyfflMHKA/0',
+        title: '星空中的诗意',
+        description: '从古至今，星空一直是文学创作的重要题材。中国古典诗词中有大量描写星空的名篇，如苏轼的《水调歌头·明月几时有》、张若虚的《春江花月夜》等。本文梳理中外文学作品中对星空的优美描绘。',
+        uploadTime: '2023-10-25',
+        category: '天文文学'
+      },
+      'people': {
+        type: 'video',
+        mediaUrl: 'https://vd3.bdstatic.com/mda-km95q3k4vgs02bsf/sc/cae_h264_nowatermark/1607571461/mda-km95q3k4vgs02bsf.mp4',
+        poster: 'https://mmbiz.qpic.cn/mmbiz_jpg/Sa4vicbJR0aZG1fibcuHgdlYrJicV2rD8ySVa06v4Fj1xnbKtMvkrYp7DGBD9YULo3xtpvOQAF0eKiayicauicDUo6kg/0',
+        title: '伽利略的天文贡献',
+        description: '伽利略·伽利莱(1564-1642)是科学革命时期的关键人物，他改进了望远镜并用于天文观测，发现了木星的四颗最大卫星、金星的相位变化等现象，为日心说提供了有力证据。本片讲述伽利略的生平和科学贡献。',
+        uploadTime: '2024-02-15',
+        category: '天文人物',
+        audioUrl: 'https://example.com/audio/galileo_story.mp3'
+      }
+    };
+    
+    return mockDataMap[section] || {
+      type: 'image',
+      mediaUrl: 'https://mmbiz.qpic.cn/mmbiz_jpg/Sa4vicbJR0aZG1fibcuHgdlYrJicV2rD8ySI8FOibPic4vzTf8EZ1xLe6V7OPJqpvicI8vicxfxyNUHf0mh1TvSVqfZTw/0',
+      title: '默认内容',
+      description: '暂无详细描述',
+      uploadTime: '2024-05-01',
+      category: '未分类'
+    };
+  },
+  
+  // 返回上一页
+  navigateBack: function() {
+    wx.navigateBack();
+  },
+  
+  // 播放/暂停音频
+  playAudio: function() {
+    if (this.data.isPlaying) {
+      this.audioContext.pause();
+    } else {
+      this.audioContext.play();
+    }
+  },
+  
+  // 选择媒体类型
+  selectMediaType: function(e) {
+    const type = e.currentTarget.dataset.type;
+    this.setData({ mediaType: type });
+  },
+  
+  // 选择媒体文件
+  chooseMedia: function() {
+    const mediaType = this.data.mediaType;
+    
+    if (mediaType === 'image') {
+      wx.chooseImage({
+        count: 1,
+        sizeType: ['original', 'compressed'],
+        sourceType: ['album', 'camera'],
+        success: (res) => {
+          const tempFilePaths = res.tempFilePaths;
+          this.setData({
+            'media.url': tempFilePaths[0]
+          });
+        }
+      });
+    } else if (mediaType === 'video') {
+      wx.chooseVideo({
+        sourceType: ['album', 'camera'],
+        maxDuration: 60,
+        camera: 'back',
+        success: (res) => {
+          this.setData({
+            'media.url': res.tempFilePath,
+            'media.poster': ''  // 视频封面可以另外上传或自动生成
+          });
+        }
+      });
+    }
+  },
+  
+  // 选择音频文件
+  chooseAudio: function() {
+    // 小程序API没有直接选择音频的接口
+    // 实际项目中可以通过选择文件插件实现
+    wx.showToast({
+      title: '请上传MP3文件',
+      icon: 'none'
+    });
+    
+    // 模拟选择了音频
+    setTimeout(() => {
+      this.setData({
+        audioUrl: 'mock_audio_file.mp3'
+      });
+      
+      wx.showToast({
+        title: '已选择音频文件',
+        icon: 'success'
+      });
+    }, 1000);
+  },
+  
+  // 上传内容
+  uploadContent: function() {
+    // 检查是否已选择媒体
+    if (!this.data.media.url) {
+      wx.showToast({
+        title: '请选择媒体文件',
+        icon: 'none'
+      });
+      return;
+    }
+    
+    // 显示上传中提示
+    wx.showLoading({
+      title: '上传中...'
+    });
+    
+    // 模拟上传过程
+    setTimeout(() => {
+      wx.hideLoading();
+      
+      wx.showToast({
+        title: '上传成功',
+        icon: 'success'
+      });
+      
+      // 重新获取内容
+      this.fetchContent(this.data.section);
+    }, 1500);
+    
+    // 实际项目中应调用上传API
+    /*
+    // 上传媒体文件
+    wx.uploadFile({
+      url: 'https://your-api-url/upload',
+      filePath: this.data.media.url,
+      name: 'media',
+      formData: {
+        'section': this.data.section,
+        'type': this.data.mediaType,
+        'title': this.data.media.title,
+        'description': this.data.media.description
+      },
+      success: (res) => {
+        const data = JSON.parse(res.data);
+        if (data.success) {
+          // 上传音频
+          if (this.data.audioUrl) {
+            this.uploadAudio(data.mediaId);
+          } else {
+            wx.showToast({
+              title: '上传成功',
+              icon: 'success'
+            });
+            this.fetchContent(this.data.section);
+          }
+        } else {
+          wx.showToast({
+            title: '上传失败: ' + data.message,
+            icon: 'none'
+          });
+        }
+      },
+      fail: (err) => {
+        wx.showToast({
+          title: '上传失败，请重试',
+          icon: 'none'
+        });
+        console.error('上传失败:', err);
+      }
+    });
+    */
+  },
+  
+  // 上传音频
+  uploadAudio: function(mediaId) {
+    // 实际项目中应调用音频上传API
+    /*
+    wx.uploadFile({
+      url: 'https://your-api-url/upload-audio',
+      filePath: this.data.audioUrl,
+      name: 'audio',
+      formData: {
+        'mediaId': mediaId
+      },
+      success: (res) => {
+        const data = JSON.parse(res.data);
+        if (data.success) {
+          wx.showToast({
+            title: '上传成功',
+            icon: 'success'
+          });
+          this.fetchContent(this.data.section);
+        } else {
+          wx.showToast({
+            title: '音频上传失败: ' + data.message,
+            icon: 'none'
+          });
+        }
+      },
+      fail: (err) => {
+        wx.showToast({
+          title: '音频上传失败，请重试',
+          icon: 'none'
+        });
+        console.error('音频上传失败:', err);
+      }
+    });
+    */
+  },
+  
+  // 页面卸载
+  onUnload: function() {
+    // 释放音频资源
+    if (this.audioContext) {
+      this.audioContext.stop();
+      this.audioContext.destroy();
+    }
+  }
+}) 

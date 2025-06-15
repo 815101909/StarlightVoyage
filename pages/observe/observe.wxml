@@ -1,0 +1,206 @@
+<!--pages/observe/observe.wxml-->
+<scroll-view scroll-y class="container observe-page">
+  <!-- 顶部背景星空 -->
+  <view class="observe-bg"></view>
+  
+  <view class="page-header">
+    <view class="title-container">
+      <text class="page-title">江月何年初照人？</text>
+    </view>
+    <text class="page-subtitle">唐代 · 张若虚 · 《春江花月夜》</text>
+  </view>
+  
+  <!-- 第二部分：北斗七星探索区域 -->
+  <view class="constellation-section">
+    <view class="section-title">探索宇宙</view>
+    
+    <view class="big-dipper-container">
+      <!-- 背景小星星 -->
+      <view class="background-stars">
+        <view class="tiny-star" style="top: 15%; left: 20%;"></view>
+        <view class="tiny-star" style="top: 25%; left: 45%;"></view>
+        <view class="tiny-star" style="top: 35%; left: 75%;"></view>
+        <view class="tiny-star" style="top: 55%; left: 30%;"></view>
+        <view class="tiny-star" style="top: 65%; left: 65%;"></view>
+        <view class="tiny-star" style="top: 80%; left: 40%;"></view>
+        <view class="tiny-star" style="top: 10%; left: 85%;"></view>
+        <view class="tiny-star" style="top: 45%; left: 15%;"></view>
+        <view class="tiny-star" style="top: 75%; left: 90%;"></view>
+        <view class="tiny-star" style="top: 20%; left: 60%;"></view>
+        <view class="tiny-star" style="top: 50%; left: 85%;"></view>
+        <view class="tiny-star" style="top: 85%; left: 55%;"></view>
+        <view class="tiny-star" style="top: 40%; left: 92%;"></view>
+        <view class="tiny-star" style="top: 60%; left: 8%;"></view>
+        <view class="tiny-star" style="top: 30%; left: 33%;"></view>
+      </view>
+      
+      <!-- 流星 -->
+      <view class="meteor meteor-1"></view>
+      <view class="meteor meteor-2"></view>
+      <view class="meteor meteor-3"></view>
+      
+      <!-- 点击空白处隐藏信息 -->
+      <view class="tap-overlay" wx:if="{{showInfo}}" bindtap="hideStarInfo"></view>
+      
+      <!-- 瑶光/摇光 - 北斗七（勺柄末端） -->
+      <view class="star-point {{activeStar === 'yaoGuang' ? 'active' : ''}}" style="top: 23.5%; left: 7.5%;" bindtap="showStarInfo" data-star="yaoGuang">
+        <view class="star yaoGuang"></view>
+        <text class="star-name">瑶光</text>
+      </view>
+      
+      <!-- 开阳 - 北斗六（勺柄中部） -->
+      <view class="star-point {{activeStar === 'kaiYang' ? 'active' : ''}}" style="top: 29%; left: 25%;" bindtap="showStarInfo" data-star="kaiYang">
+        <view class="star kaiYang"></view>
+        <text class="star-name">开阳</text>
+      </view>
+      
+      <!-- 玉衡 - 北斗五（勺柄第一颗） -->
+      <view class="star-point {{activeStar === 'yuHeng' ? 'active' : ''}}" style="top: 42.5%; left: 38%;" bindtap="showStarInfo" data-star="yuHeng">
+        <view class="star yuHeng"></view>
+        <text class="star-name">玉衡</text>
+      </view>
+      
+      <!-- 天权 - 北斗四（勺口与勺柄连接处） -->
+      <view class="star-point {{activeStar === 'tianQuan' ? 'active' : ''}}" style="top: 53%; left: 52%;" bindtap="showStarInfo" data-star="tianQuan">
+        <view class="star tianQuan"></view>
+        <text class="star-name">天权</text>
+      </view>
+      
+      <!-- 天玑 - 北斗三（勺口第三星） -->
+      <view class="star-point {{activeStar === 'tianJi' ? 'active' : ''}}" style="top: 72%; left: 54.5%;" bindtap="showStarInfo" data-star="tianJi">
+        <view class="star tianJi"></view>
+        <text class="star-name">天玑</text>
+      </view>
+      
+      <!-- 天璇 - 北斗二（勺口第二星） -->
+      <view class="star-point {{activeStar === 'tianXuan' ? 'active' : ''}}" style="top: 76%; left: 77%;" bindtap="showStarInfo" data-star="tianXuan">
+        <view class="star tianXuan"></view>
+        <text class="star-name">天璇</text>
+      </view>
+      
+      <!-- 天枢 - 北斗一（勺口起点） -->
+      <view class="star-point {{activeStar === 'tianShu' ? 'active' : ''}}" style="top: 57%; left: 85%;" bindtap="showStarInfo" data-star="tianShu">
+        <view class="star tianShu"></view>
+        <text class="star-name">天枢</text>
+      </view>
+      
+      <!-- 星星连线 -->
+      <view class="star-lines"></view>
+      
+      <!-- 点击后显示的内容区域 -->
+      <view class="star-info-container" wx:if="{{showInfo}}" catchtap="preventBubble">
+        <view class="star-info-card">
+          <view class="info-title">{{currentStarInfo.title}}</view>
+          <button class="deep-learning-btn" bindtap="navigateToDeepLearning" data-star="{{activeStar}}">深入学习</button>
+        </view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 第三部分：你的守护星星测试 -->
+  <view class="guardian-star-section">
+    <view class="section-title">你的守护星星</view>
+    <view class="section-subtitle">探索7颗著名恒星，寻找与你灵魂共鸣的那一颗</view>
+    
+    <view class="guardian-star-container">
+      <!-- 开始测试界面 -->
+      <view class="test-start-view" wx:if="{{testSection === 'start'}}">
+        <view class="test-intro">
+          <text class="test-intro-text">宇宙中有无数星星，</text>
+          <text class="test-intro-text">哪一颗会成为你的守护星？</text>
+          <text class="test-intro-subtext">回答几个问题，寻找属于你的那颗星辰</text>
+        </view>
+        <button class="start-btn" bindtap="startTest">开始测试</button>
+      </view>
+      
+      <!-- 问题测试界面 -->
+      <view class="test-question-view" wx:if="{{testSection === 'question'}}">
+        <view class="question-count">Question {{currentQuestion + 1}}/{{questions.length}}</view>
+        <view class="question-content">
+          <text class="question-text">{{questions[currentQuestion].text}}</text>
+        </view>
+        <view class="answer-options">
+          <view 
+            wx:for="{{questions[currentQuestion].options}}" 
+            wx:key="index"
+            class="answer-option {{userAnswers[currentQuestion] === index ? 'selected' : ''}}"
+            bindtap="selectAnswer"
+            data-index="{{index}}">
+            <text>{{item}}</text>
+          </view>
+        </view>
+        <view class="question-navigation">
+          <button class="next-question-btn" bindtap="nextQuestion">下一题</button>
+        </view>
+      </view>
+      
+      <!-- 结果显示界面 -->
+      <view class="test-result-view" wx:if="{{testSection === 'result'}}">
+        <view class="result-star-container">
+          <view class="result-star-image">
+            <view class="guardian-star {{guardianStar.className}}"></view>
+          </view>
+          <view class="result-star-info">
+            <text class="result-star-name">{{guardianStar.name}}</text>
+            <text class="result-star-type">{{guardianStar.type}}</text>
+            <text class="result-star-distance">距离地球: {{guardianStar.distance}}</text>
+          </view>
+        </view>
+        
+        <view class="result-description">
+          <text class="result-description-title">你的守护星</text>
+          <text class="result-description-text">{{guardianStar.description}}</text>
+          <text class="result-personality">{{guardianStar.personality}}</text>
+        </view>
+        
+        <view class="result-actions">
+          <button class="share-btn" bindtap="shareResult">分享我的守护星</button>
+          <button class="restart-btn" bindtap="restartTest">重新测试</button>
+        </view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 第四部分：照片观测区域 -->
+  <view class="section photo-observation">
+    <view class="section-header">
+      <text class="section-title">照片观测</text>
+      <text class="section-subtitle">分享你的星空发现</text>
+    </view>
+    
+    <view class="section-content">
+      <!-- 用户照片展示区 -->
+      <view class="user-photos-container">
+        <block wx:if="{{userPhotos.length > 0}}">
+          <view class="photos-grid">
+            <view class="photo-item" wx:for="{{userPhotos}}" wx:key="id" bindtap="previewPhoto" data-photo="{{item}}">
+              <image class="photo-image" src="{{item.url}}" mode="aspectFill"></image>
+              <view class="photo-info">
+                <text class="photo-name">{{item.name}}</text>
+                <text class="photo-date">{{item.date}}</text>
+              </view>
+            </view>
+          </view>
+        </block>
+        <view wx:else class="empty-photos">
+          <view class="empty-icon"></view>
+          <text class="empty-text">暂无观测照片，拍摄一张吧</text>
+        </view>
+      </view>
+      
+      <!-- 操作按钮 -->
+      <view class="observation-actions">
+        <button class="upload-photo-btn" bindtap="uploadPhoto">
+          <view class="btn-icon camera-icon"></view>
+          <text>拍照观测</text>
+        </button>
+        <button class="share-community-btn" bindtap="shareToCommunity">
+          <view class="btn-icon share-icon"></view>
+          <text>记录一下</text>
+        </button>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 其余内容部分待添加 -->
+</scroll-view> 

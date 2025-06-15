@@ -1,0 +1,11 @@
+{
+  "navigationBarBackgroundColor": "#081020",
+  "navigationBarTextStyle": "white",
+  "navigationBarTitleText": "学习内容",
+  "backgroundColor": "#081020",
+  "backgroundTextStyle": "light",
+  "enablePullDownRefresh": true,
+  "navigationStyle": "custom",
+  "disableScroll": true,
+  "usingComponents": {}
+}

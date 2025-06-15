@@ -1,0 +1,94 @@
+<view class="container about-page">
+  <!-- 顶部图片 -->
+  <view class="app-header">
+    <image class="app-logo" src="/assets/icons/app_logo.png" mode="aspectFit"></image>
+    <view class="app-info">
+      <text class="app-name">{{appInfo.name}}</text>
+      <text class="app-version">版本 {{appInfo.version}} ({{appInfo.buildNumber}})</text>
+    </view>
+  </view>
+  
+  <!-- 功能特点 -->
+  <view class="features-section">
+    <view class="section-title">功能特点</view>
+    
+    <view class="features-list">
+      <view wx:for="{{features}}" wx:key="title" class="feature-item">
+        <image class="feature-icon" src="{{item.icon}}" mode="aspectFit"></image>
+        <view class="feature-content">
+          <text class="feature-title">{{item.title}}</text>
+          <text class="feature-desc">{{item.desc}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 成就与荣誉 -->
+  <view class="achievements-section">
+    <view class="section-header" bindtap="toggleAchievements">
+      <text class="section-title">成就与荣誉</text>
+      <view class="toggle-icon {{showAchievements ? 'active' : ''}}">▼</view>
+    </view>
+    
+    <view class="achievements-content" wx:if="{{showAchievements}}">
+      <view class="achievement-item">
+        <text class="achievement-time">2023年3月</text>
+        <text class="achievement-title">最佳教育小程序提名</text>
+      </view>
+      <view class="achievement-item">
+        <text class="achievement-time">2022年12月</text>
+        <text class="achievement-title">年度科普精品内容</text>
+      </view>
+      <view class="achievement-item">
+        <text class="achievement-time">2022年9月</text>
+        <text class="achievement-title">用户满意度五星评价</text>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 隐私与协议 -->
+  <view class="policy-section">
+    <view class="section-title">隐私与协议</view>
+    
+    <view class="policy-item" bindtap="viewUserAgreement">
+      <text class="policy-label">用户协议</text>
+      <text class="policy-arrow">></text>
+    </view>
+    
+    <view class="policy-item" bindtap="viewPrivacyPolicy">
+      <text class="policy-label">隐私政策</text>
+      <text class="policy-arrow">></text>
+    </view>
+  </view>
+  
+  <!-- 操作按钮 -->
+  <view class="action-section">
+    <button class="action-button check-update" bindtap="checkUpdate">检查更新</button>
+    <button class="action-button feedback" bindtap="goToFeedback">意见反馈</button>
+    <button class="action-button share" open-type="share">分享给好友</button>
+  </view>
+  
+  <!-- 开发者信息 -->
+  <view class="developer-section">
+    <view class="developer-title">开发者</view>
+    <view class="developer-name">{{developer.name}}</view>
+    
+    <view class="developer-contact">
+      <view class="contact-item" bindtap="contactUs">
+        <text class="contact-icon">✉️</text>
+        <text class="contact-text">联系我们</text>
+      </view>
+      
+      <view class="contact-item" bindtap="viewWebsite">
+        <text class="contact-icon">🌐</text>
+        <text class="contact-text">访问网站</text>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 底部版权 -->
+  <view class="footer">
+    <text class="copyright">© 2022-2023 晓视界 保留所有权利</text>
+    <text class="update-date">最后更新：{{appInfo.lastUpdate}}</text>
+  </view>
+</view> 

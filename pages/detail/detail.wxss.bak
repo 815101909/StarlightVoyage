@@ -1,0 +1,806 @@
+/* pages/detail/detail.wxss */
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #0F1A38;
+  color: #ffffff;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 30rpx;
+  background-color: #ffffff;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 10;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  padding: 10rpx;
+}
+
+.back-icon {
+  width: 36rpx;
+  height: 36rpx;
+  margin-right: 10rpx;
+}
+
+.page-title {
+  flex: 1;
+  text-align: center;
+  font-size: 36rpx;
+  font-weight: 500;
+  margin-right: 46rpx;
+}
+
+.content-wrapper {
+  flex: 1;
+  padding: 30rpx;
+  overflow-y: auto;
+}
+
+.a4-item {
+  background-color: #ffffff;
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+  margin-bottom: 40rpx;
+  overflow: hidden;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.media-content {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.content-image {
+  width: 100%;
+  height: 400rpx;
+  display: block;
+  object-fit: contain;
+}
+
+.content-video {
+  width: 100%;
+  height: 400rpx;
+}
+
+/* Audio Player Styles */
+.audio-player {
+  width: 90%;
+  margin: 20rpx auto;
+  padding: 24rpx;
+  background-color: rgba(29, 44, 87, 0.6);
+  border: 1px solid rgba(125, 159, 244, 0.3);
+  border-radius: 16rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(5px);
+}
+
+.audio-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12rpx 30rpx;
+  background-color: rgba(125, 159, 244, 0.3);
+  color: white;
+  border-radius: 30rpx;
+  margin-bottom: 12rpx;
+  transition: all 0.3s;
+}
+
+.audio-button:active {
+  background-color: rgba(125, 159, 244, 0.5);
+  transform: scale(0.97);
+}
+
+.audio-icon {
+  width: 32rpx;
+  height: 32rpx;
+  margin-right: 12rpx;
+  position: relative;
+}
+
+.audio-icon::before {
+  content: '';
+  position: absolute;
+  left: 10rpx;
+  top: 8rpx;
+  border-style: solid;
+  border-width: 8rpx 0 8rpx 14rpx;
+  border-color: transparent transparent transparent #ffffff;
+}
+
+.stop-icon::before {
+  border-style: none;
+  width: 14rpx;
+  height: 14rpx;
+  background-color: #ffffff;
+  left: 9rpx;
+  top: 9rpx;
+}
+
+.audio-text {
+  font-size: 26rpx;
+  color: #fff;
+  font-weight: 500;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.3);
+}
+
+.audio-progress {
+  width: 100%;
+  margin-top: 16rpx;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6rpx;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 3rpx;
+  overflow: hidden;
+}
+
+.progress-inner {
+  height: 100%;
+  background-color: rgba(125, 159, 244, 0.8);
+  border-radius: 3rpx;
+  box-shadow: 0 0 8rpx rgba(125, 159, 244, 0.5);
+}
+
+.time-display {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 8rpx;
+}
+
+.stop-button {
+  background-color: rgba(255, 100, 100, 0.4);
+  margin-top: 12rpx;
+}
+
+.stop-button:active {
+  background-color: rgba(255, 100, 100, 0.6);
+}
+
+.text-content {
+  padding: 30rpx;
+  font-size: 28rpx;
+  line-height: 1.6;
+  color: #333333;
+  width: 100%;
+  text-align: center;
+}
+
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300rpx;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 28rpx;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.5);
+}
+
+.upload-area {
+  margin-top: 40rpx;
+  margin-bottom: 60rpx;
+  display: flex;
+  justify-content: center;
+}
+
+.upload-button {
+  background-color: rgba(125, 159, 244, 0.3);
+  color: #ffffff;
+  font-size: 28rpx;
+  padding: 20rpx 60rpx;
+  border-radius: 40rpx;
+  border: 1px solid rgba(125, 159, 244, 0.5);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.3);
+}
+
+.upload-button:active {
+  opacity: 0.8;
+  transform: scale(0.98);
+}
+
+/* 星空背景 */
+.star-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, #0F1A38 0%, #1A2C57 100%);
+  z-index: -1;
+  overflow: hidden;
+}
+
+.star-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(2px 2px at 20px 30px, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0));
+  background-size: 200px 200px;
+  z-index: -1;
+}
+
+/* 顶部标题栏 */
+.header {
+  width: 100%;
+  height: 100rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 30rpx;
+  position: relative;
+  z-index: 10;
+  margin-top: 160rpx;
+  background: linear-gradient(to right, rgba(15, 26, 56, 0.5), rgba(29, 44, 87, 0.7), rgba(15, 26, 56, 0.5));
+  border-radius: 50rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(5px);
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  padding: 10rpx 20rpx;
+  background-color: rgba(125, 159, 244, 0.2);
+  border-radius: 40rpx;
+  transition: all 0.3s;
+}
+
+.back-btn:active {
+  background-color: rgba(125, 159, 244, 0.4);
+  transform: scale(0.98);
+}
+
+.back-arrow {
+  width: 22rpx;
+  height: 22rpx;
+  border-left: 3rpx solid #fff;
+  border-bottom: 3rpx solid #fff;
+  transform: rotate(45deg);
+  margin-right: 12rpx;
+}
+
+.back-text {
+  font-size: 28rpx;
+  color: #fff;
+  font-weight: 500;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.5);
+}
+
+.page-title {
+  font-size: 38rpx;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 0 0 15rpx rgba(125, 159, 244, 0.7);
+  letter-spacing: 2rpx;
+}
+
+.placeholder-right {
+  width: 90rpx;
+}
+
+/* 内容滚动区域 */
+.content-scroll {
+  height: calc(100vh - 300rpx);
+  padding: 0 30rpx;
+  margin-top: 40rpx;
+}
+
+/* A4列表样式 */
+.a4-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 60rpx;
+  padding-bottom: 60rpx;
+}
+
+/* 单个A4项目容器 */
+.a4-item-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+/* A4项目 */
+.a4-item {
+  width: 90vw;
+  height: calc(90vw * 1.414); /* A4比例 1:1.414 */
+  background-color: rgba(11, 20, 44, 0.7);
+  border-radius: 16rpx;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  box-shadow: 0 8rpx 30rpx rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(125, 159, 244, 0.3);
+  margin: 0 auto; /* 确保居中 */
+}
+
+/* 媒体内容样式 */
+.media-content {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block; /* 确保块级显示以便居中 */
+  margin: 0 auto; /* 水平居中 */
+}
+
+/* 文本内容样式 */
+.text-content {
+  width: 100%;
+  padding: 30rpx;
+  color: #fff;
+  font-size: 28rpx;
+  line-height: 1.8;
+  overflow-y: auto;
+  text-align: center; /* 文本居中 */
+}
+
+/* A4 上传区域 */
+.upload-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.media-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.upload-icon {
+  font-size: 80rpx;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 20rpx;
+  width: 100rpx;
+  height: 100rpx;
+  line-height: 90rpx;
+  text-align: center;
+  border: 2rpx dashed rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+}
+
+.upload-text {
+  font-size: 32rpx;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 10rpx;
+}
+
+.upload-desc {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* 容器设置 */
+.container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* 整体居中对齐 */
+  overflow: hidden;
+}
+
+/* 内容介绍区域 */
+.content-intro {
+  width: 90vw;
+  margin: 20rpx auto 30rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 内容文本展示区 */
+.content-text-box {
+  width: 85vw;
+  margin: 20rpx auto 15rpx;
+  padding: 20rpx 25rpx;
+  background: rgba(29, 44, 87, 0.6);
+  border: 1px solid rgba(125, 159, 244, 0.3);
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.4), inset 0 0 30rpx rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(5px);
+  position: relative;
+  overflow: hidden;
+  max-height: 200rpx; /* 限制最大高度 */
+  box-sizing: border-box; /* 确保边框和内边距计算在宽度内 */
+}
+
+.content-text-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4rpx;
+  background: linear-gradient(90deg, transparent, rgba(125, 159, 244, 0.8), transparent);
+}
+
+.content-text {
+  font-size: 28rpx;
+  line-height: 1.8;
+  color: #fff;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.5);
+  display: block;
+  text-align: justify;
+  letter-spacing: 1rpx;
+  overflow-y: auto; /* 添加垂直滚动 */
+  max-height: 160rpx; /* 确保可滚动区域适当 */
+  padding-right: 10rpx; /* 为滚动条预留空间 */
+  width: 100%; /* 确保文本宽度不超出容器 */
+  box-sizing: border-box; /* 确保内边距计算在宽度内 */
+}
+
+/* 晓视界按钮 */
+.xiaoshijie-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16rpx 40rpx;
+  background: linear-gradient(135deg, rgba(125, 159, 244, 0.5), rgba(86, 130, 239, 0.8));
+  border-radius: 40rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.4);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.xiaoshijie-button::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.xiaoshijie-button:active {
+  transform: scale(0.97);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.5);
+}
+
+.xiaoshijie-button:active::after {
+  opacity: 1;
+}
+
+.xiaoshijie-icon {
+  width: 36rpx;
+  height: 36rpx;
+  position: relative;
+  margin-right: 10rpx;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 0 10rpx rgba(125, 159, 244, 0.7);
+}
+
+.xiaoshijie-icon::before {
+  content: '';
+  position: absolute;
+  width: 20rpx;
+  height: 20rpx;
+  background-color: rgba(125, 159, 244, 0.9);
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.xiaoshijie-text {
+  font-size: 30rpx;
+  color: #fff;
+  font-weight: 500;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.3);
+  letter-spacing: 2rpx;
+}
+
+/* 操作按钮区域 */
+.action-buttons {
+  width: 90vw;
+  margin: 20rpx auto 40rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 空内容样式 */
+.empty-content {
+  background: rgba(29, 44, 87, 0.4);
+  border: 1px dashed rgba(125, 159, 244, 0.3);
+  min-height: 80rpx;
+  max-height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.placeholder-text {
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  font-style: italic;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 文本容器 */
+.content-text-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 20rpx 0 15rpx;
+}
+
+.detail-page {
+  background-color: #050B1F;
+  min-height: 100vh;
+  padding-bottom: 30rpx;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 页面标题 */
+.header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 20rpx 30rpx;
+  background: rgba(11, 21, 48, 0.7);
+  position: relative;
+  z-index: 10;
+}
+
+.back-btn {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-arrow {
+  width: 20rpx;
+  height: 20rpx;
+  border-left: 4rpx solid #fff;
+  border-bottom: 4rpx solid #fff;
+  transform: rotate(45deg);
+}
+
+.page-title {
+  flex: 1;
+  font-size: 36rpx;
+  font-weight: bold;
+  text-align: center;
+  color: #fff;
+  margin-right: 60rpx;
+}
+
+/* A4容器 */
+.a4-container {
+  width: 595rpx; /* A4宽度比例 */
+  height: 842rpx; /* A4高度比例 */
+  background-color: #fff;
+  margin: 40rpx auto;
+  border-radius: 12rpx;
+  box-shadow: 0 8rpx 30rpx rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  color: #333;
+}
+
+/* 媒体内容区 */
+.media-content {
+  width: 100%;
+  height: 50%;
+  background-color: #f5f5f5;
+  position: relative;
+  overflow: hidden;
+}
+
+.media-image,
+.media-video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* 内容信息区 */
+.content-info {
+  flex: 1;
+  padding: 30rpx;
+  overflow-y: auto;
+}
+
+.content-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  margin-bottom: 20rpx;
+  color: #333;
+}
+
+.content-description {
+  font-size: 28rpx;
+  line-height: 1.6;
+  color: #666;
+  margin-bottom: 30rpx;
+}
+
+/* 音频控制 */
+.audio-control {
+  display: flex;
+  align-items: center;
+  margin: 30rpx 0;
+  padding: 15rpx;
+  background-color: #f0f0f0;
+  border-radius: 30rpx;
+}
+
+.audio-btn {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  background-color: #7D9FF4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+}
+
+.audio-icon {
+  width: 0;
+  height: 0;
+  border-style: solid;
+}
+
+.play .audio-icon {
+  border-width: 12rpx 0 12rpx 20rpx;
+  border-color: transparent transparent transparent #fff;
+  margin-left: 5rpx;
+}
+
+.pause .audio-icon {
+  width: 16rpx;
+  height: 20rpx;
+  border-width: 0 5rpx 0 5rpx;
+  border-color: #fff;
+  border-style: double;
+  border-left: 5rpx solid #fff;
+  border-right: 5rpx solid #fff;
+  margin: 0;
+}
+
+.audio-text {
+  font-size: 26rpx;
+  color: #555;
+}
+
+/* 附加信息 */
+.additional-info {
+  margin-top: 20rpx;
+  border-top: 1px solid #eee;
+  padding-top: 20rpx;
+}
+
+.info-item {
+  display: flex;
+  margin-bottom: 10rpx;
+}
+
+.info-label {
+  font-size: 24rpx;
+  color: #999;
+  margin-right: 20rpx;
+  width: 120rpx;
+}
+
+.info-value {
+  font-size: 24rpx;
+  color: #666;
+}
+
+/* 管理员上传区域 */
+.admin-upload {
+  width: 595rpx;
+  background-color: rgba(11, 21, 48, 0.7);
+  border-radius: 12rpx;
+  padding: 30rpx;
+  margin-top: 20rpx;
+}
+
+.upload-title {
+  font-size: 32rpx;
+  color: #fff;
+  margin-bottom: 20rpx;
+  text-align: center;
+}
+
+.upload-selector {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30rpx;
+}
+
+.upload-option {
+  padding: 12rpx 30rpx;
+  border-radius: 30rpx;
+  font-size: 28rpx;
+  margin: 0 15rpx;
+  background-color: rgba(125, 159, 244, 0.2);
+  color: #fff;
+}
+
+.upload-option.active {
+  background-color: #7D9FF4;
+}
+
+.upload-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.upload-btn {
+  width: 180rpx;
+  height: 70rpx;
+  line-height: 70rpx;
+  text-align: center;
+  background-color: rgba(125, 159, 244, 0.3);
+  color: #fff;
+  border-radius: 8rpx;
+  font-size: 26rpx;
+}
+
+.audio-upload {
+  background-color: rgba(37, 181, 164, 0.3);
+}
+
+.submit-btn {
+  background-color: #25b5a4;
+} 

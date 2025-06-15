@@ -1,0 +1,96 @@
+<view class="container setting-page">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">通用设置</text>
+  </view>
+  
+  <!-- 加载中 -->
+  <view class="loading-container" wx:if="{{isLoading}}">
+    <view class="loading-icon"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+  
+  <block wx:if="{{!isLoading}}">
+    <!-- 字体大小设置 -->
+    <view class="setting-section">
+      <view class="section-title">阅读设置</view>
+      
+      <view class="setting-item">
+        <text class="setting-label">字体大小</text>
+        <view class="font-size-options">
+          <radio-group bindchange="onFontSizeChange">
+            <view class="font-option-container">
+              <view wx:for="{{fontSizeOptions}}" wx:key="value" class="font-option {{item.checked ? 'active' : ''}}">
+                <radio value="{{item.value}}" checked="{{item.checked}}" color="#3778FF" />
+                <text class="font-label">{{item.label}}</text>
+              </view>
+            </view>
+          </radio-group>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 通知设置 -->
+    <view class="setting-section">
+      <view class="section-title">通知设置</view>
+      
+      <view class="setting-item">
+        <view class="setting-item-header">
+          <text class="setting-label">接收推送通知</text>
+          <switch checked="{{notificationSettings.pushEnabled}}" bindchange="toggleNotification" data-setting="pushEnabled" color="#3778FF" />
+        </view>
+        <text class="setting-desc">开启后，您将收到系统的各类通知</text>
+      </view>
+      
+      <block wx:if="{{notificationSettings.pushEnabled}}">
+        <view class="setting-item sub-setting">
+          <text class="setting-label">活动通知</text>
+          <switch checked="{{notificationSettings.activityNotice}}" bindchange="toggleNotification" data-setting="activityNotice" color="#3778FF" />
+        </view>
+        
+        <view class="setting-item sub-setting">
+          <text class="setting-label">学习提醒</text>
+          <switch checked="{{notificationSettings.learningReminder}}" bindchange="toggleNotification" data-setting="learningReminder" color="#3778FF" />
+        </view>
+        
+        <view class="setting-item sub-setting">
+          <text class="setting-label">营销信息</text>
+          <switch checked="{{notificationSettings.marketingInfo}}" bindchange="toggleNotification" data-setting="marketingInfo" color="#3778FF" />
+        </view>
+      </block>
+    </view>
+    
+    <!-- 外观设置 -->
+    <view class="setting-section">
+      <view class="section-title">外观设置</view>
+      
+      <view class="setting-item" bindtap="toggleDarkMode">
+        <text class="setting-label">暗黑模式</text>
+        <switch checked="{{darkMode}}" color="#3778FF" />
+      </view>
+    </view>
+    
+    <!-- 数据设置 -->
+    <view class="setting-section">
+      <view class="section-title">数据与存储</view>
+      
+      <view class="setting-item" bindtap="toggleAutoSync">
+        <text class="setting-label">数据自动同步</text>
+        <switch checked="{{autoSync}}" color="#3778FF" />
+      </view>
+      
+      <view class="setting-item" bindtap="toggleWifiDownload">
+        <view class="setting-item-header">
+          <text class="setting-label">仅在WiFi下下载课程</text>
+          <switch checked="{{wifiDownloadOnly}}" color="#3778FF" />
+        </view>
+        <text class="setting-desc">启用后，只有连接WiFi网络才会下载课程资源</text>
+      </view>
+    </view>
+    
+    <!-- 底部按钮 -->
+    <view class="footer-action">
+      <button class="reset-button" bindtap="resetSettings">恢复默认设置</button>
+    </view>
+  </block>
+</view> 

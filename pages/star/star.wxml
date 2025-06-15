@@ -1,0 +1,125 @@
+<!--pages/star/star.wxml-->
+<view class="container star-page">
+  <!-- 顶部背景星空 -->
+  <view class="star-bg"></view>
+  
+  <view class="page-header">
+    <text class="page-title">上下未形，何由考之？</text>
+    <text class="page-subtitle">先秦 · 屈原·《天问》</text>
+  </view>
+  
+  <!-- 太空地图组件 -->
+  <view class="space-map">
+    <view class="map-header">
+      <text class="map-title">太空地图</text>
+      <view class="map-tabs">
+        <view class="map-tab {{currentMap === 'universe' ? 'active' : ''}}" bindtap="switchMap" data-map="universe">宇宙</view>
+        <view class="map-tab {{currentMap === 'galaxy' ? 'active' : ''}}" bindtap="switchMap" data-map="galaxy">星系</view>
+        <view class="map-tab {{currentMap === 'celestial' ? 'active' : ''}}" bindtap="switchMap" data-map="celestial">天体</view>
+        <view class="map-tab {{currentMap === 'earth' ? 'active' : ''}}" bindtap="switchMap" data-map="earth">地球</view>
+      </view>
+    </view>
+    
+    <view class="map-content">
+      <!-- 预留视频播放区域 -->
+      <video wx:if="{{mapVideos[currentMap]}}" 
+             class="map-video" 
+             src="{{mapVideos[currentMap]}}" 
+             object-fit="cover"
+             controls="{{false}}"
+             autoplay="{{true}}"
+             loop="{{true}}"
+             muted="{{true}}">
+      </video>
+      <!-- 无视频时的占位图 -->
+      <view wx:else class="map-placeholder">
+        <image class="placeholder-img" src="pic/{{currentMap}}.jpg" mode="aspectFill"></image>
+        <view class="placeholder-mask">
+          <text class="placeholder-text">太空探索中...</text>
+        </view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 轮播形式展示四个部分 -->
+  <view class="swiper-container">
+    <swiper class="section-swiper" 
+            autoplay="{{autoplay}}" 
+            interval="{{interval}}" 
+            duration="{{duration}}"
+            circular="{{circular}}"
+            current="{{current}}"
+            bindchange="swiperChange">
+            
+      <!-- 宇宙结构部分 -->
+      <swiper-item>
+        <view class="section-card" bindtap="navigateToDetail" data-section="universe-structure">
+          <image class="section-image" src="pic/宇宙结构.jpg" mode="aspectFill"></image>
+          <view class="section-overlay">
+            <view class="section-content">
+              <view class="section-title">宇宙结构</view>
+              <view class="section-desc">从微观粒子到宏观宇宙，探索宇宙的层次结构与演化历程</view>
+            </view>
+            <view class="section-icon">→</view>
+          </view>
+        </view>
+      </swiper-item>
+      
+      <!-- 天体类型部分 -->
+      <swiper-item>
+        <view class="section-card" bindtap="navigateToDetail" data-section="celestial-types">
+          <image class="section-image" src="pic/天体类型.jpg" mode="aspectFill"></image>
+          <view class="section-overlay">
+            <view class="section-content">
+              <view class="section-title">天体类型</view>
+              <view class="section-desc">恒星、行星、彗星、黑洞...了解宇宙中各种奇妙天体</view>
+            </view>
+            <view class="section-icon">→</view>
+          </view>
+        </view>
+      </swiper-item>
+      
+      <!-- 能量与场部分 -->
+      <swiper-item>
+        <view class="section-card" bindtap="navigateToDetail" data-section="energy-fields">
+          <image class="section-image" src="pic/能量与场.jpg" mode="aspectFill"></image>
+          <view class="section-overlay">
+            <view class="section-content">
+              <view class="section-title">能量与场</view>
+              <view class="section-desc">引力、电磁力、强弱核力...宇宙中的能量与场如何运作</view>
+            </view>
+            <view class="section-icon">→</view>
+          </view>
+        </view>
+      </swiper-item>
+      
+      <!-- 我们在哪部分 -->
+      <swiper-item>
+        <view class="section-card" bindtap="navigateToDetail" data-section="where-we-are">
+          <image class="section-image" src="pic/我们在哪.jpg" mode="aspectFill"></image>
+          <view class="section-overlay">
+            <view class="section-content">
+              <view class="section-title">我们在哪</view>
+              <view class="section-desc">太阳系、银河系、本星系群...人类在浩瀚宇宙中的位置</view>
+            </view>
+            <view class="section-icon">→</view>
+          </view>
+        </view>
+      </swiper-item>
+    </swiper>
+    
+    <!-- 轮播指示点 -->
+    <view class="swiper-dots">
+      <block wx:for="{{sections}}" wx:key="id">
+        <view class="dot {{current === index ? 'active' : ''}}" 
+              bindtap="dotTap" 
+              data-index="{{index}}"></view>
+      </block>
+    </view>
+  </view>
+  
+  <!-- 底部装饰 -->
+  <view class="footer-decoration">
+    <view class="footer-text">向宇宙深处探索</view>
+  </view>
+</view> 

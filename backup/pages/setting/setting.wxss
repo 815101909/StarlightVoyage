@@ -1,0 +1,150 @@
+/* pages/setting/setting.wxss */
+
+.setting-page {
+  padding-bottom: 40rpx;
+  background-color: #f7f9fc;
+}
+
+.page-header {
+  padding: 30rpx;
+  background-color: #fff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.page-title {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 500rpx;
+}
+
+.loading-icon {
+  width: 80rpx;
+  height: 80rpx;
+  border: 6rpx solid #e9ecef;
+  border-top: 6rpx solid #3778FF;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  margin-top: 20rpx;
+  font-size: 28rpx;
+  color: #666;
+}
+
+/* 设置区域 */
+.setting-section {
+  margin: 20rpx 0;
+  background-color: #fff;
+  border-radius: 10rpx;
+  overflow: hidden;
+}
+
+.section-title {
+  padding: 20rpx 30rpx;
+  font-size: 28rpx;
+  color: #666;
+  font-weight: 500;
+}
+
+.setting-item {
+  padding: 30rpx;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+}
+
+.setting-item:last-child {
+  border-bottom: none;
+}
+
+.setting-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.setting-label {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.setting-desc {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: #999;
+}
+
+.sub-setting {
+  padding-left: 60rpx;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 字体大小设置 */
+.font-size-options {
+  margin-top: 20rpx;
+  width: 100%;
+}
+
+.font-option-container {
+  display: flex;
+  justify-content: space-around;
+}
+
+.font-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 15rpx 30rpx;
+  border-radius: 8rpx;
+  border: 1px solid #eee;
+}
+
+.font-option.active {
+  background-color: rgba(55, 120, 255, 0.1);
+  border-color: #3778FF;
+}
+
+.font-label {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: #666;
+}
+
+.font-option.active .font-label {
+  color: #3778FF;
+}
+
+/* 底部重置按钮 */
+.footer-action {
+  margin-top: 40rpx;
+  padding: 0 30rpx;
+  display: flex;
+  justify-content: center;
+}
+
+.reset-button {
+  font-size: 28rpx;
+  color: #666;
+  background-color: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 8rpx;
+  padding: 20rpx 40rpx;
+  width: 80%;
+} 

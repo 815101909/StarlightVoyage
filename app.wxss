@@ -1,0 +1,105 @@
+/**app.wxss**/
+/* 全局样式 */
+page {
+  font-family: '思源宋体', 'Source Han Serif', 'Source Han Serif SC', 'Noto Serif SC', 'Source Han Serif CN', 'Source Han Serif TC', 'Source Han Serif TW', 'Source Han Serif HK', serif, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica,
+    Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei',
+    sans-serif;
+  --primary-color: #7D9FF4;
+  --secondary-color: #5D7DCF;
+  --accent-color: #E8C36D;
+  --dark-bg: #0F1A38;
+  --darker-bg: #081020;
+  --text-color: #FFFFFF;
+  --text-secondary: #BBBBBB;
+  
+  background-color: var(--dark-bg);
+  color: var(--text-color);
+}
+
+/* 常用容器 */
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 30rpx;
+}
+
+.card {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.15);
+}
+
+.section-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  margin-bottom: 20rpx;
+  color: var(--primary-color);
+}
+
+.section-subtitle {
+  font-size: 28rpx;
+  font-weight: 500;
+  margin-bottom: 16rpx;
+  color: var(--text-secondary);
+}
+
+/* 按钮样式 */
+.btn {
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: 40rpx;
+  padding: 18rpx 36rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  border: none;
+  text-align: center;
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: var(--primary-color);
+  border: 2rpx solid var(--primary-color);
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10rpx); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* 星星背景 */
+.star-bg {
+  background-color: var(--darker-bg);
+  background-image: radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 10px),
+    radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 5px),
+    radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 6px);
+  background-size: 550px 550px, 350px 350px, 250px 250px;
+  background-position: 0 0, 40px 60px, 130px 270px;
+}
+
+/* 渐变文字 */
+.gradient-text {
+  background-image: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+  -webkit-background-clip: text;
+  color: transparent;
+  display: inline-block;
+} 

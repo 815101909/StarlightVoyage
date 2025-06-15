@@ -1,0 +1,69 @@
+<view class="container member-center">
+  <!-- 页面背景 -->
+  <view class="page-bg"></view>
+
+  <!-- 加载中 -->
+  <view class="loading-container" wx:if="{{isLoading}}">
+    <view class="loading-icon"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <block wx:if="{{!isLoading}}">
+    <!-- 宣传海报区域 -->
+    <view class="promotion-area">
+      <view class="promotion-image-container">
+        <image class="promotion-image" src="{{promotionImage}}" mode="widthFix"></image>
+      </view>
+    </view>
+    
+    <!-- 会员方案选择 -->
+    <view class="member-plans">
+      <view class="section-title">
+        <text>会员方案</text>
+      </view>
+      <view class="plans-list">
+        <view 
+          wx:for="{{memberPlans}}" 
+          wx:key="id" 
+          class="plan-card {{selectedPlan && selectedPlan.id === item.id ? 'selected' : ''}} {{item.recommended ? 'recommended' : ''}}"
+          bindtap="selectPlan"
+          data-id="{{item.id}}"
+        >
+          <view class="recommended-tag" wx:if="{{item.recommended}}">
+            <text>推荐</text>
+          </view>
+          <view class="plan-header">
+            <text class="plan-name">{{item.name}}</text>
+          </view>
+          <view class="plan-price">
+            <text class="currency">¥</text>
+            <text class="amount">{{item.price}}</text>
+          </view>
+          <view class="plan-period">{{item.period}}</view>
+          <view class="original-price">¥{{item.originalPrice}}</view>
+        </view>
+      </view>
+      
+      <!-- 统一的开通按钮 -->
+      <view class="unified-btn" bindtap="showPurchaseModal">
+        <text>立即开通</text>
+      </view>
+    </view>
+  </block>
+  
+  <!-- 会员购买确认弹窗 -->
+  <view class="modal-container" wx:if="{{isSelectingPlan}}">
+    <view class="modal-mask" bindtap="cancelPurchase"></view>
+    <view class="modal-content">
+      <view class="modal-title">确认购买</view>
+      <view class="modal-plan-info">
+        <text class="modal-plan-name">{{selectedPlan.name}}</text>
+        <text class="modal-plan-price">¥{{selectedPlan.price}}</text>
+      </view>
+      <view class="modal-actions">
+        <button class="modal-cancel" bindtap="cancelPurchase">取消</button>
+        <button class="modal-confirm" bindtap="confirmPurchase">确认支付</button>
+      </view>
+    </view>
+  </view>
+</view> 

@@ -1,0 +1,39 @@
+<!--pages/planet_wheel/planet_wheel.wxml-->
+<view class="starry-wish-page" catchtap="onSkyTap">
+  <!-- 星空背景 -->
+  <view class="star-bg"></view>
+  
+  <!-- 渲染所有星星 -->
+  <block wx:for="{{stars}}" wx:key="id">
+    <view 
+      class="star-item {{item.isWished ? 'wished' : ''}} {{item.id === activeStarId ? 'active' : ''}}" 
+      style="left: {{item.x}}%; top: {{item.y}}%; width: {{item.size}}rpx; height: {{item.size}}rpx; z-index: {{item.id === activeStarId ? 10 : 2}};"
+      catchtap="onStarTap"
+      data-id="{{item.id}}"
+    >
+      <text class="star-icon">⭐</text>
+      <view wx:if="{{item.isWished}}" class="wish-content">
+        <view>{{item.wish}}</view>
+        <view class="wish-date">{{item.date}}</view>
+      </view>
+    </view>
+  </block>
+
+  <!-- 许愿弹窗 -->
+  <view wx:if="{{showWishInput}}" class="wish-modal" catchtap="cancelWish">
+    <view class="wish-modal-content" catchtap="stopTap">
+      <textarea 
+        class="wish-input" 
+        placeholder="写下你的愿望..."
+        maxlength="50"
+        value="{{wishText}}"
+        bindinput="onWishInput"
+      ></textarea>
+      <view class="wish-count">{{wishText.length}}/50</view>
+      <view class="wish-modal-actions">
+        <button class="wish-btn" bindtap="confirmWish">许愿</button>
+        <button class="cancel-btn" bindtap="cancelWish">取消</button>
+      </view>
+    </view>
+  </view>
+</view> 

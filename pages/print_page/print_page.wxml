@@ -1,0 +1,34 @@
+<!--pages/print_page/print_page.wxml-->
+<view class="print-container">
+  <!-- A4 Print Area -->
+  <view class="print-content">
+    <!-- 空白A4区域 -->
+    <view class="a4-area">
+      <!-- API预留，用户将自行实现上传功能 -->
+    </view>
+  </view>
+  
+  <!-- 诗句区域 -->
+  <view class="poem-container">
+    <view class="poem-title">《天真的预言》</view>
+    <view class="poem-author">威廉·布莱克</view>
+    
+    <view class="poem-content">
+      <view class="poem-original">
+        <view class="poem-line">To see a world in a grain of sand</view>
+        <view class="poem-line">And a heaven in a wild flower,</view>
+        <view class="poem-line">Hold infinity in the palm of your hand</view>
+        <view class="poem-line">And eternity in an hour.</view>
+      </view>
+      
+      <view class="poem-translation">
+        <view class="poem-line">一颗沙里看出一个世界，</view>
+        <view class="poem-line">一朵野花里一座天堂，</view>
+        <view class="poem-line">把无限放在你的手掌上，</view>
+        <view class="poem-line">永恒在一刹那里收藏。</view>
+      </view>
+      
+      <view class="poem-translator">——梁宗岱 译</view>
+    </view>
+  </view>
+</view> 

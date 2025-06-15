@@ -1,0 +1,44 @@
+<view class="container system-message-page">
+  <!-- 页面背景 -->
+  <view class="page-bg"></view>
+  
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">系统消息</text>
+    <view class="refresh-btn" bindtap="refreshMessages">
+      <text class="refresh-icon">🔄</text>
+    </view>
+  </view>
+  
+  <!-- 消息列表 -->
+  <view class="message-list" wx:if="{{!isLoading && messages.length > 0}}">
+    <view 
+      wx:for="{{messages}}" 
+      wx:key="id" 
+      class="message-item {{item.isRead ? 'read' : 'unread'}} {{item.type}}-message"
+      bindtap="markAsRead"
+      data-id="{{item.id}}"
+    >
+      <view class="message-indicator"></view>
+      <view class="message-content">
+        <view class="message-header">
+          <text class="message-title">{{item.title}}</text>
+          <text class="message-time">{{item.date}} {{item.time}}</text>
+        </view>
+        <text class="message-preview">{{item.content}}</text>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 空消息提示 -->
+  <view class="empty-messages" wx:if="{{!isLoading && messages.length === 0}}">
+    <view class="empty-icon">📭</view>
+    <view class="empty-text">暂无系统消息</view>
+  </view>
+  
+  <!-- 加载中 -->
+  <view class="loading-container" wx:if="{{isLoading}}">
+    <view class="loading-icon"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+</view> 

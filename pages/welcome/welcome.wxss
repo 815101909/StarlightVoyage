@@ -1,0 +1,229 @@
+/* pages/welcome/welcome.wxss */
+.welcome-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  background-color: var(--darker-bg);
+  transition: background 0.5s ease;
+}
+
+/* 星空背景 */
+.star-bg {
+  background-color: var(--darker-bg);
+  background-image: radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 10px),
+    radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 5px),
+    radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 6px);
+  background-size: 550px 550px, 350px 350px, 250px 250px;
+  background-position: 0 0, 40px 60px, 130px 270px;
+  animation: twinkle 4s linear infinite;
+}
+
+@keyframes twinkle {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+/* 流星动画 */
+.meteor-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.meteor {
+  position: absolute;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.8), transparent);
+  width: 200rpx;
+  height: 2rpx;
+  transform: rotate(-45deg);
+  animation: meteor-fall 3s linear infinite;
+}
+
+.meteor-1 {
+  top: 10%;
+  left: 90%;
+  animation-delay: 0.3s;
+}
+
+.meteor-2 {
+  top: 40%;
+  left: 80%;
+  animation-delay: 1s;
+  width: 150rpx;
+}
+
+.meteor-3 {
+  top: 60%;
+  left: 70%;
+  animation-delay: 1.7s;
+  width: 250rpx;
+}
+
+@keyframes meteor-fall {
+  0% {
+    transform: translateX(0) translateY(0) rotate(-45deg);
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-150vw) translateY(150vh) rotate(-45deg);
+    opacity: 0;
+  }
+}
+
+/* 行星动画 */
+.planets-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.planet {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 1;
+  animation: float 2s ease-in-out infinite;
+}
+
+.rotate-planet {
+  animation: float 2s ease-in-out infinite, rotate 10s linear infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes float {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(180deg); }
+  100% { transform: translateY(0px) rotate(360deg); }
+}
+
+.planet-1 {
+  width: 100rpx;
+  height: 100rpx;
+  background: radial-gradient(circle at 30% 30%, #FFA07A, #8B4513);
+  top: 15%;
+  right: 20%;
+  box-shadow: 0 0 20rpx rgba(255, 160, 122, 0.6);
+}
+
+.planet-2 {
+  width: 60rpx;
+  height: 60rpx;
+  background: radial-gradient(circle at 30% 30%, #B0E0E6, #4682B4);
+  bottom: 25%;
+  left: 25%;
+  box-shadow: 0 0 15rpx rgba(176, 224, 230, 0.6);
+}
+
+.planet-3 {
+  width: 80rpx;
+  height: 80rpx;
+  background: radial-gradient(circle at 30% 30%, #DDA0DD, #9932CC);
+  top: 65%;
+  right: 35%;
+  box-shadow: 0 0 20rpx rgba(221, 160, 221, 0.6);
+}
+
+/* 欢迎文字 */
+.welcome-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  text-align: center;
+}
+
+.text-line {
+  opacity: 1;
+  transform: translateY(0);
+  margin-bottom: 30rpx;
+}
+
+.text-line.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.line-1 {
+  font-size: 42rpx;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.line-2 {
+  font-size: 60rpx;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin: 20rpx 0;
+}
+
+.line-3 {
+  font-size: 32rpx;
+  color: var(--text-secondary);
+}
+
+/* 按钮区域 */
+.button-container {
+  margin-top: 80rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0;
+  transform: translateY(30rpx);
+  transition: all 0.5s ease;
+  position: absolute;
+  bottom: 80rpx;
+  width: 100%;
+}
+
+.button-container.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.enter-btn {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  border: none;
+  border-radius: 50rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  padding: 24rpx 80rpx;
+  box-shadow: 0 8rpx 30rpx rgba(125, 159, 244, 0.4);
+  margin-bottom: 30rpx;
+}
+
+.skip-text {
+  color: white;
+  font-size: 28rpx;
+  opacity: 0.9;
+  padding: 20rpx 60rpx;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 30rpx;
+  animation: pulse 1s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+  100% { opacity: 0.6; transform: scale(1); }
+} 

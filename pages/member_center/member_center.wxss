@@ -1,0 +1,438 @@
+.member-center {
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+  padding-bottom: 40rpx;
+  box-sizing: border-box;
+}
+
+.page-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #050b1f;
+  background-image: linear-gradient(to bottom, #0c1840, #050b1f);
+  z-index: -1;
+}
+
+/* 加载中样式 */
+.loading-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+.loading-icon {
+  width: 100rpx;
+  height: 100rpx;
+  border: 6rpx solid rgba(255, 255, 255, 0.3);
+  border-top: 6rpx solid #3a79fe;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-text {
+  margin-top: 30rpx;
+  font-size: 28rpx;
+  color: #ffffff;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 用户会员信息 */
+.user-member-info {
+  margin: 30rpx 30rpx 40rpx;
+  padding: 30rpx;
+  background-color: rgba(30, 45, 75, 0.7);
+  border-radius: 15rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 6rpx 12rpx rgba(0, 0, 0, 0.3);
+}
+
+.avatar-container {
+  position: relative;
+  margin-bottom: 20rpx;
+}
+
+.user-avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  border: 4rpx solid #3a79fe;
+  background-color: #1a233b;
+}
+
+.member-badge {
+  position: absolute;
+  bottom: 0;
+  right: -10rpx;
+  background: linear-gradient(90deg, #f5d442, #ff9d00);
+  border-radius: 30rpx;
+  padding: 4rpx 16rpx;
+  font-size: 20rpx;
+  color: #fff;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.3);
+}
+
+.user-info {
+  text-align: center;
+  margin-bottom: 16rpx;
+}
+
+.user-name {
+  font-size: 32rpx;
+  color: #ffffff;
+  font-weight: bold;
+  margin-bottom: 8rpx;
+  display: block;
+}
+
+.member-status {
+  font-size: 26rpx;
+  color: #f5d442;
+  display: block;
+}
+
+.member-expire {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+}
+
+.member-days {
+  margin-left: 20rpx;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* 会员权益样式 */
+.member-benefits {
+  margin: 0 30rpx 40rpx;
+  padding: 20rpx 30rpx 30rpx;
+  background-color: rgba(30, 45, 75, 0.7);
+  border-radius: 15rpx;
+  box-shadow: 0 6rpx 12rpx rgba(0, 0, 0, 0.3);
+}
+
+.section-title {
+  font-size: 30rpx;
+  color: #ffffff;
+  font-weight: bold;
+  margin: 10rpx 0 20rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.benefits-list {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.benefit-item {
+  width: 50%;
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+  box-sizing: border-box;
+  padding-right: 10rpx;
+}
+
+.benefit-icon {
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3a79fe, #7d9ff4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24rpx;
+  color: #ffffff;
+  margin-right: 10rpx;
+  flex-shrink: 0;
+}
+
+.benefit-text {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.9);
+  flex: 1;
+}
+
+/* 宣传海报区域 */
+.promotion-area {
+  margin: 30rpx 30rpx 40rpx;
+  padding: 20rpx 30rpx 30rpx;
+  background-color: rgba(30, 45, 75, 0.7);
+  border-radius: 15rpx;
+  box-shadow: 0 6rpx 12rpx rgba(0, 0, 0, 0.3);
+}
+
+.admin-actions {
+  display: flex;
+}
+
+.upload-btn {
+  background-color: rgba(58, 121, 254, 0.3);
+  padding: 6rpx 20rpx;
+  border-radius: 20rpx;
+  font-size: 22rpx;
+  color: #ffffff;
+  border: 1rpx solid rgba(58, 121, 254, 0.6);
+}
+
+.promotion-image-container {
+  width: 100%;
+  height: 800rpx;
+  border-radius: 10rpx;
+  overflow: hidden;
+  background-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.2);
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.promotion-image {
+  width: 100%;
+  display: block;
+}
+
+.placeholder-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.placeholder-text text {
+  font-size: 28rpx;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+}
+
+/* 会员方案选择 */
+.member-plans {
+  margin: 0 30rpx 40rpx;
+  padding: 20rpx 30rpx 30rpx;
+  background-color: rgba(30, 45, 75, 0.7);
+  border-radius: 15rpx;
+  box-shadow: 0 6rpx 12rpx rgba(0, 0, 0, 0.3);
+}
+
+.plans-list {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  margin-bottom: 30rpx;
+}
+
+.plan-card {
+  width: 23%;
+  background-color: rgba(26, 35, 59, 0.8);
+  border-radius: 15rpx;
+  padding: 15rpx 10rpx;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.2);
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.plan-card:active {
+  transform: scale(0.98);
+}
+
+.plan-card.recommended {
+  border: 1px solid #f5d442;
+  background-color: rgba(38, 51, 86, 0.8);
+}
+
+.plan-card.selected {
+  border: 2px solid #3a79fe;
+  box-shadow: 0 0 15rpx rgba(58, 121, 254, 0.5);
+}
+
+.recommended-tag {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: linear-gradient(45deg, #f5d442, #ff9d00);
+  padding: 4rpx 12rpx;
+  font-size: 18rpx;
+  color: #fff;
+  border-bottom-left-radius: 10rpx;
+}
+
+.plan-header {
+  width: 100%;
+  margin-bottom: 10rpx;
+  padding-top: 10rpx;
+}
+
+.plan-name {
+  font-size: 26rpx;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.plan-price {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  margin-bottom: 6rpx;
+}
+
+.currency {
+  font-size: 22rpx;
+  color: #f5d442;
+  margin-right: 2rpx;
+}
+
+.amount {
+  font-size: 34rpx;
+  color: #f5d442;
+  font-weight: bold;
+}
+
+.plan-period {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 6rpx;
+}
+
+.original-price {
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.5);
+  text-decoration: line-through;
+}
+
+/* 统一开通按钮 */
+.unified-btn {
+  background: linear-gradient(90deg, #3a79fe, #7d9ff4);
+  padding: 20rpx 0;
+  border-radius: 40rpx;
+  text-align: center;
+  font-size: 32rpx;
+  color: #ffffff;
+  font-weight: bold;
+  margin-top: 10rpx;
+  box-shadow: 0 6rpx 10rpx rgba(0, 0, 0, 0.2);
+}
+
+.unified-btn:active {
+  transform: scale(0.98);
+  box-shadow: 0 3rpx 5rpx rgba(0, 0, 0, 0.2);
+}
+
+/* 确认购买弹窗 */
+.modal-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+.modal-content {
+  width: 80%;
+  background-color: #1a233b;
+  border-radius: 15rpx;
+  padding: 40rpx 30rpx;
+  position: relative;
+  z-index: 1001;
+  box-shadow: 0 10rpx 25rpx rgba(0, 0, 0, 0.5);
+}
+
+.modal-title {
+  font-size: 34rpx;
+  color: #ffffff;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 30rpx;
+}
+
+.modal-plan-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40rpx;
+  padding: 20rpx;
+  background-color: rgba(58, 121, 254, 0.1);
+  border-radius: 10rpx;
+}
+
+.modal-plan-name {
+  font-size: 28rpx;
+  color: #ffffff;
+}
+
+.modal-plan-price {
+  font-size: 34rpx;
+  color: #f5d442;
+  font-weight: bold;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 20rpx;
+}
+
+.modal-cancel, .modal-confirm {
+  flex: 1;
+  height: 80rpx;
+  line-height: 80rpx;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  padding: 0;
+}
+
+.modal-cancel {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  border: 1rpx solid rgba(255, 255, 255, 0.2);
+}
+
+.modal-confirm {
+  background: linear-gradient(90deg, #3a79fe, #7d9ff4);
+  color: #ffffff;
+  font-weight: bold;
+} 

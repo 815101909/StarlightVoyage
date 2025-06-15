@@ -1,0 +1,172 @@
+<!--pages/explore/explore.wxml-->
+<view class="container explore-page">
+  <!-- 顶部背景星空 -->
+  <view class="explore-bg"></view>
+  
+  <!-- 第一部分：页面标题 -->
+  <view class="page-header">
+    <text class="page-title">星河欲转千帆舞</text>
+    <text class="page-subtitle">宋代 · 李清照 · 《渔家傲》</text>
+  </view>
+  
+  <!-- 第二部分：探索不停歇 -->
+  <view class="section explore-section">
+    <view class="section-header">
+      <text class="section-title">探索不停歇</text>
+      <view class="date-picker-container">
+        <picker mode="date" bindchange="dateChange">
+          <view class="date-picker">
+            <text class="date-picker-text">{{currentDate}}</text>
+            <text class="date-picker-icon">▼</text>
+          </view>
+        </picker>
+      </view>
+    </view>
+    
+    <!-- 切换标签 -->
+    <view class="section-tabs">
+      <view class="tab {{currentTab === 'news' ? 'active' : ''}}" bindtap="switchTab" data-tab="news">
+        <text class="tab-icon">🔭</text>
+        <text class="tab-text">天文时事</text>
+      </view>
+      <view class="tab {{currentTab === 'review' ? 'active' : ''}}" bindtap="switchTab" data-tab="review">
+        <text class="tab-icon">📖</text>
+        <text class="tab-text">天文回顾</text>
+      </view>
+    </view>
+    
+    <!-- 天文时事内容 -->
+    <view class="tab-content" wx:if="{{currentTab === 'news'}}">
+      <scroll-view scroll-y class="article-scroll-list" enable-flex show-scrollbar="{{true}}" bindscrolltolower="loadNewsArticles">
+        <view class="article-list">
+          <block wx:for="{{newsArticles}}" wx:key="id">
+            <view class="article-card" bindtap="openArticle" data-id="{{item.id}}" data-type="news">
+              <image class="article-image" src="{{item.coverUrl}}" mode="aspectFill"></image>
+              <view class="article-info">
+                <view class="article-title">{{item.title}}</view>
+                <view class="article-meta">
+                  <view class="article-tags">
+                    <text class="article-tag">{{item.tag}}</text>
+                    <text class="article-source">{{item.source}}</text>
+                  </view>
+                  <text class="article-date">{{item.date}}</text>
+                </view>
+              </view>
+            </view>
+          </block>
+          
+          <!-- 加载中状态 -->
+          <view class="loading-container" wx:if="{{isLoading}}">
+            <view class="loading-icon"></view>
+            <text class="loading-text">加载中...</text>
+          </view>
+          
+          <!-- 没有更多数据 -->
+          <view class="no-more" wx:if="{{!hasMore.news && newsArticles.length > 0}}">
+            <text class="no-more-text">没有更多了</text>
+          </view>
+          
+          <!-- 空状态 -->
+          <view class="empty-state" wx:if="{{!isLoading && newsArticles.length === 0}}">
+            <image class="empty-image" src="/assets/images/empty.png" mode="aspectFit"></image>
+            <text class="empty-text">这一天没有天文时事</text>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+    
+    <!-- 天文回顾内容 -->
+    <view class="tab-content" wx:if="{{currentTab === 'review'}}">
+      <scroll-view scroll-y class="article-scroll-list" enable-flex show-scrollbar="{{true}}" bindscrolltolower="loadReviewArticles">
+        <view class="article-list">
+          <block wx:for="{{reviewArticles}}" wx:key="id">
+            <view class="article-card" bindtap="openArticle" data-id="{{item.id}}" data-type="review">
+              <image class="article-image" src="{{item.coverUrl}}" mode="aspectFill"></image>
+              <view class="article-info">
+                <view class="article-title">{{item.title}}</view>
+                <view class="article-meta">
+                  <view class="article-tags">
+                    <text class="article-tag">{{item.tag}}</text>
+                    <text class="article-source">{{item.source}}</text>
+                  </view>
+                  <text class="article-date">{{item.date}}</text>
+                </view>
+              </view>
+            </view>
+          </block>
+          
+          <!-- 加载中状态 -->
+          <view class="loading-container" wx:if="{{isLoading}}">
+            <view class="loading-icon"></view>
+            <text class="loading-text">加载中...</text>
+          </view>
+          
+          <!-- 没有更多数据 -->
+          <view class="no-more" wx:if="{{!hasMore.review && reviewArticles.length > 0}}">
+            <text class="no-more-text">没有更多了</text>
+          </view>
+          
+          <!-- 空状态 -->
+          <view class="empty-state" wx:if="{{!isLoading && reviewArticles.length === 0}}">
+            <image class="empty-image" src="/assets/images/empty.png" mode="aspectFit"></image>
+            <text class="empty-text">这一天没有天文回顾</text>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+  
+  <!-- 第三部分：宇宙小剧场 -->
+  <view class="section video-section">
+    <view class="section-header">
+      <text class="section-title">宇宙小剧场</text>
+      <view class="date-picker-container">
+        <picker mode="date" bindchange="videoDateChange">
+          <view class="date-picker">
+            <text class="date-picker-text">{{currentDate}}</text>
+            <text class="date-picker-icon">▼</text>
+          </view>
+        </picker>
+      </view>
+    </view>
+    
+    <!-- 视频列表 -->
+    <scroll-view scroll-y class="video-content-scroll" enable-flex show-scrollbar="{{true}}" bindscrolltolower="loadMoreVideos">
+      <view class="video-list">
+        <block wx:for="{{videoList}}" wx:key="id">
+          <view class="video-list-item" bindtap="playVideo" data-id="{{item.id}}">
+            <view class="video-item-container">
+              <image class="video-item-cover" src="{{item.coverUrl}}" mode="aspectFill"></image>
+              <view class="video-item-play-icon">▶</view>
+              <view class="video-item-duration">{{item.duration}}</view>
+            </view>
+            <view class="video-item-info">
+              <view class="video-item-title">{{item.title}}</view>
+              <view class="video-item-meta">
+                <text class="video-item-date">{{item.date}}</text>
+                <text class="video-item-views">{{item.views}}人观看</text>
+              </view>
+            </view>
+          </view>
+        </block>
+        
+        <!-- 加载中状态 -->
+        <view class="loading-container" wx:if="{{isLoading}}">
+          <view class="loading-icon"></view>
+          <text class="loading-text">加载中...</text>
+        </view>
+        
+        <!-- 没有更多数据 -->
+        <view class="no-more" wx:if="{{!hasMore.video && videoList.length > 0}}">
+          <text class="no-more-text">没有更多了</text>
+        </view>
+        
+        <!-- 空状态 -->
+        <view class="empty-state" wx:if="{{!isLoading && videoList.length === 0}}">
+          <image class="empty-image" src="/assets/images/empty.png" mode="aspectFit"></image>
+          <text class="empty-text">这一天没有视频</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+</view> 
