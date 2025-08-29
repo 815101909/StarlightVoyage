@@ -1,63 +1,221 @@
 <!--pages/detail/detail.wxml-->
 <view class="container">
-  <!-- 页面标题 -->
-  <view class="page-title">{{pageTitle}}</view>
-  
-  <!-- 内容展示区 -->
-  <scroll-view scroll-y class="content-wrapper">
-    <!-- A4内容区域 -->
-    <view class="a4-container">
-      <block wx:for="{{contentList}}" wx:key="id" wx:if="{{contentList.length > 0}}">
-        <!-- A4页面卡片 -->
-        <view class="a4-page">
-          <view class="a4-image-container">
-            <image 
-              src="{{item.mediaUrl}}" 
-              mode="aspectFit" 
-              class="a4-image"
-              bindtap="previewImage"
-              data-url="{{item.mediaUrl}}"></image>
+  <!-- 返回按钮 -->
+  <view class="back-button" bindtap="navigateBack">
+    <text class="back-icon">←</text>
+  </view>
+
+  <!-- 标题显示 -->
+  <view class="title-container">
+    <!-- contentList数据的标题 -->
+    <text wx:if="{{contentList && contentList.length > 0}}" class="page-title">
+      {{contentList[0].title}}
+    </text>
+    <!-- cardData数据的标题 -->
+    <text wx:else class="page-title">
+      {{cardData.title || '知识卡片'}}
+    </text>
           </view>
           
-          <!-- 图片索引（多张图片时显示） -->
-          <view class="image-index" wx:if="{{contentList.length > 1}}">{{index + 1}} / {{contentList.length}}</view>
+  <view class="image-container">
+    <!-- 处理contentList数据（从section参数加载的内容） -->
+    <block wx:if="{{contentList && contentList.length > 0}}">
+      <!-- 混合媒体轮播（图片+视频） -->
+      <block wx:if="{{contentList[0].mediaItems && contentList[0].mediaItems.length > 0}}">
+        <swiper 
+          class="media-swiper" 
+          indicator-dots="{{contentList[0].mediaItems.length > 1}}"
+          indicator-color="rgba(255,255,255,0.5)"
+          indicator-active-color="#ffffff"
+          autoplay="{{false}}"
+          circular="{{true}}"
+          bindchange="onSwiperChange"
+        >
+          <swiper-item wx:for="{{contentList[0].mediaItems}}" wx:key="*this">
+            <!-- 显示图片 -->
+            <image 
+              wx:if="{{item.type === 'image'}}"
+              src="{{item.url}}" 
+              class="main-image" 
+              mode="aspectFit"
+              show-menu-by-longpress="{{true}}"
+              bindload="onImageLoad"
+              binderror="onImageError"
+              bindtap="onImageTap"
+              data-url="{{item.url}}"
+              data-urls="{{contentList[0].imageUrls}}"
+              data-index="{{index}}"
+            />
+            <!-- 显示视频 -->
+            <video 
+              wx:elif="{{item.type === 'video'}}"
+              src="{{item.url}}"
+              class="main-video"
+              controls="{{true}}"
+              poster=""
+              object-fit="contain"
+              show-fullscreen-btn="{{true}}"
+              show-play-btn="{{true}}"
+              show-center-play-btn="{{true}}"
+              enable-play-gesture="{{true}}"
+              binderror="onVideoError"
+              bindplay="onVideoPlay"
+              bindpause="onVideoPause"
+            />
+          </swiper-item>
+        </swiper>
+        <!-- 媒体计数 -->
+        <view wx:if="{{contentList[0].mediaItems.length > 1}}" class="media-counter">
+          {{currentImageIndex + 1}} / {{contentList[0].mediaItems.length}}
+          </view>
+      </block>
+      <!-- 多图轮播（兼容旧格式） -->
+      <block wx:elif="{{contentList[0].imageUrls && contentList[0].imageUrls.length > 0}}">
+        <swiper 
+          class="image-swiper" 
+          indicator-dots="{{contentList[0].imageUrls.length > 1}}"
+          indicator-color="rgba(255,255,255,0.5)"
+          indicator-active-color="#ffffff"
+          autoplay="{{false}}"
+          circular="{{true}}"
+          bindchange="onSwiperChange"
+        >
+          <swiper-item wx:for="{{contentList[0].imageUrls}}" wx:key="*this">
+            <image 
+              src="{{item}}" 
+              class="main-image" 
+              mode="aspectFit"
+              show-menu-by-longpress="{{true}}"
+              bindload="onImageLoad"
+              binderror="onImageError"
+              bindtap="onImageTap"
+              data-url="{{item}}"
+              data-urls="{{contentList[0].imageUrls}}"
+              data-index="{{index}}"
+            />
+          </swiper-item>
+        </swiper>
+        <!-- 图片计数 -->
+        <view wx:if="{{contentList[0].imageUrls.length > 1}}" class="image-counter">
+          {{currentImageIndex + 1}} / {{contentList[0].imageUrls.length}}
         </view>
-        
-        <!-- 朗读按钮（每张图片对应一个） -->
-        <view class="audio-section">
-          <button class="audio-button {{isPlaying && currentPlayingId === item.id ? 'playing' : ''}}" 
-            bindtap="playAudio" 
-            data-id="{{item.id}}" 
-            data-url="{{item.audioUrl}}">
-            <view class="audio-icon">{{isPlaying && currentPlayingId === item.id ? '■' : '▶'}}</view>
-            <text>{{isPlaying && currentPlayingId === item.id ? '停止朗读' : '开始朗读'}}</text>
-          </button>
+      </block>
+      <!-- 兼容单图格式 -->
+      <block wx:elif="{{contentList[0].imageUrl}}">
+        <image 
+          src="{{contentList[0].imageUrl}}" 
+          class="main-image" 
+          mode="aspectFit"
+          show-menu-by-longpress="{{true}}"
+          bindload="onImageLoad"
+          binderror="onImageError"
+          bindtap="onImageTap"
+          data-url="{{contentList[0].imageUrl}}"
+          data-urls="{{[contentList[0].imageUrl]}}"
+          data-index="0"
+        />
+      </block>
+      <!-- 空白A4纸 - 只有在完全没有任何图片数据时才显示 -->
+      <view wx:elif="{{(!contentList[0].mediaItems || contentList[0].mediaItems.length === 0) && (!contentList[0].imageUrls || contentList[0].imageUrls.length === 0) && !contentList[0].imageUrl}}" class="placeholder-image">
+        <!-- 空白A4纸 -->
         </view>
       </block>
       
-      <!-- 默认A4页面（当contentList为空时显示） -->
-      <view class="a4-page" wx:if="{{!contentList || contentList.length === 0}}">
-        <view class="a4-image-container">
-          <image 
-            src="/pages/star/pic/北斗七星.jpg" 
-            mode="aspectFit" 
-            class="a4-image"></image>
+    <!-- 处理cardData数据（从cardId参数加载的内容） -->
+    <block wx:else>
+      <!-- 混合媒体轮播（图片+视频） -->
+      <block wx:if="{{cardData.mediaItems && cardData.mediaItems.length > 0}}">
+        <swiper 
+          class="media-swiper" 
+          indicator-dots="{{cardData.mediaItems.length > 1}}"
+          indicator-color="rgba(255,255,255,0.5)"
+          indicator-active-color="#ffffff"
+          autoplay="{{false}}"
+          circular="{{true}}"
+          bindchange="onSwiperChange"
+        >
+          <swiper-item wx:for="{{cardData.mediaItems}}" wx:key="*this">
+            <!-- 显示图片 -->
+            <image 
+              wx:if="{{item.type === 'image'}}"
+              src="{{item.url}}" 
+              class="main-image" 
+              mode="aspectFit"
+              show-menu-by-longpress="{{true}}"
+              bindtap="onImageTap"
+              data-url="{{item.url}}"
+              data-urls="{{cardData.imageUrls}}"
+              data-index="{{index}}"
+            />
+            <!-- 显示视频 -->
+            <video 
+              wx:elif="{{item.type === 'video'}}"
+              src="{{item.url}}"
+              class="main-video"
+              controls="{{true}}"
+              poster=""
+              object-fit="contain"
+              show-fullscreen-btn="{{true}}"
+              show-play-btn="{{true}}"
+              show-center-play-btn="{{true}}"
+              enable-play-gesture="{{true}}"
+              binderror="onVideoError"
+              bindplay="onVideoPlay"
+              bindpause="onVideoPause"
+            />
+          </swiper-item>
+        </swiper>
+        <!-- 媒体计数 -->
+        <view wx:if="{{cardData.mediaItems.length > 1}}" class="media-counter">
+          {{currentImageIndex + 1}} / {{cardData.mediaItems.length}}
+          </view>
+      </block>
+      <!-- 多图轮播（兼容旧格式） -->
+      <block wx:elif="{{cardData.imageUrls && cardData.imageUrls.length > 0}}">
+        <swiper 
+          class="image-swiper" 
+          indicator-dots="{{cardData.imageUrls.length > 1}}"
+          indicator-color="rgba(255,255,255,0.5)"
+          indicator-active-color="#ffffff"
+          autoplay="{{false}}"
+          circular="{{true}}"
+          bindchange="onSwiperChange"
+        >
+          <swiper-item wx:for="{{cardData.imageUrls}}" wx:key="*this">
+            <image 
+              src="{{item}}" 
+              class="main-image" 
+              mode="aspectFit"
+              show-menu-by-longpress="{{true}}"
+              bindtap="onImageTap"
+              data-url="{{item}}"
+              data-urls="{{cardData.imageUrls}}"
+              data-index="{{index}}"
+            />
+          </swiper-item>
+        </swiper>
+        <!-- 图片计数 -->
+        <view wx:if="{{cardData.imageUrls.length > 1}}" class="image-counter">
+          {{currentImageIndex + 1}} / {{cardData.imageUrls.length}}
         </view>
-      </view>
-      
-      <!-- 默认朗读按钮（当contentList为空时显示） -->
-      <view class="audio-section" wx:if="{{!contentList || contentList.length === 0}}">
-        <button class="audio-button" bindtap="playAudio" data-id="default-audio" data-url="/audio/beidou/default.mp3">
-          <view class="audio-icon">▶</view>
-          <text>开始朗读</text>
-        </button>
-      </view>
+      </block>
+      <!-- 兼容单图格式 -->
+      <block wx:elif="{{cardData.imageUrl}}">
+        <image 
+          src="{{cardData.imageUrl}}" 
+          class="main-image" 
+          mode="aspectFit"
+          show-menu-by-longpress="{{true}}"
+          bindtap="onImageTap"
+          data-url="{{cardData.imageUrl}}"
+          data-urls="{{[cardData.imageUrl]}}"
+          data-index="0"
+        />
+      </block>
+      <!-- 空白A4纸 - 只有在完全没有任何图片数据时才显示 -->
+      <view wx:elif="{{(!cardData.mediaItems || cardData.mediaItems.length === 0) && (!cardData.imageUrls || cardData.imageUrls.length === 0) && !cardData.imageUrl}}" class="placeholder-image">
+        <!-- 空白A4纸 -->
     </view>
-
-    <!-- 加载动画 -->
-    <view class="loading-container" wx:if="{{isLoading}}">
-      <view class="loading-star"></view>
-      <view class="loading-text">加载中...</view>
+    </block>
     </view>
-  </scroll-view>
-</view> 
+</view>

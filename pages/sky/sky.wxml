@@ -9,12 +9,12 @@
     <text class="page-subtitle">唐代 · 李贺 · 《天上谣》</text>
   </view>
   
-  <!-- 今日星宿展示区 -->
-  <view class="today-xingxiu-card">
-    <image class="today-xingxiu-bg" src="pics/星宿值班日历.jpg" mode="aspectFill"></image>
-    <view class="today-xingxiu-content">
+      <!-- 今日星宿展示区 -->
+    <view class="today-xingxiu-card">
+      <image class="today-xingxiu-bg" src="pics/星宿值班日历.jpg" mode="aspectFill"></image>
+      <view class="today-xingxiu-content">
       <view class="today-xingxiu-text">
-        <text>{{todayDate}} · {{todayXingxiu.name}}宿值日 · {{todayXingxiu.directionName}}第{{todayXingxiu.order}}宿</text>
+        <text>左青龙·右白虎·前朱雀·后玄武</text>
       </view>
     </view>
   </view>
@@ -50,11 +50,11 @@
           <text class="loading-text">加载星图中...</text>
         </view>
         
-        <swiper class="starmap-swiper" indicator-dots="{{true}}" autoplay="{{true}}" interval="4000" circular="{{true}}" bindchange="onStarmapChange" current="{{currentStarmapIndex}}" wx:if="{{!loading}}">
+        <swiper class="starmap-swiper" indicator-dots="{{true}}" indicator-color="rgba(255, 255, 255, 0.5)" indicator-active-color="rgba(255, 255, 255, 0.9)" autoplay="{{true}}" interval="4000" circular="{{true}}" bindchange="onStarmapChange" current="{{currentStarmapIndex}}" wx:if="{{!loading}}">
           <!-- 所有星图轮播 -->
           <swiper-item wx:for="{{starmapList}}" wx:key="id">
-            <view class="starmap-item" bindtap="previewStarmap" data-src="{{item.imageUrl}}" data-index="{{index}}">
-              <image class="starmap-image" src="{{item.imageUrl ? item.imageUrl : '/assets/images/placeholder-starmap.jpg'}}" mode="aspectFill"></image>
+            <view class="starmap-item" bindtap="previewStarmap" data-src="{{item.imageUrl}}" data-index="{{index}}" wx:if="{{item.imageUrl}}">
+              <image class="starmap-image" src="{{item.imageUrl}}" mode="aspectFill"></image>
               <view class="starmap-overlay">
                 <text class="starmap-title">{{item.title}}</text>
               </view>
@@ -74,6 +74,8 @@
       <view class="section-content cards-content">
         <swiper class="magazine-swiper" 
                 indicator-dots="{{false}}" 
+                indicator-color="rgba(255, 255, 255, 0.5)"
+                indicator-active-color="rgba(255, 255, 255, 0.9)"
                 autoplay="{{true}}" 
                 interval="4000" 
                 duration="600"
@@ -82,11 +84,10 @@
                 previous-margin="40rpx"
                 next-margin="40rpx">
           <swiper-item wx:for="{{magazineCards}}" wx:key="id">
-            <view class="magazine-card" bindtap="openCardDetail" data-id="{{item.id}}">
+            <view class="magazine-card" bindtap="onCardTap" data-index="{{index}}" wx:if="{{item.coverImage}}">
               <image class="magazine-cover" src="{{item.coverImage}}" mode="aspectFill"></image>
               <view class="magazine-overlay">
                 <text class="magazine-title">{{item.title}}</text>
-                <text class="magazine-subtitle">{{item.subtitle}}</text>
               </view>
             </view>
           </swiper-item>
@@ -97,63 +98,43 @@
     <view class="section-content-area" wx:if="{{currentContent === 'function'}}">
       <!-- 星宿功能内容 -->
       <view class="section-content function-content">
-        <!-- 功能类型选择器 -->
-        <view class="function-selector">
-          <view class="function-tab {{activeFunction === 'official' ? 'active' : ''}}" bindtap="switchFunction" data-function="official">
-            <view class="function-icon official-icon"></view>
-            <text class="function-tab-text">天官体系</text>
-          </view>
-          <view class="function-tab {{activeFunction === 'medical' ? 'active' : ''}}" bindtap="switchFunction" data-function="medical">
-            <view class="function-icon medical-icon"></view>
-            <text class="function-tab-text">天医体系</text>
-          </view>
+        <!-- 统一的功能轮播卡片 -->
+        <swiper class="magazine-swiper" 
+                indicator-dots="{{true}}" 
+                indicator-color="rgba(255, 255, 255, 0.5)"
+                indicator-active-color="rgba(255, 255, 255, 0.9)"
+                autoplay="{{true}}" 
+                interval="3000" 
+                duration="600"
+                circular="{{true}}"
+                display-multiple-items="1"
+                previous-margin="40rpx"
+                next-margin="40rpx">
+          <swiper-item wx:for="{{allSystems}}" wx:key="_id">
+            <view class="magazine-card function-card" bindtap="onFunctionCardTap" data-card-id="{{item._id}}">
+              <image class="magazine-cover" src="{{item.coverImage}}" mode="aspectFill"></image>
+            </view>
+          </swiper-item>
+        </swiper>
+        <!-- 如果没有数据，显示加载提示 -->
+        <view wx:if="{{allSystems.length === 0}}" class="loading-placeholder">
+          <text class="loading-text">正在加载星宿功能数据...</text>
         </view>
-        
-        <!-- 功能内容区域 -->
-        <scroll-view scroll-y class="function-content-scroll">
-          <!-- 天官体系内容 -->
-          <view class="function-panel {{activeFunction === 'official' ? 'active' : ''}}" wx:if="{{activeFunction === 'official'}}">
-            <view class="a4-scroll-container">
-              <view class="a4-print-list">
-                <!-- 横向A4打印页 -->
-                <view class="a4-print-item">
-                  <view class="a4-print-page">
-                    <!-- A4区域将通过API填充内容 -->
-                  </view>
-                </view>
-              </view>
-            </view>
-          </view>
-
-          <!-- 天医体系内容 -->
-          <view class="function-panel {{activeFunction === 'medical' ? 'active' : ''}}" wx:if="{{activeFunction === 'medical'}}">
-            <view class="a4-scroll-container">
-              <view class="a4-print-list">
-                <!-- 横向A4打印页 -->
-                <view class="a4-print-item">
-                  <view class="a4-print-page">
-                    <!-- A4区域将通过API填充内容 -->
-                  </view>
-                </view>
-              </view>
-            </view>
-          </view>
-        </scroll-view>
       </view>
     </view>
     
     <view class="section-content-area" wx:if="{{currentContent === 'expression'}}">
-      <!-- 星象表达内容将在这里显示 -->
+      <!-- 星象表达内容 -->
       <view class="section-content expression-content">
         <!-- 表达方式选择器 -->
         <view class="expression-selector">
           <view class="expression-tab {{activeExpression === 'literature' ? 'active' : ''}}" bindtap="switchExpression" data-expression="literature">
             <view class="expression-icon literature-icon"></view>
-            <text class="expression-tab-text">文学</text>
+            <text class="expression-tab-text">诗词</text>
           </view>
           <view class="expression-tab {{activeExpression === 'astrology' ? 'active' : ''}}" bindtap="switchExpression" data-expression="astrology">
             <view class="expression-icon astrology-icon"></view>
-            <text class="expression-tab-text">占星</text>
+            <text class="expression-tab-text">名著</text>
           </view>
           <view class="expression-tab {{activeExpression === 'mythology' ? 'active' : ''}}" bindtap="switchExpression" data-expression="mythology">
             <view class="expression-icon mythology-icon"></view>
@@ -162,79 +143,85 @@
         </view>
         
         <!-- 表达内容区域 -->
-        <scroll-view scroll-y class="expression-content-scroll">
-          <!-- 文学表达 - A4打印区域 -->
+        <view class="expression-content-area">
+          <!-- 文学表达轮播卡片 -->
           <view class="expression-panel {{activeExpression === 'literature' ? 'active' : ''}}" wx:if="{{activeExpression === 'literature'}}">
-            <view class="a4-scroll-container">
-              <view class="a4-print-list">
-                <!-- 三个横向A4区域 -->
-                <view class="a4-print-item">
-                  <view class="a4-print-page">
-                    <!-- A4区域1将通过API填充内容 -->
-                  </view>
+            <swiper class="magazine-swiper" 
+                    indicator-dots="{{true}}" 
+                    autoplay="{{true}}" 
+                    interval="3000" 
+                    duration="600"
+                    circular="{{true}}"
+                    display-multiple-items="1"
+                    previous-margin="40rpx"
+                    next-margin="40rpx">
+              <swiper-item wx:for="{{literatureExpression}}" wx:key="id">
+                <view class="magazine-card expression-card" 
+                      bindtap="onExpressionCardTap" 
+                      data-index="{{index}}" 
+                      data-type="literature">
+                  <image class="magazine-cover" src="{{item.coverImage}}" mode="aspectFill"></image>
                 </view>
-                <view class="a4-print-item">
-                  <view class="a4-print-page">
-                    <!-- A4区域2将通过API填充内容 -->
-                  </view>
-                </view>
-                <view class="a4-print-item">
-                  <view class="a4-print-page">
-                    <!-- A4区域3将通过API填充内容 -->
-                  </view>
-                </view>
-              </view>
+              </swiper-item>
+            </swiper>
+            <!-- 如果没有数据，显示加载提示 -->
+            <view wx:if="{{literatureExpression.length === 0}}" class="loading-placeholder">
+              <text class="loading-text">正在加载文学表达数据...</text>
             </view>
           </view>
 
-          <!-- 占星表达 - A4打印区域 -->
+          <!-- 占星表达轮播卡片 -->
           <view class="expression-panel {{activeExpression === 'astrology' ? 'active' : ''}}" wx:if="{{activeExpression === 'astrology'}}">
-            <view class="a4-scroll-container">
-              <view class="a4-print-list">
-                <!-- 三个横向A4区域 -->
-                <view class="a4-print-item">
-                  <view class="a4-print-page">
-                    <!-- A4区域1将通过API填充内容 -->
-                  </view>
+            <swiper class="magazine-swiper" 
+                    indicator-dots="{{true}}" 
+                    autoplay="{{true}}" 
+                    interval="3000" 
+                    duration="600"
+                    circular="{{true}}"
+                    display-multiple-items="1"
+                    previous-margin="40rpx"
+                    next-margin="40rpx">
+              <swiper-item wx:for="{{astrologyExpression}}" wx:key="id">
+                <view class="magazine-card expression-card" 
+                      bindtap="onExpressionCardTap" 
+                      data-index="{{index}}" 
+                      data-type="astrology">
+                  <image class="magazine-cover" src="{{item.coverImage}}" mode="aspectFill"></image>
                 </view>
-                <view class="a4-print-item">
-                  <view class="a4-print-page">
-                    <!-- A4区域2将通过API填充内容 -->
-                  </view>
-                </view>
-                <view class="a4-print-item">
-                  <view class="a4-print-page">
-                    <!-- A4区域3将通过API填充内容 -->
-                  </view>
-                </view>
-              </view>
+              </swiper-item>
+            </swiper>
+            <!-- 如果没有数据，显示加载提示 -->
+            <view wx:if="{{astrologyExpression.length === 0}}" class="loading-placeholder">
+              <text class="loading-text">正在加载占星表达数据...</text>
             </view>
           </view>
 
-          <!-- 故事表达 - A4打印区域 -->
+          <!-- 故事表达轮播卡片 -->
           <view class="expression-panel {{activeExpression === 'mythology' ? 'active' : ''}}" wx:if="{{activeExpression === 'mythology'}}">
-            <view class="a4-scroll-container">
-              <view class="a4-print-list">
-                <!-- 三个横向A4区域 -->
-                <view class="a4-print-item">
-                  <view class="a4-print-page">
-                    <!-- A4区域1将通过API填充内容 -->
-                  </view>
+            <swiper class="magazine-swiper" 
+                    indicator-dots="{{true}}" 
+                    autoplay="{{true}}" 
+                    interval="3000" 
+                    duration="600"
+                    circular="{{true}}"
+                    display-multiple-items="1"
+                    previous-margin="40rpx"
+                    next-margin="40rpx">
+              <swiper-item wx:for="{{mythologyExpression}}" wx:key="id">
+                <view class="magazine-card expression-card" 
+                      bindtap="onExpressionCardTap" 
+                      data-index="{{index}}" 
+                      data-type="mythology">
+                  <image class="magazine-cover" src="{{item.coverImage}}" mode="aspectFill"></image>
                 </view>
-                <view class="a4-print-item">
-                  <view class="a4-print-page">
-                    <!-- A4区域2将通过API填充内容 -->
-                  </view>
-                </view>
-                <view class="a4-print-item">
-                  <view class="a4-print-page">
-                    <!-- A4区域3将通过API填充内容 -->
-                  </view>
-                </view>
-              </view>
+              </swiper-item>
+            </swiper>
+            <!-- 如果没有数据，显示加载提示 -->
+            <view wx:if="{{mythologyExpression.length === 0}}" class="loading-placeholder">
+              <text class="loading-text">正在加载故事表达数据...</text>
             </view>
           </view>
-        </scroll-view>
+        </view>
       </view>
     </view>
   </view>
@@ -262,41 +249,130 @@
     </view>
   </view>
 
-  <!-- 卡片详情A4模态框 -->
-  <view class="card-detail-modal {{showCardModal ? 'active' : ''}}" catchtouchmove="preventModalScroll">
+  <!-- 卡片详情A4模态框 - 单页显示 -->
+  <view class="card-detail-modal {{showCardModal ? 'active' : ''}}">
     <view class="modal-mask" bindtap="closeCardModal"></view>
     <view class="a4-modal-content">
       <!-- 模态框头部 -->
       <view class="a4-modal-header">
-        <text class="a4-modal-title">星宿详情</text>
+        <text class="a4-modal-title">{{currentCardDetail.title}}</text>
         <view class="page-indicator">{{currentCardPage}} / {{totalCardPages}}</view>
         <view class="close-btn" bindtap="closeCardModal">×</view>
       </view>
       
-      <!-- 模态框内容 - 两个竖排的A4区域 -->
-      <view class="a4-modal-body">
+      <!-- 模态框内容 - 单个A4页面显示星宿详情 -->
+      <scroll-view scroll-y class="a4-modal-body">
         <view class="a4-container">
-          <!-- 上方A4区域 -->
-          <view class="a4-page top-page">
-            <view class="a4-blank-area">
-              <!-- 上方A4区域由后台API填充内容 -->
+          <!-- 星宿详情A4页面 -->
+          <view class="a4-page single-page" wx:if="{{currentCardDetail}}">
+            <view class="a4-content-area">
+              <!-- 星宿标题 -->
+              <view class="xingxiu-header">
+                <text class="xingxiu-title">{{currentCardDetail.title}}</text>
+              </view>
+              
+              <!-- 图片展示区域 - 只显示专门的详细图片 -->
+              <view class="star-images-section" wx:if="{{currentCardDetail.imageUrls && currentCardDetail.imageUrls.length > 0}}">
+                <swiper class="star-images-swiper" 
+                        indicator-dots="{{currentCardDetail.imageUrls.length > 1}}" 
+                        indicator-color="rgba(255, 255, 255, 0.5)"
+                        indicator-active-color="rgba(255, 255, 255, 0.9)"
+                        autoplay="{{false}}" 
+                        interval="4000" 
+                        duration="600"
+                        circular="{{currentCardDetail.imageUrls.length > 1}}"
+                        display-multiple-items="1"
+                        previous-margin="0rpx"
+                        next-margin="0rpx">
+                  <swiper-item wx:for="{{currentCardDetail.imageUrls}}" wx:key="index" wx:for-index="index">
+                    <view class="star-image-card" bindtap="previewExpressionImage" data-src="{{item}}">
+                      <image class="star-image" 
+                             src="{{item}}" 
+                             mode="aspectFit"
+                             binderror="onImageError"></image>
+                      <view class="star-image-overlay" wx:if="{{currentCardDetail.imageUrls.length > 1}}">
+                        <text class="image-counter">{{index + 1}} / {{currentCardDetail.imageUrls.length}}</text>
+                      </view>
+                    </view>
+                  </swiper-item>
+                </swiper>
+              </view>
+              
+              <!-- 没有详细图片时的提示 -->
+              <view class="no-image-placeholder" wx:else style="text-align: center; padding: 40rpx; color: #999; font-size: 28rpx;">
+                暂无图片资料
+              </view>
+              
+              <!-- 描述内容已隐藏 -->
             </view>
           </view>
           
-          <!-- 下方A4区域 -->
-          <view class="a4-page bottom-page">
-            <view class="a4-blank-area">
-              <!-- 下方A4区域由后台API填充内容 -->
+          <!-- 空白页提示 -->
+          <view class="a4-page empty-page" wx:else>
+            <view class="empty-content">
+              <text class="empty-text">加载中...</text>
             </view>
           </view>
         </view>
-      </view>
+      </scroll-view>
       
       <!-- 分页按钮 -->
       <view class="a4-modal-footer">
-        <view class="page-button prev {{currentCardPage <= 1 ? 'disabled' : ''}}" bindtap="prevCardPage">上一页</view>
-        <view class="page-button next {{currentCardPage >= totalCardPages ? 'disabled' : ''}}" bindtap="nextCardPage">下一页</view>
+        <view class="page-button prev {{currentCardPage <= 1 ? 'disabled' : ''}}" 
+              bindtap="{{currentExpressionType ? 'prevExpressionPage' : 'prevCardPage'}}">上一页</view>
+        <view class="page-button next {{currentCardPage >= totalCardPages ? 'disabled' : ''}}" 
+              bindtap="{{currentExpressionType ? 'nextExpressionPage' : 'nextCardPage'}}">下一页</view>
       </view>
     </view>
   </view>
-</view> 
+
+  <!-- 星宿卡片详情模态框 -->
+  <view class="detail-modal {{showDetailModal ? 'active' : ''}}" catchtouchmove="preventModalScroll">
+    <view class="modal-mask" bindtap="closeDetailModal"></view>
+    <view class="detail-modal-content">
+      <!-- 模态框头部 -->
+      <view class="detail-modal-header">
+        <text class="detail-modal-title">{{currentDetailCard.title}}</text>
+        <view class="detail-page-indicator">第 {{currentDetailPage}} 页</view>
+        <view class="close-btn" bindtap="closeDetailModal">×</view>
+      </view>
+      
+      <!-- A4详情页面 -->
+      <scroll-view scroll-y class="detail-modal-body">
+        <view class="detail-a4-container">
+          <view class="detail-a4-page">
+            <view class="detail-card-header">
+              <text class="detail-card-title">{{currentDetailCard.title}}</text>
+            </view>
+            
+            <!-- 封面图片 -->
+            <view class="detail-card-image-container" wx:if="{{currentDetailCard.coverImage}}">
+              <image class="detail-card-image" 
+                     src="{{currentDetailCard.coverImage}}" 
+                     mode="aspectFit"
+                     binderror="onImageError"></image>
+            </view>
+            
+            <!-- 描述内容 -->
+            <view class="detail-card-content">
+              <text class="detail-card-description">{{currentDetailCard.description}}</text>
+            </view>
+            
+            <!-- 更多内容（如果有的话） -->
+            <view class="detail-card-additional" wx:if="{{currentDetailCard.additionalContent}}">
+              <text class="detail-card-additional-content">{{currentDetailCard.additionalContent}}</text>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+      
+      <!-- 分页按钮 -->
+      <view class="detail-modal-footer" wx:if="{{totalDetailPages > 1}}">
+        <view class="detail-page-button prev {{currentDetailPage <= 1 ? 'disabled' : ''}}" 
+              bindtap="prevDetailPage">上一页</view>
+        <view class="detail-page-button next {{currentDetailPage >= totalDetailPages ? 'disabled' : ''}}" 
+              bindtap="nextDetailPage">下一页</view>
+      </view>
+    </view>
+  </view>
+</view>

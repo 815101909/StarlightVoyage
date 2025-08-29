@@ -1,1 +1,67 @@
- 
+<view class="edit-profile-page">
+  <form bindsubmit="saveProfileForm">
+    <!-- 头像编辑 -->
+    <view class="avatar-section">
+      <view class="section-title">头像</view>
+      <view class="avatar-wrapper" bindtap="chooseAvatar">
+        <image wx:if="{{userInfo.avatarUrl}}" class="avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>
+        <view wx:else class="default-avatar" style="background-color: {{defaultAvatarBgColor}};">
+          <text>舟</text>
+        </view>
+        <view class="edit-icon">更换头像</view>
+      </view>
+    </view>
+    <!-- 基本信息 -->
+    <view class="info-section">
+      <view class="section-title">基本信息</view>
+      
+      <view class="input-item">
+        <text class="label">昵称</text>
+        <input class="input" name="nickName" value="{{userInfo.nickName}}" placeholder="请输入昵称" maxlength="12"/>
+      </view>
+
+
+
+
+    </view>
+
+    <!-- 标签选择 -->
+    <view class="tags-section">
+      <view class="section-title">我的标签</view>
+      <view class="tags-grid">
+        <view 
+          wx:for="{{tagList}}" 
+          wx:key="value" 
+          class="tag-item {{item.selected ? 'selected' : ''}}"
+          bindtap="toggleTag"
+          data-tag="{{item.value}}"
+        >
+          <text class="tag-icon">{{item.icon}}</text>
+          <text class="tag-name">{{item.name}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 学习目标 -->
+    <view class="goal-section">
+      <view class="section-title">学习目标</view>
+      <view class="goal-list">
+        <view 
+          wx:for="{{goalList}}" 
+          wx:key="value"
+          class="goal-item {{item.selected ? 'selected' : ''}}"
+          bindtap="selectGoal"
+          data-goal="{{item.value}}"
+        >
+          <text class="goal-icon">{{item.icon}}</text>
+          <text class="goal-content">{{item.content}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 保存按钮 -->
+    <view class="button-section">
+      <button class="save-btn" form-type="submit">保存修改</button>
+    </view>
+  </form>
+</view>

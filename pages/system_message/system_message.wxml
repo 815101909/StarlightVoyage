@@ -14,16 +14,16 @@
   <view class="message-list" wx:if="{{!isLoading && messages.length > 0}}">
     <view 
       wx:for="{{messages}}" 
-      wx:key="id" 
-      class="message-item {{item.isRead ? 'read' : 'unread'}} {{item.type}}-message"
-      bindtap="markAsRead"
-      data-id="{{item.id}}"
+      wx:key="_id" 
+      class="message-item {{item.type}}-message"
+      bindtap="viewMessageDetail"
+      data-message="{{item}}"
     >
-      <view class="message-indicator"></view>
+      <view class="message-indicator" style="background-color: {{item.color}};"></view>
       <view class="message-content">
         <view class="message-header">
           <text class="message-title">{{item.title}}</text>
-          <text class="message-time">{{item.date}} {{item.time}}</text>
+          <text class="message-time">{{item.timeStr}}</text>
         </view>
         <text class="message-preview">{{item.content}}</text>
       </view>

@@ -47,7 +47,7 @@
   height: 120rpx;
   border-radius: 50%;
   border: 4rpx solid rgba(125, 161, 255, 0.3);
-  background: linear-gradient(135deg, #3a4a9c, #7d97ff);
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -155,6 +155,16 @@
   background: linear-gradient(135deg, #465B9A, #7D9FF4);
 }
 
+.starcard-button-unchecked {
+  background: linear-gradient(135deg, #7b4e5b, #f49d9d);
+  box-shadow: 0 4rpx 12rpx rgba(255, 107, 107, 0.4);
+}
+
+.unchecked-desc {
+  color: #ffdbdb !important;
+  font-weight: bold;
+}
+
 .planet-wheel-button {
   background: linear-gradient(135deg, #2C7A7B, #81E6D9);
 }
@@ -224,7 +234,15 @@
   font-size: 22rpx;
   padding: 6rpx 14rpx;
   border-radius: 20rpx;
-  box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2rpx 6rpx rgba(255, 107, 107, 0.5);
+  animation: pulseBadge 1.5s infinite;
+  font-weight: bold;
+}
+
+@keyframes pulseBadge {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
 }
 
 /* 部分标题 */
@@ -322,15 +340,17 @@
   border-bottom: none;
 }
 
+/* 活动图标样式 */
 .activity-icon {
-  width: 40rpx;
-  height: 40rpx;
-  border-radius: 20rpx;
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 24rpx;
   margin-right: 20rpx;
-  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  background: rgba(125, 159, 244, 0.1);
 }
 
 .activity-content {
@@ -361,23 +381,27 @@
 
 /* 活动图标类型 */
 .read-icon {
-  background-image: url('/assets/icons/read.png');
   background-color: rgba(125, 159, 244, 0.2);
 }
 
 .checkin-icon {
-  background-image: url('/assets/icons/starcard.png');
   background-color: rgba(255, 204, 102, 0.2);
 }
 
 .observe-icon {
-  background-image: url('/assets/icons/observe.png');
   background-color: rgba(102, 204, 153, 0.2);
 }
 
 .activity-collection-icon {
-  background-image: url('/assets/icons/star.png');
   background-color: rgba(255, 153, 102, 0.2);
+}
+
+.activity-community-icon {
+  background-color: rgba(153, 102, 255, 0.2);
+}
+
+.watch-icon {
+  background-color: rgba(255, 102, 204, 0.2); 
 }
 
 /* 底部 */
@@ -635,4 +659,168 @@
   font-size: 36rpx;
   color: rgba(255, 255, 255, 0.4);
   transform: rotate(90deg);
+}
+
+/* 活动列表弹窗 */
+.activity-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  visibility: hidden;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.activity-modal.show {
+  visibility: visible;
+  opacity: 1;
+}
+
+.activity-modal-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.activity-modal-content {
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  transform: translate(-50%, -50%);
+  width: 85%;
+  max-width: 800rpx;
+  max-height: 80vh;
+  background: #001529;
+  border-radius: 16rpx;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.activity-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx 30rpx;
+  border-bottom: 1rpx solid #15395b;
+  background: #002140;
+}
+
+.activity-modal-title {
+  font-size: 28rpx;
+  color: #fff;
+}
+
+.activity-modal-close {
+  font-size: 32rpx;
+  color: #8b949e;
+  padding: 10rpx;
+  width: 50rpx;
+  height: 50rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.activity-modal-list {
+  flex: 1;
+  padding: 10rpx 30rpx;
+  max-height: calc(70vh - 90rpx);
+}
+
+.activity-modal .activity-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #15395b;
+}
+
+.activity-modal .activity-icon {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  margin-right: 16rpx;
+  background: #002140;
+  flex-shrink: 0;
+}
+
+.activity-modal .activity-info {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.activity-modal .activity-title {
+  font-size: 24rpx;
+  color: #fff;
+  margin-bottom: 6rpx;
+  line-height: 1.4;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  word-break: break-all;
+}
+
+.activity-modal .activity-time {
+  font-size: 20rpx;
+  color: #8b949e;
+}
+
+/* 加载更多和没有更多的样式 */
+.loading-more, .no-more {
+  text-align: center;
+  padding: 16rpx 0;
+}
+
+.loading-text, .no-more-text {
+  font-size: 20rpx;
+  color: #8b949e;
+}
+
+/* 活动类型图标的特定样式 */
+.activity-modal .read-icon {
+  color: #1890ff;
+}
+
+.activity-modal .checkin-icon {
+  color: #52c41a;
+}
+
+.activity-modal .favorite-icon {
+  color: #faad14;
+}
+
+.activity-modal .observe-icon {
+  color: #13c2c2;
+}
+
+.activity-modal .community-icon {
+  color: #722ed1;
+}
+
+.activity-modal .watch-icon {
+  color: #2f54eb;
+}
+
+/* 没有更多数据的文本样式 */
+.no-more {
+  font-size: 20rpx;
+  color: #8b949e;
+  text-align: center;
+  padding: 20rpx 0;
 }

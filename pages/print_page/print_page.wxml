@@ -4,7 +4,20 @@
   <view class="print-content">
     <!-- 空白A4区域 -->
     <view class="a4-area">
-      <!-- API预留，用户将自行实现上传功能 -->
+      <block wx:if="{{printImages.length > 0}}">
+        <image src="{{printImages[currentImageIndex]}}" mode="aspectFit" class="print-image" bindtap="previewImage"></image>
+        <!-- 切换按钮 -->
+        <view class="image-nav" wx:if="{{printImages.length > 1}}">
+          <view class="nav-btn prev" bindtap="prevImage">
+            <text class="nav-icon">◀</text>
+          </view>
+          <view class="nav-counter">{{currentImageIndex + 1}}/{{printImages.length}}</view>
+          <view class="nav-btn next" bindtap="nextImage">
+            <text class="nav-icon">▶</text>
+          </view>
+        </view>
+      </block>
+      <view wx:else class="no-image-tip">未添加图片</view>
     </view>
   </view>
   

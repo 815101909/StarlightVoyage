@@ -1,4 +1,6 @@
 {
   "navigationBarTitleText": "观测",
+  "enableShareTimeline": true,
+  "enableShareAppMessage": true,
   "usingComponents": {}
 } 

@@ -45,16 +45,35 @@
   align-items: flex-start;
   padding-top: 60rpx;
   margin-bottom: 60rpx;
+  width: 100%;
 }
 
 /* A4 区域 */
 .a4-area {
-  width: 700rpx; /* 更大的A4宽度 */
-  height: 990rpx; /* 更大的A4高度 */
-  background-color: #ffffff;
+  width: 700rpx;
+  height: 990rpx;
+  background-color: transparent;
   border-radius: 8rpx;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40rpx;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.print-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.no-image-tip {
+  color: #999;
+  font-size: 28rpx;
+  text-align: center;
 }
 
 /* 诗句区域样式 */
@@ -64,6 +83,7 @@
   flex-direction: column;
   align-items: center;
   color: rgba(255, 255, 255, 0.9);
+  margin-top: 40rpx;
 }
 
 .poem-title {
@@ -145,4 +165,40 @@
 .btn-icon {
   font-size: 32rpx;
   margin-right: 6rpx;
+}
+
+/* 图片导航 */
+.image-nav {
+  position: absolute;
+  bottom: 20rpx;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 40rpx;
+}
+
+.nav-btn {
+  width: 60rpx;
+  height: 60rpx;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.nav-icon {
+  color: #fff;
+  font-size: 24rpx;
+}
+
+.nav-counter {
+  color: rgba(0, 0, 0, 0.7);
+  font-size: 24rpx;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 4rpx 20rpx;
+  border-radius: 20rpx;
 } 

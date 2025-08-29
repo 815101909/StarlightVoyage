@@ -9,7 +9,7 @@
         <text class="logo-text">界</text>
       </view>
     </view>
-    <view class="app-name">晓视界</view>
+    <view class="app-name">小舟摇星河</view>
     <view class="app-slogan">探索星空，记录星际之旅</view>
   </view>
   
@@ -17,17 +17,15 @@
   <view class="login-options">
     <!-- 微信一键登录 -->
     <button class="login-btn wechat-login" open-type="getUserInfo" bindgetuserinfo="getUserInfo">
-      <view style="display:flex; align-items:center; justify-content:center; margin-left:-25rpx;">
-        <image class="btn-icon" src="/assets/icons/wechat.png" mode="aspectFit"></image>
-        <text>微信登录</text>
+      <view style="display:flex; align-items:center; justify-content:center;">
+        <text>微信快捷登录</text>
       </view>
     </button>
     
     <!-- 手机号登录 -->
     <button class="login-btn phone-login" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber">
-      <view style="display:flex; align-items:center; justify-content:center; margin-left:-25rpx;">
-        <image class="btn-icon" src="/assets/icons/phone.png" mode="aspectFit"></image>
-        <text>手机号登录</text>
+      <view style="display:flex; align-items:center; justify-content:center;">
+        <text>手机号快捷登录</text>
       </view>
     </button>
   </view>
@@ -47,4 +45,4 @@
   <view class="guest-login" bindtap="guestLogin">
     <text>先逛逛，稍后再登录</text>
   </view>
-</view> 
+</view>

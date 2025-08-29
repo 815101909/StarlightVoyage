@@ -1,253 +1,546 @@
 Page({
-  /**
-   * 页面的初始数据
-   */
   data: {
-    article: {
-      title: "探索宇宙奥秘：从星辰大海到深空探索",
-      date: "2023-10-18",
-      tag: "科学探索",
-      coverUrl: "https://example.com/cover.jpg",
-      
-      // 第一段介绍部分
-      introFirstChar: "宇",
-      introRest: "宙是一个神秘而广阔的存在，自人类文明开始，我们就不断抬头仰望星空，思考自己在宇宙中的位置。随着科技的发展，人类对宇宙的探索也从单纯的观测逐步迈向了深空探索的新时代。",
-      
-      // 第一张内容图片
-      firstContentImage: "https://example.com/first-content-image.jpg",
-      firstImageCaption: "银河系中心的壮丽景象，由哈勃太空望远镜拍摄",
-      
-      // 第二段内容
-      contentPart1FirstChar: "天",
-      contentPart1Rest: "文学是人类最古老的科学之一，早在几千年前，我们的祖先就已经开始记录天象，追踪星辰运动的规律。从伽利略的望远镜到现代的巨型射电望远镜阵列，观测设备的进步让我们看得更远，探索得更深。",
-      
-      // 第二张内容图片
-      contentImage: "https://example.com/content-image.jpg",
-      imageCaption: "詹姆斯·韦伯太空望远镜捕捉到的深空壮丽景象",
-      
-      // 第三段结论
-      conclusionFirstChar: "随",
-      conclusionRest: "着太空探索技术的不断突破，人类正在计划更远的旅程，比如重返月球、载人登陆火星以及探索太阳系的边缘。这些任务不仅是科学上的挑战，也是整个人类文明的伟大冒险。展望未来，星辰大海将不再是遥不可及的梦想，而是我们共同的目标和征途。"
-    },
+    article: null,
     isLoading: true,
-    fontSize: 28, // Default font size in rpx
+    fontSize: 22, // 默认字体大小
+    minFontSize: 10, // 最小字体大小
+    maxFontSize: 40, // 最大字体大小
+    fontSizeStep: 2, // 每次调整的步长
     isReading: false,
     isBookmarked: false,
     audioContext: null,
-    // Sample HTML for content (will be replaced with real content from API)
-    sampleHtml: '<div style="color: white;">文章内容示例</div>',
+    userInfo: {
+      memberLevel: 0,
+      expireDate: null
+    },
+    isMember: false,
+    showMemberLock: false,
+    // 音频进度相关
+    audioDuration: 0, // 音频总时长（秒）
+    audioCurrentTime: 0, // 当前播放时间（秒）
+    audioProgress: 0, // 播放进度百分比
+    // 音频播放速度相关
+    playbackRate: 1.0, // 当前播放速度
+    playbackRates: [0.75, 0.8, 0.9, 1.0, 1.1, 1.25], // 可选播放速度
+    currentRateIndex: 3, // 当前速度索引，默认指向1.0倍速
+    // 背景音乐相关
+    bgmContext: null,
+    isBgmPlaying: false,
+    bgmUrl: 'cloud://cloud1-1gsyt78b92c539ef.636c-cloud1-1gsyt78b92c539ef-1370520707/audio/bgm/科学-科技-先进 (99)_爱给网_aigei_com.mp3'
   },
 
-  /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad: function (options) {
-    // 初始化音频控制器
+  onLoad: function(options) {
+    // 初始化云开发环境
+    if (!wx.cloud) {
+      wx.showToast({
+        title: '请使用 2.2.3 或以上的基础库以使用云能力',
+        icon: 'none'
+      });
+      return;
+    }
+    wx.cloud.init({
+      env: 'cloud1-1gsyt78b92c539ef', // 使用与app.js相同的云环境ID
+      traceUser: true
+    });
+
     this.initAudioContext();
+    this.initBgmContext();
     
     wx.showLoading({
       title: '加载中',
     });
     
+    // 设置字体大小
+    const savedFontSize = wx.getStorageSync('fontSize') || 32;
     this.setData({
-      fontSize: wx.getStorageSync('fontSize') || 32,
+      fontSize: savedFontSize,
       isBookmarked: false
     });
 
-    // 获取文章ID
-    const articleId = options.id || '1'; // 默认ID为1
-    this.setData({ articleId });
-    
-    // 检查文章是否被收藏
-    if(articleId) {
-      this.checkBookmarkStatus(articleId);
+    if (options.articleId) {
+      // 先检查会员状态，然后加载文章
+      this.checkMemberStatus().then(() => {
+        this.loadArticleDetail(options.articleId);
+        // 加载完成后自动播放背景音乐
+        this.playBgm();
+      });
+      // 检查是否已收藏
+      this.checkFavoriteStatus(options.articleId);
+    } else {
+      wx.showToast({
+        title: '参数错误',
+        icon: 'none'
+      });
+      setTimeout(() => {
+        wx.navigateBack();
+      }, 1500);
     }
-    
-    // 此处应该从API获取文章数据
-    // 目前使用示例数据
-    this.loadSampleArticle();
-
-    wx.hideLoading();
   },
-  
-  /**
-   * 获取文章数据
-   */
-  fetchArticleData: function(id, type = 'news') {
-    // Show loading
-    wx.showLoading({
-      title: '加载中...',
-    });
-    
-    this.setData({ isLoading: true });
-    
-    // API endpoint
-    const apiUrl = `https://your-api-domain.com/api/articles/${id}`;
-    
-    // Request article data
-    wx.request({
-      url: apiUrl,
-      method: 'GET',
-      data: {
-        type: type
-      },
-      success: (res) => {
-        if (res.statusCode === 200 && res.data.success) {
-          // Format article data
-          const article = this.formatArticleData(res.data.data);
-          this.setData({ article, isLoading: false });
-        } else {
-          this.handleApiError();
-        }
-      },
-      fail: (err) => {
-        console.error('API请求失败：', err);
-        this.handleApiError();
-      },
-      complete: () => {
-        wx.hideLoading();
+
+  onShow: function() {
+    // 页面显示时重新检查会员状态
+    this.checkMemberStatus().then(() => {
+      // 重新计算是否显示会员锁定
+      if (this.data.article) {
+        const showMemberLock = !this.data.isMember;
+        this.setData({ showMemberLock });
       }
     });
   },
-  
-  /**
-   * API错误处理（加载样例数据）
-   */
-  handleApiError: function() {
-    wx.showToast({
-      title: '获取文章失败，加载示例内容',
-      icon: 'none'
-    });
-    
-    // Load sample article for development
-    this.loadSampleArticle();
+
+  // 获取云存储文件临时链接
+  getCloudFileUrl: async function(fileID) {
+    console.log('开始获取云存储文件：', fileID);
+    try {
+      const result = await wx.cloud.getTempFileURL({
+        fileList: [fileID]
+      });
+      
+      console.log('云存储返回结果：', result);
+      if (result.fileList && result.fileList[0] && result.fileList[0].tempFileURL) {
+        console.log('获取到临时链接：', result.fileList[0].tempFileURL);
+        return result.fileList[0].tempFileURL;
+      }
+      console.log('未获取到临时链接');
+      return null;
+    } catch (error) {
+      console.error('获取云存储文件失败：', error);
+      return null;
+    }
   },
-  
-  /**
-   * 提取段落首字符和剩余内容
-   */
-  extractFirstCharAndRest: function(text) {
-    // Remove HTML tags if present
-    let cleanText = text.replace(/<\/?[^>]+(>|$)/g, "").trim();
+
+  // 加载文章详情
+  loadArticleDetail: async function(articleId) {
+    try {
+      const result = await wx.cloud.callFunction({
+        name: 'explore',
+        data: {
+          action: 'getArticleDetail',
+          articleId
+        }
+      });
+
+      if (result.result.success) {
+        // 处理文章数据
+        const articleData = result.result.data;
+        const formattedArticle = await this.formatArticleData(articleData);
+        
+        // 检查是否需要显示会员锁定（对所有文章都需要会员）
+        const showMemberLock = !this.data.isMember;
+        
+        console.log('锁定检查:', {
+          category: formattedArticle.category,
+          isMember: this.data.isMember,
+          memberLevel: this.data.userInfo.memberLevel,
+          expireDate: this.data.userInfo.expireDate,
+          showMemberLock: showMemberLock
+        });
+        
+        this.setData({
+          article: formattedArticle,
+          isLoading: false,
+          showMemberLock: showMemberLock
+        });
+
+        // 设置页面标题
+        wx.setNavigationBarTitle({
+          title: formattedArticle.title || '文章详情'
+        });
+
+        // 记录阅读活动
+        recordReadActivity(formattedArticle);
+      } else {
+        wx.showToast({
+          title: result.result.message || '加载失败',
+          icon: 'none'
+        });
+      }
+    } catch (error) {
+      wx.showToast({
+        title: '加载失败',
+        icon: 'none'
+      });
+    } finally {
+      wx.hideLoading();
+      this.setData({ isLoading: false });
+    }
+  },
+
+  // 检查会员状态
+  checkMemberStatus: async function() {
+    try {
+      // 检查用户是否已登录
+      const token = wx.getStorageSync('token');
+      const userInfo = wx.getStorageSync('userInfo');
+      
+      if (!token || !userInfo) {
+        // 用户未登录，设置为非会员状态
+        this.setData({
+          userInfo: {
+            memberLevel: 0,
+            expireDate: null
+          },
+          isMember: false
+        });
+        console.log('用户未登录，设置为非会员状态');
+        return Promise.resolve();
+      }
+      
+      const result = await wx.cloud.callFunction({
+        name: 'auth',
+        data: {
+          action: 'getProfile'
+        }
+      });
+
+      if (result.result.success) {
+        const userInfo = result.result.data;
+        const now = new Date();
+        const expireDate = userInfo.expireDate ? new Date(userInfo.expireDate) : null;
+        // memberLevel: 0=非会员, 1=会员
+        const isMember = userInfo.memberLevel === 1 && (!expireDate || expireDate > now);
+        
+        this.setData({
+          userInfo: {
+            memberLevel: userInfo.memberLevel || 0,
+            expireDate: userInfo.expireDate
+          },
+          isMember: isMember
+        });
+        
+        console.log('会员状态检查结果:', { isMember, memberLevel: userInfo.memberLevel, expireDate: userInfo.expireDate });
+        return Promise.resolve();
+      }
+    } catch (error) {
+      console.error('检查会员状态失败:', error);
+      // 出错时也设置为非会员状态
+      this.setData({
+        userInfo: {
+          memberLevel: 0,
+          expireDate: null
+        },
+        isMember: false
+      });
+      return Promise.reject(error);
+    }
+  },
+
+  // 跳转到会员中心
+  goToMemberCenter: function() {
+    wx.navigateTo({
+      url: '/pages/member_center/member_center'
+    });
+  },
+
+  checkFavoriteStatus: async function(articleId) {
+    try {
+      // 检查用户是否登录
+      const token = wx.getStorageSync('token');
+      if (!token) {
+        return;
+      }
+      
+      // 调用云函数获取用户收藏列表
+      const result = await wx.cloud.callFunction({
+        name: 'profile',
+        data: {
+          action: 'getFavorites'
+        }
+      });
+      
+      if (result.result.success) {
+        const favorites = result.result.data || [];
+        // 检查当前文章是否在收藏列表中
+        const isBookmarked = favorites.some(item => item.articleId === articleId);
+        this.setData({ isBookmarked });
+      }
+    } catch (error) {
+      console.error('检查收藏状态失败:', error);
+    }
+  },
+
+  // 收藏或取消收藏文章
+  bookmarkArticle: async function() {
+    if (!this.data.article) {
+      wx.showToast({
+        title: '文章加载中',
+        icon: 'none'
+      });
+      return;
+    }
     
-    // 确保文本不为空
+    // 检查用户是否登录
+    const token = wx.getStorageSync('token');
+    if (!token) {
+      wx.showModal({
+        title: '提示',
+        content: '收藏功能需要登录，是否前往登录？',
+        success: (res) => {
+          if (res.confirm) {
+            wx.navigateTo({
+              url: '/pages/login/login'
+            });
+          }
+        }
+      });
+      return;
+    }
+    
+    try {
+      const article = this.data.article;
+      // 调用云函数进行收藏操作
+      const result = await wx.cloud.callFunction({
+        name: 'profile',
+        data: {
+          action: 'toggleFavorite',
+          data: {
+            articleId: article._id,
+            title: article.title,
+            coverUrl: article.coverUrl
+          }
+        }
+      });
+      
+      if (result.result.success) {
+        // 更新收藏状态
+        const isBookmarked = result.result.data.isFavorite;
+        this.setData({ isBookmarked });
+        
+        // 显示提示
+        wx.showToast({
+          title: result.result.message,
+          icon: 'success'
+        });
+      } else {
+        wx.showToast({
+          title: result.result.message || '操作失败',
+          icon: 'none'
+        });
+      }
+    } catch (error) {
+      console.error('收藏操作失败:', error);
+      wx.showToast({
+        title: '操作失败，请稍后再试',
+        icon: 'none'
+      });
+    }
+  },
+
+  // 处理富文本内容
+  processRichText: function(richText) {
+    if (!richText) {
+      console.log('输入为空');
+      return { 
+        nodes: null,
+        images: []
+      };
+    }
+
+    try {
+      // 如果是字符串,尝试解析为HTML
+      const content = typeof richText === 'string' ? richText : JSON.stringify(richText);
+      console.log('原始内容:', content);
+      
+      const images = [];
+      let processedContent = content;
+
+      // 1. 提取图片和描述
+      const imgPattern = /<img[^>]+src=["']([^"']+)["'][^>]*>/g;
+      
+      // 匹配两种格式的描述：
+      // 1. 标准格式："这是一段描述X"
+      // 2. 自定义格式：任意文本（在<p style="text-align: center">中）
+      const descPattern = /<p[^>]*style="text-align:\s*center"[^>]*>([^<]+)<\/p>/g;
+      
+      // 先收集所有图片
+      const imgMatches = [...content.matchAll(imgPattern)];
+      console.log('找到的图片:', imgMatches);
+      
+      // 再收集所有描述
+      const descMatches = [...content.matchAll(descPattern)];
+      console.log('找到的描述:', descMatches);
+
+      // 组合图片和描述
+      imgMatches.forEach((imgMatch, index) => {
+        const imgUrl = imgMatch[1];
+        const fullImgTag = imgMatch[0];
+        
+        // 尝试获取对应的描述文本
+        let descText = '';
+        if (descMatches[index]) {
+          // 提取描述文本（在第一个捕获组中）
+          descText = descMatches[index][1].trim();
+        }
+
+        images.push({
+          url: imgUrl,
+          width: 320,
+          height: 240,
+          description: descText
+        });
+
+        // 只从内容中移除图片标签和对应的描述
+        processedContent = processedContent.replace(fullImgTag, '');
+        if (descMatches[index]) {
+          processedContent = processedContent.replace(descMatches[index][0], '');
+        }
+      });
+
+      console.log('处理后的内容:', processedContent);
+      console.log('提取的图片和描述:', images);
+
+      return {
+        nodes: processedContent,
+        images: images
+      };
+
+    } catch (error) {
+      console.error('处理富文本内容失败:', error);
+      return {
+        nodes: richText,
+        images: []
+      };
+    }
+  },
+
+  // 格式化文章数据
+  formatArticleData: async function(data) {
+    // 处理富文本内容
+    const processedIntro = this.processRichText(data.body || '');
+    const processedContent = this.processRichText(data.content || '');
+    const processedConclusion = this.processRichText(data.conclusion || '');
+
+    // 处理音频文件
+    if (data.voice) {
+      console.log('处理音频文件：', data.voice);
+      const audioUrl = await this.getCloudFileUrl(data.voice);
+      if (audioUrl) {
+        console.log('设置音频源：', audioUrl);
+        this.audioContext.src = audioUrl;
+      }
+    }
+
+    return {
+      ...data,
+      // 处理封面图片URL
+      coverUrl: data.imageUrl || data.coverUrl || '',
+      
+      // 打印图片URL
+      print: data.print || '',
+      
+      // 思考问题
+      thinkingQuestion: data.thoughtDescription || '这项最新的太空发现对人类未来探索宇宙有什么意义？',
+      
+      // 分段内容
+      introNodes: processedIntro.nodes,
+      introImages: processedIntro.images || [],
+      
+      contentNodes: processedContent.nodes,
+      contentImages: processedContent.images || [],
+      
+      conclusionNodes: processedConclusion.nodes,
+      conclusionImages: processedConclusion.images || [],
+      
+      // 合并所有图片
+      images: [
+        ...processedIntro.images || [],
+        ...processedContent.images || [],
+        ...processedConclusion.images || []
+      ]
+    };
+  },
+
+  // 跳转到习题页面
+  showExercises: function() {
+    if (!this.data.article) {
+      wx.showToast({
+        title: '文章数据未加载',
+        icon: 'none'
+      });
+      return;
+    }
+    
+    wx.navigateTo({
+      url: `/pages/exercises/exercises?id=${this.data.article._id}&title=${encodeURIComponent(this.data.article.title)}`,
+      fail: () => {
+        wx.showToast({
+          title: '跳转失败',
+          icon: 'none'
+        });
+      }
+    });
+  },
+
+  // 提取首字符和剩余内容
+  extractFirstCharAndRest: function(text) {
+    const cleanText = text.replace(/<\/?[^>]+(>|$)/g, "").trim();
+    
     if (!cleanText) {
       return { firstChar: "", rest: "" };
     }
     
-    // Extract first character and the rest
     const firstChar = cleanText.charAt(0);
     const rest = cleanText.substring(1);
     
-    console.log('处理文本:', cleanText, '首字:', firstChar, '余下:', rest); // 调试输出
-    
     return { firstChar, rest };
   },
-  
-  /**
-   * 格式化文章数据
-   */
-  formatArticleData: function(apiData) {
-    // Process intro text
-    const introText = apiData.intro || '';
-    const introExtracted = this.extractFirstCharAndRest(introText);
-    
-    // Process content part 1
-    const contentPart1Text = apiData.contentPart1 || '';
-    const contentPart1Extracted = this.extractFirstCharAndRest(contentPart1Text);
-    
-    // Process conclusion
-    const conclusionText = apiData.conclusion || '';
-    const conclusionExtracted = this.extractFirstCharAndRest(conclusionText);
-    
-    // Format and return article data from API
-    return {
-      id: apiData.id,
-      title: apiData.title,
-      coverUrl: apiData.coverUrl,
-      date: apiData.date,
-      tag: apiData.tag,
-      audioUrl: apiData.audioUrl || null,
-      contentImage: apiData.contentImage || null,
-      imageCaption: apiData.imageCaption || '',
-      thinkingQuestion: apiData.thinkingQuestion || '',
-      
-      // Text content with first character separated
-      introFirstChar: introExtracted.firstChar,
-      introRest: introExtracted.rest,
-      
-      contentPart1FirstChar: contentPart1Extracted.firstChar,
-      contentPart1Rest: contentPart1Extracted.rest,
-      
-      conclusionFirstChar: conclusionExtracted.firstChar,
-      conclusionRest: conclusionExtracted.rest
-    };
-  },
-  
-  /**
-   * 加载示例文章（开发阶段使用）
-   */
-  loadSampleArticle: function() {
-    let article = {
-      title: '仰望星空：人类探索宇宙的旅程',
-      date: '2023年10月15日',
-      tag: '科普阅读',
-      coverUrl: '/images/universe.jpg',
-      introduction: '宇宙是一个充满神秘和壮丽的地方，自古以来就吸引着人类的目光和想象力。从最早的天文学家到现代的太空探索，人类对宇宙的探索从未停止。',
-      contentPart1: '天文学是人类最古老的科学之一。早在古代，人们就开始观测星空，试图理解那些闪烁的光点。随着技术的进步，我们的视野不断扩展，从肉眼观测到望远镜的发明，再到现代的哈勃太空望远镜，人类对宇宙的理解也在不断深入。',
-      conclusion: '随着太空探索技术的不断发展，人类或许能够解答更多关于宇宙起源和演化的问题。正如诗人所言："我们都是星尘的孩子，通过观察星空，我们在探索自己的起源。"',
-      contentImage: '/images/telescope.jpg',
-      imageCaption: '哈勃太空望远镜传回的深空图像',
-      firstContentImage: '/images/stars.jpg',
-      firstImageCaption: '夜空中的银河系',
-      thinkingQuestion: '在阅读完本文后，你认为人类为什么要不断探索宇宙？太空探索对我们的日常生活有哪些直接或间接的影响？'
-    };
 
-    // 提取首字符和剩余内容
-    const introProcessed = this.extractFirstCharAndRest(article.introduction);
-    const contentPart1Processed = this.extractFirstCharAndRest(article.contentPart1);
-    const conclusionProcessed = this.extractFirstCharAndRest(article.conclusion);
-
-    // 更新数据，确保首字符和剩余内容正确设置
-    this.setData({
-      article: {
-        ...article,
-        introFirstChar: introProcessed.firstChar,
-        introRest: introProcessed.rest,
-        contentPart1FirstChar: contentPart1Processed.firstChar,
-        contentPart1Rest: contentPart1Processed.rest,
-        conclusionFirstChar: conclusionProcessed.firstChar,
-        conclusionRest: conclusionProcessed.rest
-      }
-    });
-    
-    console.log('Article loaded:', this.data.article); // 调试输出
-  },
-
-  /**
-   * 初始化音频上下文
-   */
+  // 初始化音频上下文
   initAudioContext: function() {
     const audioContext = wx.createInnerAudioContext();
     
     audioContext.onPlay(() => {
       console.log('音频开始播放');
       this.setData({ isReading: true });
+      this.startProgressUpdate();
+    });
+    
+    audioContext.onPause(() => {
+      console.log('音频暂停');
+      this.setData({ isReading: false });
+      this.stopProgressUpdate();
     });
     
     audioContext.onStop(() => {
       console.log('音频停止');
       this.setData({ isReading: false });
+      this.stopProgressUpdate();
     });
     
     audioContext.onEnded(() => {
       console.log('音频播放结束');
-      this.setData({ isReading: false });
+      this.setData({ 
+        isReading: false,
+        audioCurrentTime: 0,
+        audioProgress: 0
+      });
+      this.stopProgressUpdate();
+    });
+    
+    audioContext.onCanplay(() => {
+      console.log('音频可以播放，时长：', audioContext.duration);
+      // 设置播放速度
+      audioContext.playbackRate = this.data.playbackRate;
+      this.setData({
+        audioDuration: audioContext.duration || 0
+      });
+    });
+    
+    audioContext.onTimeUpdate(() => {
+      const currentTime = audioContext.currentTime || 0;
+      const duration = audioContext.duration || 0;
+      const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+      
+      this.setData({
+        audioCurrentTime: currentTime,
+        audioProgress: progress
+      });
     });
     
     audioContext.onError((res) => {
       console.error('音频播放错误：', res);
       this.setData({ isReading: false });
+      this.stopProgressUpdate();
       wx.showToast({
         title: '朗读功能暂不可用',
         icon: 'none'
@@ -256,376 +549,425 @@ Page({
     
     this.audioContext = audioContext;
   },
-  
-  /**
-   * 检查文章收藏状态
-   */
-  checkBookmarkStatus: function(articleId) {
-    // Get bookmarked articles from storage
-    wx.getStorage({
-      key: 'bookmarkedArticles',
-      success: (res) => {
-        const bookmarkedArticles = res.data || [];
-        const isBookmarked = bookmarkedArticles.includes(articleId);
-        this.setData({ isBookmarked });
-      },
-      fail: () => {
-        // No bookmarked articles found in storage
-        this.setData({ isBookmarked: false });
-      }
+
+  // 初始化背景音乐上下文
+  initBgmContext: function() {
+    const bgmContext = wx.createInnerAudioContext();
+    
+    bgmContext.loop = true; // 循环播放
+    bgmContext.volume = 0.1; // 设置音量为5%
+    
+    bgmContext.onPlay(() => {
+      console.log('背景音乐开始播放');
+      this.setData({ isBgmPlaying: true });
     });
+    
+    bgmContext.onPause(() => {
+      console.log('背景音乐暂停');
+      this.setData({ isBgmPlaying: false });
+    });
+    
+    bgmContext.onStop(() => {
+      console.log('背景音乐停止');
+      this.setData({ isBgmPlaying: false });
+    });
+    
+    bgmContext.onError((res) => {
+      console.error('背景音乐播放错误：', res);
+      this.setData({ isBgmPlaying: false });
+      wx.showToast({
+        title: '背景音乐加载失败',
+        icon: 'none'
+      });
+    });
+    
+    this.bgmContext = bgmContext;
   },
-  
-  /**
-   * 收藏/取消收藏文章
-   */
-  bookmarkArticle: function() {
-    if (!this.data.article) return;
-    
-    const articleId = this.data.article.id;
-    const isCurrentlyBookmarked = this.data.isBookmarked;
-    
-    // Get current bookmarked articles
-    wx.getStorage({
-      key: 'bookmarkedArticles',
-      success: (res) => {
-        let bookmarkedArticles = res.data || [];
+
+  // 播放背景音乐
+  playBgm: async function() {
+    try {
+      // 获取云存储文件的临时链接
+      const result = await wx.cloud.getTempFileURL({
+        fileList: [this.data.bgmUrl]
+      });
+      
+      if (result.fileList && result.fileList[0] && result.fileList[0].tempFileURL) {
+        const tempUrl = result.fileList[0].tempFileURL;
+        console.log('背景音乐临时链接：', tempUrl);
         
-        if (isCurrentlyBookmarked) {
-          // Remove from bookmarks
-          bookmarkedArticles = bookmarkedArticles.filter(id => id !== articleId);
-          wx.showToast({
-            title: '已取消收藏',
-            icon: 'none'
-          });
+        this.bgmContext.src = tempUrl;
+        this.bgmContext.play();
+      } else {
+        console.error('获取背景音乐临时链接失败');
+      }
+    } catch (error) {
+      console.error('播放背景音乐失败：', error);
+    }
+  },
+
+  // 切换背景音乐播放状态
+    toggleBgm: function() {
+      if (this.data.isBgmPlaying) {
+        this.bgmContext.pause();
+      } else {
+        if (this.bgmContext.src) {
+          this.bgmContext.play();
         } else {
-          // Add to bookmarks
-          bookmarkedArticles.push(articleId);
-          wx.showToast({
-            title: '已加入收藏',
-            icon: 'success'
-          });
+          this.playBgm();
         }
+      }
+    },
+
+    // 播放文章朗读音频
+     playAudio: async function() {
+       try {
+         if (this.data.article && this.data.article.voice) {
+           // 如果是云存储文件，获取临时链接
+           let audioUrl = this.data.article.voice;
+           if (audioUrl.startsWith('cloud://')) {
+             const result = await wx.cloud.getTempFileURL({
+               fileList: [audioUrl]
+             });
+             if (result.fileList && result.fileList[0] && result.fileList[0].tempFileURL) {
+               audioUrl = result.fileList[0].tempFileURL;
+             }
+           }
+           
+           console.log('设置朗读音频源：', audioUrl);
+           this.audioContext.src = audioUrl;
+           this.audioContext.play();
+         }
+       } catch (error) {
+         console.error('播放朗读音频失败：', error);
+         wx.showToast({
+           title: '音频播放失败',
+           icon: 'none'
+         });
+       }
+     },
+
+     // 切换朗读播放状态（原有功能）
+     toggleReading: function() {
+       console.log('点击朗读按钮');
+       
+       // 检查会员权限
+       if (!this.data.isMember) {
+         wx.showModal({
+           title: '会员专享',
+           content: '朗读功能仅限会员使用，是否前往开通会员？',
+           confirmText: '开通会员',
+           cancelText: '取消',
+           success: (res) => {
+             if (res.confirm) {
+               this.goToMemberCenter();
+             }
+           }
+         });
+         return;
+       }
+       
+       if (!this.data.article || !this.data.article.voice) {
+         wx.showToast({
+           title: '暂无朗读音频',
+           icon: 'none'
+         });
+         return;
+       }
+ 
+       if (this.data.isReading) {
+         this.audioContext.pause();
+       } else {
+         if (this.audioContext.src) {
+           this.audioContext.play();
+         } else {
+           this.playAudio();
+         }
+       }
+     },
+
+  // 开始进度更新
+  startProgressUpdate: function() {
+    this.stopProgressUpdate(); // 先清除之前的定时器
+    this.progressTimer = setInterval(() => {
+      if (this.audioContext) {
+        const currentTime = this.audioContext.currentTime || 0;
+        const duration = this.audioContext.duration || 0;
+        const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
         
-        // Save updated bookmarks
-        wx.setStorage({
-          key: 'bookmarkedArticles',
-          data: bookmarkedArticles,
-          complete: () => {
-            this.setData({ isBookmarked: !isCurrentlyBookmarked });
-          }
+        this.setData({
+          audioCurrentTime: currentTime,
+          audioProgress: progress
         });
-      },
-      fail: () => {
-        // No bookmarks yet, create new array
-        const bookmarkedArticles = [articleId];
-        wx.setStorage({
-          key: 'bookmarkedArticles',
-          data: bookmarkedArticles,
-          complete: () => {
-            this.setData({ isBookmarked: true });
+      }
+    }, 1000);
+  },
+
+  // 停止进度更新
+  stopProgressUpdate: function() {
+    if (this.progressTimer) {
+      clearInterval(this.progressTimer);
+      this.progressTimer = null;
+    }
+  },
+
+  // 格式化时间显示
+  formatTime: function(seconds) {
+    if (!seconds || isNaN(seconds)) return '00:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  },
+
+
+
+
+
+  // 处理富文本点击事件
+  onRichTextTap: function(e) {
+    // 获取点击的节点信息
+    const node = e.target;
+    if (!node) return;
+    
+    // 检查是否点击了图片
+    if (node.nodeName === 'IMG') {
+      // 获取图片索引
+      const index = parseInt(node.dataset.index);
+      if (!isNaN(index) && this.data.article.images) {
+        const urls = this.data.article.images.map(img => img.url);
+        const current = urls[index];
+        
+        // 预览图片
+        wx.previewImage({
+          current,
+          urls,
+          success: () => {
+            // console.log('图片预览成功');
+          },
+          fail: (error) => {
+            // console.error('图片预览失败:', error);
             wx.showToast({
-              title: '已加入收藏',
-              icon: 'success'
+              title: '图片预览失败',
+              icon: 'none'
             });
           }
         });
       }
-    });
+    }
   },
   
-  /**
-   * 增加字体大小
-   */
+  // 预览图片
+  previewImage: function(e) {
+    const current = e.currentTarget.dataset.url;
+    const urls = this.data.article.images ? this.data.article.images.map(img => img.url) : [];
+    
+    wx.previewImage({
+      current,
+      urls: urls.length ? urls : [current]
+    });
+  },
+
+  // 分享
+  onShareAppMessage: function() {
+    const article = this.data.article;
+    return {
+      title: article.title,
+      path: `/pages/article_detail/article_detail?id=${article._id}`,
+      imageUrl: article.imageUrl
+    };
+  },
+
+  // 分享到朋友圈
+  onShareTimeline: function() {
+    const article = this.data.article;
+    return {
+      title: article.title,
+      query: `id=${article._id}`,
+      imageUrl: article.imageUrl
+    };
+  },
+
+  // 处理封面图片加载错误
+  handleCoverError: function(e) {
+    // console.error('封面图片加载失败:', e)
+    this.setData({
+      'article.coverUrl': ''
+    })
+  },
+
+  // 增加字体大小
   increaseFontSize: function() {
-    // 最大字体大小限制
-    if (this.data.fontSize < 48) {
-      const newSize = this.data.fontSize + 2;
-      this.setData({
-        fontSize: newSize
-      });
-      // 保存设置到本地存储
+    const newSize = Math.min(this.data.fontSize + this.data.fontSizeStep, this.data.maxFontSize);
+    if (newSize !== this.data.fontSize) {
+      this.setData({ fontSize: newSize });
       wx.setStorageSync('fontSize', newSize);
-      
-      wx.showToast({
-        title: '字体已放大',
-        icon: 'none',
-        duration: 500
-      });
+      wx.vibrateShort({ type: 'light' });
     } else {
       wx.showToast({
         title: '已是最大字号',
         icon: 'none',
-        duration: 500
+        duration: 1000
       });
     }
   },
-  
-  /**
-   * 减小字体大小
-   */
+
+  // 减小字体大小
   decreaseFontSize: function() {
-    // 最小字体大小限制
-    if (this.data.fontSize > 24) {
-      const newSize = this.data.fontSize - 2;
-      this.setData({
-        fontSize: newSize
+    const newSize = Math.max(this.data.fontSize - this.data.fontSizeStep, this.data.minFontSize);
+    if (newSize !== this.data.fontSize) {
+      this.setData({ fontSize: newSize }, () => {
+        // 重新处理所有富文本内容
+        if (this.data.article) {
+          const article = this.data.article;
+          const processedIntro = this.processRichText(article.body || '');
+          const processedContent = this.processRichText(article.content || '');
+          const processedConclusion = this.processRichText(article.conclusion || '');
+          
+          this.setData({
+            'article.introSections': processedIntro.sections,
+            'article.contentSections': processedContent.sections,
+            'article.conclusionSections': processedConclusion.sections
+          });
+        }
       });
-      // 保存设置到本地存储
       wx.setStorageSync('fontSize', newSize);
-      
-      wx.showToast({
-        title: '字体已缩小',
-        icon: 'none',
-        duration: 500
-      });
+      wx.vibrateShort({ type: 'light' });
     } else {
       wx.showToast({
         title: '已是最小字号',
         icon: 'none',
-        duration: 500
+        duration: 1000
       });
     }
   },
-  
-  /**
-   * 朗读文章
-   */
-  readArticle: function() {
-    // 检查是否正在朗读
-    if (this.data.isReading) {
-      // 如果正在朗读，则停止
-      if (this.audioContext) {
-        this.audioContext.stop();
-      }
-      this.setData({ isReading: false });
+
+  // 跳转到习题页面
+  showExercises: function() {
+    if (!this.data.article || !this.data.article._id) {
+      wx.showToast({
+        title: '文章信息不完整',
+        icon: 'none'
+      });
       return;
     }
-    
-    // API预留接口
-    const apiUrl = "https://your-api-domain.com/api/tts";
-    const articleText = this.getArticleFullText();
-    
-    // 显示加载中
-    wx.showLoading({
-      title: '准备朗读...',
-    });
-    
-    // 调用朗读API
-    wx.request({
-      url: apiUrl,
-      method: 'POST',
-      data: {
-        text: articleText,
-        articleId: this.data.article.id,
-        voice: 'female', // 可选参数：语音类型
-        speed: 1.0       // 可选参数：语速
-      },
-      success: (res) => {
-        if (res.statusCode === 200 && res.data.success) {
-          // 获取音频URL
-          const audioUrl = res.data.audioUrl;
-          
-          // 播放音频
-          if (this.audioContext) {
-            this.audioContext.src = audioUrl;
-            this.audioContext.play();
-            this.setData({ isReading: true });
-          }
-        } else {
-          this.handleTtsError();
-        }
-      },
-      fail: (err) => {
-        console.error('TTS API请求失败：', err);
-        this.handleTtsError();
-      },
-      complete: () => {
-        wx.hideLoading();
-      }
-    });
-    
-    // 开发阶段处理（模拟API）
-    this.simulateTts();
-  },
-  
-  // 获取文章完整文本用于朗读
-  getArticleFullText: function() {
-    const article = this.data.article;
-    return `${article.title}。${article.introFirstChar}${article.introRest}${article.contentPart1FirstChar}${article.contentPart1Rest}${article.conclusionFirstChar}${article.conclusionRest}`;
-  },
-  
-  // 模拟TTS API响应（开发阶段）
-  simulateTts: function() {
-    wx.hideLoading();
-    
-    // 模拟成功响应
-    if (Math.random() > 0.2) { // 80%成功率
-      wx.showToast({
-        title: '开始朗读',
-        icon: 'success'
-      });
-      this.setData({ isReading: true });
-      
-      // 3秒后自动停止（模拟）
-      setTimeout(() => {
-        this.setData({ isReading: false });
-      }, 3000);
-    } else {
-      this.handleTtsError();
-    }
-  },
-  
-  // TTS错误处理
-  handleTtsError: function() {
-    wx.showToast({
-      title: '朗读功能暂不可用',
-      icon: 'none'
-    });
-    this.setData({ isReading: false });
-  },
-  
-  /**
-   * 打印功能 - 跳转到打印页面
-   */
-  printArticle: function() {
-    // 获取文章ID
-    const articleId = this.data.article.id || 'sample-1';
-    
-    // 跳转到打印页面
+
     wx.navigateTo({
-      url: `/pages/print_page/print_page?articleId=${articleId}&title=${encodeURIComponent(this.data.article.title)}`,
-      success: () => {
-        console.log('成功跳转到打印页面');
-      },
-      fail: (err) => {
-        console.error('跳转打印页面失败：', err);
+      url: `/pages/exercises/exercises?id=${this.data.article._id}&title=${encodeURIComponent(this.data.article.title || '')}`,
+      fail: (error) => {
+        // console.error('跳转习题页面失败:', error);
         wx.showToast({
-          title: '打印功能暂不可用',
+          title: '跳转失败',
           icon: 'none'
         });
       }
     });
   },
-  
-  /**
-   * 显示习题
-   */
-  showExercises: function() {
-    wx.showToast({
-      title: '正在加载习题...',
-      icon: 'loading',
-      duration: 1500
-    });
-    
-    // Mock exercise loading (would be replaced with actual API)
-    setTimeout(() => {
-      wx.navigateTo({
-        url: `/pages/exercises/exercises?articleId=${this.data.article.id}`
+
+  // 跳转到习题页面
+  goToExercises: function() {
+    if (!this.data.article) {
+      wx.showToast({
+        title: '文章数据未加载',
+        icon: 'none'
       });
-    }, 1500);
-  },
-  
-  /**
-   * 预览图片
-   */
-  previewImage: function(e) {
-    let url = e.currentTarget.dataset.image || e.currentTarget.src;
-    let urls = [
-      this.data.article.coverUrl,
-      this.data.article.firstContentImage,
-      this.data.article.contentImage
-    ].filter(Boolean); // 过滤掉可能的空值
-    
-    wx.previewImage({
-      current: url,
-      urls: urls
+      return;
+    }
+
+    wx.navigateTo({
+      url: `/pages/exercises/exercises?id=${this.data.article._id}&title=${encodeURIComponent(this.data.article.title || '文章')}`,
+      fail: (error) => {
+        // console.error('跳转习题页面失败:', error);
+        wx.showToast({
+          title: '跳转失败',
+          icon: 'none'
+        });
+      }
     });
   },
 
   /**
-   * 生命周期函数--监听页面卸载
+   * 打印文章
    */
+  printArticle() {
+    if (!this.data.article) {
+      wx.showToast({
+        title: '文章内容加载中',
+        icon: 'none'
+      });
+      return;
+    }
+
+    wx.navigateTo({
+      url: `/pages/print_page/print_page?articleId=${this.data.article._id}&title=${encodeURIComponent(this.data.article.title)}`,
+      success: (res) => {
+        // 传递文章数据到打印页面
+        res.eventChannel.emit('acceptArticleData', {
+          article: this.data.article
+        });
+      }
+    });
+  },
+
+
+
   onUnload: function() {
-    // Stop audio and release resources
+    // 页面卸载时停止音频播放和清理定时器
+    this.stopProgressUpdate();
     if (this.audioContext) {
       this.audioContext.stop();
+      this.audioContext.destroy();
+    }
+    // 停止背景音乐
+    if (this.bgmContext) {
+      this.bgmContext.stop();
+      this.bgmContext.destroy();
     }
   },
-  
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage: function() {
-    const article = this.data.article;
-    return {
-      title: article ? article.title : '精彩文章分享',
-      path: `/pages/article_detail/article_detail?id=${article ? article.id : 'sample-1'}`,
-      imageUrl: article ? article.coverUrl : ''
-    };
-  },
 
-  /**
-   * 加载文章数据
-   */
-  loadArticleData: function(articleId) {
-    this.setData({ isLoading: true });
+  // 切换播放速度
+  togglePlaybackRate: function() {
+    const rates = this.data.playbackRates;
+    let currentIndex = this.data.currentRateIndex;
     
-    // 这里通常会调用API获取文章详情
-    // 开发阶段使用模拟数据
-    setTimeout(() => {
-      // 创建唯一的文章ID
-      const uniqueId = articleId || 'art' + Math.floor(Math.random() * 10 + 1);
-      
-      // 模拟文章数据，使用ID作为关联
-      const article = {
-        id: uniqueId,
-        title: this.getArticleTitle(uniqueId),
-        author: '晓视界编辑组',
-        date: '2023-10-15',
-        tags: ['天文', '科学', '宇宙'],
-        views: 1256,
-        likes: 328,
-        introFirstChar: '在',
-        introRest: '浩瀚的宇宙中，人类一直在寻找宜居的系外行星。最近，韦伯太空望远镜的最新观测数据带来了令人振奋的消息。',
-        contentPart1FirstChar: '科',
-        contentPart1Rest: '学家们使用韦伯太空望远镜的近红外光谱仪观测了距离地球约40光年的系外行星K2-18b的大气层。这颗行星围绕一颗红矮星运行，质量约为地球的8.6倍，半径约为地球的2.6倍，被归类为"超级地球"或"迷你海王星"。\n\n研究团队在这颗行星的大气中探测到了水分子的存在，这是韦伯望远镜首次在宜居带系外行星上探测到水分子。不仅如此，科学家们还发现了大量的甲烷和二氧化碳，这种大气成分组合与海洋行星的预测模型相符。',
-        conclusionFirstChar: '这',
-        conclusionRest: '一发现为寻找宜居系外行星提供了新的希望。科学家们计划使用韦伯望远镜进行后续观测，以获取更多关于这颗行星大气成分的详细信息。\n\n同时，这也提醒我们保护地球环境的重要性。在我们探索宇宙寻找第二个家园的同时，更应珍惜我们现有的美丽家园。',
-        relatedArticles: [
-          { id: 'art2', title: '系外行星探测技术的发展历程' },
-          { id: 'art3', title: '韦伯太空望远镜的科学任务' },
-          { id: 'art4', title: '宜居带系外行星的特征' }
-        ]
-      };
-      
-      this.setData({
-        article: article,
-        isLoading: false
-      });
-      
-      // 检查收藏状态
-      this.checkBookmarkStatus(article.id);
-    }, 500);
-  },
-  
-  /**
-   * 根据ID获取文章标题
-   */
-  getArticleTitle: function(articleId) {
-    const titleMap = {
-      'art1': '韦伯望远镜发现系外行星含有水分子',
-      'art2': '探索宇宙奥秘：从星辰大海到深空探索',
-      'art3': '2023年10月猎户座流星雨观测指南',
-      'art4': '银河系中心黑洞的最新研究成果',
-      'art5': '如何用智能手机拍摄星空',
-      'art6': '天文摄影入门：器材选择与使用技巧',
-      'art7': '太阳系外行星探测的新方法',
-      'art8': '黑洞照片背后的故事：事件视界望远镜项目',
-      'art9': '2023年值得关注的天文现象',
-      'art10': '业余天文学家如何参与科学研究'
-    };
+    // 切换到下一个速度
+    currentIndex = (currentIndex + 1) % rates.length;
+    const newRate = rates[currentIndex];
     
-    return titleMap[articleId] || '浩瀚宇宙：探索未知的奥秘';
-  },
-}) 
+    this.setData({
+      currentRateIndex: currentIndex,
+      playbackRate: newRate
+    });
+    
+    // 如果音频正在播放，立即应用新的播放速度
+    if (this.audioContext && this.audioContext.src) {
+      this.audioContext.playbackRate = newRate;
+    }
+    
+    // 显示当前播放速度
+    wx.showToast({
+      title: `播放速度: ${newRate}x`,
+      icon: 'none',
+      duration: 1000
+    });
+  }
+}); 
+
+// 记录阅读活动
+function recordReadActivity(article) {
+  wx.cloud.callFunction({
+    name: 'activity',
+    data: {
+      action: 'createActivity',
+      data: {
+        type: 'read',
+        title: `阅读了《${article.title}》`,
+        content: {
+          articleId: article._id,
+          articleTitle: article.title
+        }
+      }
+    }
+  }).catch(err => {
+    console.error('记录阅读活动失败:', err)
+  })
+}

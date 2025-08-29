@@ -1,562 +1,566 @@
+// pages/explore/explore.js
+const app = getApp()
+const cloud = wx.cloud
+
+// 辅助函数: 格式化视频时长
+function formatDuration(seconds) {
+  if (!seconds) return '00:00'
+  
+  const totalSeconds = parseInt(seconds, 10)
+  const minutes = Math.floor(totalSeconds / 60)
+  const remainingSeconds = totalSeconds % 60
+  
+  return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`
+}
+
+// 辅助函数: 格式化日期
+function formatDate(timestamp) {
+  if (!timestamp) return ''
+  const date = new Date(timestamp)
+  const utc = date.getTime() + (date.getTimezoneOffset() * 60000)
+  const cstDate = new Date(utc + (3600000 * 8))
+  
+  return `${cstDate.getFullYear()}-${String(cstDate.getMonth() + 1).padStart(2, '0')}-${String(cstDate.getDate()).padStart(2, '0')}`
+}
+
 Page({
-  /**
-   * 页面的初始数据
-   */
   data: {
-    // 当前日期
-    currentDate: '2023-11-15',
-    // 当前选中的文章类型标签
+    // 文章相关
+    articles: [],
     currentTab: 'news',
     
-    // 天文时事文章列表
-    newsArticles: [
-      {
-        id: 1,
-        title: '韦伯太空望远镜发现系外行星大气中存在水分子',
-        coverUrl: 'https://img.tech2ipo.com/upload/img/article/202307/1687945023925.jpg',
-        tag: '太空探索',
-        date: '2023-11-10',
-        summary: '最新研究表明，韦伯太空望远镜通过近红外探测器观测到系外行星WASP-121b大气层中存在水分子，这一发现为研究系外行星宜居性带来重要突破。'
-      },
-      {
-        id: 2,
-        title: '中国天眼FAST探测到47颗新脉冲星',
-        coverUrl: 'https://img.tech2ipo.com/upload/img/article/202307/1687945267047.jpg',
-        tag: '射电天文',
-        date: '2023-11-05',
-        summary: '中国科学院国家天文台宣布，500米口径球面射电望远镜(FAST)在银河系内新发现47颗脉冲星，这些脉冲星数据将帮助科学家更好地了解星体演化过程。'
-      }
-    ],
+    // 视频相关
+    videoList: [],
+    currentVideo: null,
+    showVideoModal: false,
+    filterByDate: false, // 是否启用日期筛选
     
-    // 天文回顾文章列表
-    reviewArticles: [
-      {
-        id: 101,
-        title: '哈勃太空望远镜30周年：改变人类宇宙观的30张照片',
-        coverUrl: 'https://img.tech2ipo.com/upload/img/article/202307/1687945460833.jpg', 
-        tag: '太空摄影',
-        date: '2023-10-25',
-        summary: '回顾哈勃太空望远镜服役30年来拍摄的最具影响力的30张宇宙照片，这些图像如何改变了人类对宇宙的认知和理解。'
-      },
-      {
-        id: 102,
-        title: '人类首次观测黑洞：事件视界望远镜的突破性成就',
-        coverUrl: 'https://img.tech2ipo.com/upload/img/article/202307/1687945890224.jpg',
-        tag: '黑洞研究',
-        date: '2023-09-15',
-        summary: '2019年，事件视界望远镜(EHT)项目公布了人类历史上首张黑洞照片，本文回顾这一突破性科学成就背后的故事和技术挑战。'
-      }
-    ],
-    
-    // 视频列表
-    videoList: [
-      {
-        id: 201,
-        title: '走近黑洞：宇宙中最神秘天体的秘密',
-        coverUrl: 'https://img.tech2ipo.com/upload/img/article/202307/1687946103339.jpg',
-        duration: '25:16',
-        description: '探索黑洞的形成、演化和影响，了解爱因斯坦相对论如何预测黑洞的存在。',
-        date: '2023-11-08',
-        views: '25.8万'
-      },
-      {
-        id: 202,
-        title: '宇宙中的"化学工厂"：恒星如何制造元素',
-        coverUrl: 'https://img.tech2ipo.com/upload/img/article/202307/1687946278567.jpg',
-        duration: '18:45',
-        description: '从氢和氦到铁和金，了解恒星核心的核聚变如何创造了周期表上的元素。',
-        date: '2023-10-20',
-        views: '18.3万'
-      }
-    ],
-
-    // 页码和加载状态
-    newsPage: 1,
-    reviewPage: 1,
-    videoPage: 1,
+    // 通用状态
+    currentDate: '',
     isLoading: false,
     hasMore: {
-      news: false,
-      review: false,
-      video: false
+      article: true,
+      video: true
+    },
+    page: {
+      article: 1,
+      video: 1
     }
   },
 
-  /**
-   * 切换文章标签
-   */
-  switchTab: function(e) {
-    const tab = e.currentTarget.dataset.tab;
+  // 获取云存储文件链接
+  async getCloudFileURL(fileID) {
+    try {
+      const { fileList } = await cloud.getTempFileURL({
+        fileList: [fileID]
+      })
+      return fileList[0].tempFileURL
+    } catch (error) {
+      console.error('获取云存储链接失败:', error)
+      return ''
+    }
+  },
+
+  onLoad() {
+    console.log('页面开始加载')
+    // 初始化云环境
+    if (!wx.cloud) {
+      console.error('请使用 2.2.3 或以上的基础库以使用云能力')
+      return
+    }
+    wx.cloud.init({
+      env: 'cloud1-1gsyt78b92c539ef', // 使用与app.js相同的云环境ID
+      traceUser: true
+    })
+    
+    // 设置当前日期
+    const today = new Date()
+    const year = today.getFullYear()
+    const month = String(today.getMonth() + 1).padStart(2, '0')
+    const day = String(today.getDate()).padStart(2, '0')
+    const dateStr = `${year}-${month}-${day}`
+    
+    console.log('初始化数据:', {
+      currentDate: dateStr,
+      filterByDate: false
+    })
+    
     this.setData({
-      currentTab: tab
-    });
-    
-    // 如果对应标签的数据为空，则加载数据
-    if (tab === 'news' && this.data.newsArticles.length === 0) {
-      this.loadNewsArticles();
-    } else if (tab === 'review' && this.data.reviewArticles.length === 0) {
-      this.loadReviewArticles();
+      currentDate: dateStr,
+      filterByDate: false,
+      videoList: [],
+      'page.video': 1,
+      'hasMore.video': true,
+      isLoading: false
+    }, () => {
+      // 设置完日期后立即加载数据
+      this.loadVideos()
+    })
+  },
+
+  onShow() {
+    console.log('页面显示')
+    // 如果视频列表为空，尝试重新加载
+    if (this.data.videoList.length === 0) {
+      console.log('视频列表为空，重新加载')
+      this.setData({
+        'page.video': 1,
+        'hasMore.video': true,
+        isLoading: false
+      }, () => {
+        this.loadVideos()
+      })
     }
   },
 
-  /**
-   * 加载天文时事文章
-   */
-  loadNewsArticles: function(date = '') {
-    if (this.data.isLoading || !this.data.hasMore.news) return;
+  // 切换新闻/回顾标签
+  switchTab(e) {
+    const tab = e.currentTarget.dataset.tab
+    if (tab === this.data.currentTab) return
     
-    this.setData({ isLoading: true });
-    
-    // 构建请求参数
-    const params = {
-      page: this.data.newsPage,
-      limit: 10
-    };
-    
-    if (date) {
-      params.date = date;
-    }
-    
-    // 调用API获取文章列表
-    this.requestArticles('news', params);
-  },
-  
-  /**
-   * 加载天文回顾文章
-   */
-  loadReviewArticles: function(date = '') {
-    if (this.data.isLoading || !this.data.hasMore.review) return;
-    
-    this.setData({ isLoading: true });
-    
-    // 构建请求参数
-    const params = {
-      page: this.data.reviewPage,
-      limit: 10
-    };
-    
-    if (date) {
-      params.date = date;
-    }
-    
-    // 调用API获取文章列表
-    this.requestArticles('review', params);
-  },
-  
-  /**
-   * 加载视频列表
-   */
-  loadVideos: function(date = '') {
-    if (this.data.isLoading || !this.data.hasMore.video) return;
-    
-    this.setData({ isLoading: true });
-    
-    // 构建请求参数
-    const params = {
-      page: this.data.videoPage,
-      limit: 10
-    };
-    
-    if (date) {
-      params.date = date;
-    }
-    
-    // 调用API获取视频列表
-    wx.request({
-      url: 'https://your-api-domain.com/api/videos',
-      data: params,
-      method: 'GET',
-      success: (res) => {
-        if (res.statusCode === 200 && res.data.success) {
-          const newVideos = res.data.data.list || [];
-          
-          // 更新视频列表和分页信息
-          this.setData({
-            videoList: this.data.videoPage === 1 ? newVideos : [...this.data.videoList, ...newVideos],
-            videoPage: this.data.videoPage + 1,
-            hasMore: {
-              ...this.data.hasMore,
-              video: newVideos.length === params.limit
-            }
-          });
-        } else {
-          wx.showToast({
-            title: '加载视频失败',
-            icon: 'none'
-          });
-        }
-      },
-      fail: () => {
-        wx.showToast({
-          title: '网络错误，请重试',
-          icon: 'none'
-        });
-      },
-      complete: () => {
-        this.setData({ isLoading: false });
-      }
-    });
-  },
-  
-  /**
-   * 请求文章API
-   */
-  requestArticles: function(type, params) {
-    const apiUrl = `https://your-api-domain.com/api/articles/${type}`;
-    
-    wx.request({
-      url: apiUrl,
-      data: params,
-      method: 'GET',
-      success: (res) => {
-        if (res.statusCode === 200 && res.data.success) {
-          const newArticles = res.data.data.list || [];
-          const isFirstPage = params.page === 1;
-          
-          if (type === 'news') {
-            this.setData({
-              newsArticles: isFirstPage ? newArticles : [...this.data.newsArticles, ...newArticles],
-              newsPage: params.page + 1,
-              hasMore: {
-                ...this.data.hasMore,
-                news: newArticles.length === params.limit
-              }
-            });
-          } else if (type === 'review') {
-            this.setData({
-              reviewArticles: isFirstPage ? newArticles : [...this.data.reviewArticles, ...newArticles],
-              reviewPage: params.page + 1,
-              hasMore: {
-                ...this.data.hasMore,
-                review: newArticles.length === params.limit
-              }
-            });
-          }
-        } else {
-          wx.showToast({
-            title: '加载文章失败',
-            icon: 'none'
-          });
-        }
-      },
-      fail: () => {
-        wx.showToast({
-          title: '网络错误，请重试',
-          icon: 'none'
-        });
-      },
-      complete: () => {
-        this.setData({ isLoading: false });
-      }
-    });
+    this.setData({
+      currentTab: tab,
+      articles: [],
+      'page.article': 1,
+      'hasMore.article': true
+    }, () => {
+      this.loadArticles()
+    })
   },
 
-  /**
-   * 上传文章
-   */
-  uploadArticle: function(articleData, files) {
-    return new Promise((resolve, reject) => {
-      // 先上传图片文件
-      this.uploadFiles(files).then(fileUrls => {
-        // 获取上传后的图片URL
-        const coverUrl = fileUrls.coverImage;
-        
-        // 构建文章数据
-        const article = {
-          ...articleData,
-          coverUrl
-        };
-        
-        // 发送请求上传文章内容
-        wx.request({
-          url: 'https://your-api-domain.com/api/articles',
-          method: 'POST',
-          data: article,
-          success: res => {
-            if (res.statusCode === 200 && res.data.success) {
-              resolve(res.data);
-            } else {
-              reject(new Error(res.data.message || '上传文章失败'));
-            }
-          },
-          fail: err => {
-            reject(err);
-          }
-        });
+  // 日期选择
+  dateChange(e) {
+    const date = e.detail.value
+    if (date === this.data.currentDate) return
+    
+    this.setData({
+      currentDate: date,
+      articles: [],
+      'page.article': 1,
+      'hasMore.article': true
+    }, () => {
+      this.loadArticles()
+    })
+  },
+
+  // 视频日期选择
+  videoDateChange(e) {
+    const date = e.detail.value
+    if (date === this.data.currentDate && this.data.filterByDate) return
+    
+    this.setData({
+      currentDate: date,
+      filterByDate: true, // 启用日期筛选
+      videoList: [],
+      'page.video': 1,
+      'hasMore.video': true
+    }, () => {
+      this.loadVideos()
+    })
+  },
+
+  // 重置日期筛选
+  resetDateFilter() {
+    if (!this.data.filterByDate) return
+    
+    this.setData({
+      filterByDate: false,
+      videoList: [],
+      'page.video': 1,
+      'hasMore.video': true,
+      isLoading: false // 确保可以重新加载
+    }, () => {
+      wx.showLoading({
+        title: '加载中...'
+      })
+      this.loadVideos().then(() => {
+        wx.hideLoading()
       }).catch(err => {
-        reject(err);
-      });
-    });
-  },
-  
-  /**
-   * 上传视频
-   */
-  uploadVideo: function(videoData, files) {
-    return new Promise((resolve, reject) => {
-      // 先上传视频文件和封面图
-      this.uploadFiles(files).then(fileUrls => {
-        // 获取上传后的视频URL和封面URL
-        const videoUrl = fileUrls.videoFile;
-        const coverUrl = fileUrls.coverImage;
-        
-        // 构建视频数据
-        const video = {
-          ...videoData,
-          videoUrl,
-          coverUrl
-        };
-        
-        // 发送请求上传视频内容
-        wx.request({
-          url: 'https://your-api-domain.com/api/videos',
-          method: 'POST',
-          data: video,
-          success: res => {
-            if (res.statusCode === 200 && res.data.success) {
-              resolve(res.data);
-            } else {
-              reject(new Error(res.data.message || '上传视频失败'));
-            }
-          },
-          fail: err => {
-            reject(err);
-          }
-        });
-      }).catch(err => {
-        reject(err);
-      });
-    });
-  },
-  
-  /**
-   * 上传文件（图片/视频）
-   */
-  uploadFiles: function(files) {
-    return new Promise((resolve, reject) => {
-      const uploadTasks = [];
-      const fileUrls = {};
-      
-      // 遍历文件对象
-      Object.keys(files).forEach(key => {
-        const filePath = files[key];
-        if (!filePath) return;
-        
-        // 创建上传任务
-        const task = new Promise((resolveTask, rejectTask) => {
-          wx.uploadFile({
-            url: 'https://your-api-domain.com/api/upload',
-            filePath: filePath,
-            name: 'file',
-            formData: {
-              type: key
-            },
-            success: res => {
-              const data = JSON.parse(res.data);
-              if (data.success) {
-                fileUrls[key] = data.data.url;
-                resolveTask();
-              } else {
-                rejectTask(new Error(data.message || '文件上传失败'));
-              }
-            },
-            fail: err => {
-              rejectTask(err);
-            }
-          });
-        });
-        
-        uploadTasks.push(task);
-      });
-      
-      // 等待所有上传任务完成
-      Promise.all(uploadTasks)
-        .then(() => resolve(fileUrls))
-        .catch(err => reject(err));
-    });
+        console.error('加载视频失败:', err)
+        wx.hideLoading()
+        wx.showToast({
+          title: '加载失败',
+          icon: 'none'
+        })
+      })
+    })
   },
 
-  /**
-   * 打开文章详情
-   */
-  openArticle: function(e) {
-    const id = e.currentTarget.dataset.id;
-    const type = e.currentTarget.dataset.type;
+  // 加载文章列表
+  async loadArticles() {
+    if (this.data.isLoading || !this.data.hasMore.article) return
+
+    try {
+      this.setData({ isLoading: true })
+
+      const { result } = await cloud.callFunction({
+        name: 'explore',
+        data: {
+          action: 'getArticles',
+          date: this.data.currentTab === 'news' ? this.data.currentDate : null, // 只在天文时事标签下使用日期筛选
+          page: this.data.page.article,
+          limit: 10,
+          status: 'published'
+        }
+      })
+
+      console.log('云函数返回结果:', result)
+
+      if (result.success) {
+        // 处理文章数据
+        const newArticles = result.data.map(article => {
+          return {
+            id: article.id || article._id,
+            title: article.title || '无标题',
+            summary: article.thoughtDescription || '',
+          coverUrl: article.imageUrl || '',
+            category: article.category || '未分类',
+            author: article.author || '匿名',
+            date: article.publishTime ? formatDate(Number(article.publishTime)) : '',
+          views: article.views || 0
+          }
+        })
+
+        console.log('处理后的文章数据:', newArticles)
+
+        this.setData({
+          articles: [...this.data.articles, ...newArticles],
+          'page.article': this.data.page.article + 1,
+          'hasMore.article': result.hasMore,
+          isLoading: false
+        })
+      } else {
+        console.error('加载文章失败:', result.message)
+        wx.showToast({
+          title: '加载失败',
+          icon: 'none'
+        })
+        this.setData({ isLoading: false })
+      }
+    } catch (error) {
+      console.error('加载文章失败:', error)
+      wx.showToast({
+        title: '加载失败',
+        icon: 'none'
+      })
+      this.setData({ isLoading: false })
+    }
+  },
+
+  // 加载视频列表
+  async loadVideos() {
+    console.log('进入loadVideos函数，当前状态:', {
+      isLoading: this.data.isLoading,
+      hasMore: this.data.hasMore.video,
+      filterByDate: this.data.filterByDate,
+      currentDate: this.data.currentDate,
+      page: this.data.page.video
+    })
+
+    if (this.data.isLoading) {
+      console.log('正在加载中，跳过重复加载')
+      return
+    }
+
+    try {
+      this.setData({ isLoading: true })
+
+      // 构建云函数参数
+      const params = {
+        name: 'explore',
+        data: {
+          action: 'getVideos',
+          page: this.data.page.video,
+          limit: 10
+        }
+      }
+
+      // 只在启用日期筛选时添加date参数
+      if (this.data.filterByDate) {
+        params.data.date = this.data.currentDate
+      }
+
+      console.log('调用云函数参数:', params)
+
+      const { result } = await cloud.callFunction(params)
+
+      console.log('视频加载结果:', result)
+
+      if (result && result.success) {
+        // 处理视频数据
+        const videos = result.data.map(video => {
+          // 确保视频对象有所有必要字段
+          const processedVideo = {
+            id: video.id || video._id,
+            title: video.title || '未命名视频',
+            description: video.description || '',
+            coverUrl: video.coverUrl || '',
+            videoUrl: video.videoUrl || '',
+            author: video.author || '小舟摇星河',
+            duration: formatDuration(video.duration) || '00:00',
+            publishTime: video.date || formatDate(video.createdAt),
+            views: video.views || 0
+          }
+          return processedVideo
+        })
+
+        // 更新数据
+        this.setData({
+          videoList: [...this.data.videoList, ...videos],
+          'page.video': this.data.page.video + 1,
+          'hasMore.video': videos.length === 10,
+          isLoading: false
+        })
+      } else {
+        console.error('加载视频失败:', result ? result.message : '返回结果为空')
+        this.setData({ 
+          isLoading: false,
+          'hasMore.video': false
+        })
+      }
+    } catch (error) {
+      console.error('加载视频失败:', error)
+      this.setData({ 
+        isLoading: false,
+        'hasMore.video': false
+      })
+    }
+  },
+
+  // 跳转到文章详情
+  goToArticleDetail(e) {
+    const id = e.currentTarget.dataset.id
+    console.log('准备跳转到文章详情，ID:', id)
+    console.log('完整的event数据:', e)
+    
+    if (!id) {
+      console.error('文章ID不能为空')
+      wx.showToast({
+        title: '文章ID不能为空',
+        icon: 'none'
+      })
+      return
+    }
+
+    const url = `/pages/article_detail/article_detail?articleId=${id}`
+    console.log('跳转URL:', url)
     
     wx.navigateTo({
-      url: `/pages/article_detail/article_detail?id=${id}&type=${type}`
-    });
-  },
-
-  /**
-   * 播放视频
-   */
-  playVideo: function(e) {
-    const id = e.currentTarget.dataset.id;
-    this.playVideoById(id);
-  },
-
-  /**
-   * 根据ID播放视频
-   */
-  playVideoById: function(id) {
-    // 从API获取视频详情
-    wx.request({
-      url: `https://your-api-domain.com/api/videos/${id}`,
-      method: 'GET',
+      url: url,
       success: (res) => {
-        if (res.statusCode === 200 && res.data.success) {
-          const videoData = res.data.data;
-          
-          // 跳转到视频播放页
-          wx.navigateTo({
-            url: `/pages/video/video?id=${id}`
-          });
-          
-          // 记录播放数据
-          this.recordVideoPlay(id);
-        } else {
-          wx.showToast({
-            title: '获取视频信息失败',
-            icon: 'none'
-          });
-        }
+        console.log('跳转成功:', res)
       },
-      fail: () => {
+      fail: (err) => {
+        console.error('跳转失败:', err)
+        console.error('完整的错误信息:', JSON.stringify(err))
         wx.showToast({
-          title: '网络错误，请重试',
+          title: '跳转失败',
           icon: 'none'
-        });
+        })
       }
-    });
+    })
   },
-  
-  /**
-   * 记录视频播放数据
-   */
-  recordVideoPlay: function(videoId) {
-    wx.request({
-      url: 'https://your-api-domain.com/api/videos/play',
-      method: 'POST',
-      data: {
-        videoId: videoId
+
+  // 视频准备就绪事件
+  onVideoReady(e) {
+    console.log('视频准备就绪:', e)
+    if (this.data.currentVideo) {
+      // 获取视频上下文
+      const videoContext = wx.createVideoContext('fullscreen-video')
+      // 获取视频时长
+      videoContext.getDuration({
+        success: (res) => {
+          console.log('获取到视频时长:', res.duration)
+          const duration = formatDuration(res.duration)
+          this.setData({
+            'currentVideo.duration': duration
+          })
+        }
+      })
+    }
+  },
+
+  // 播放视频
+  playVideo(e) {
+    const video = e.currentTarget.dataset.video
+    console.log('准备播放视频:', video)
+    
+    if (!video || !video.videoUrl) {
+      wx.showToast({
+        title: '视频链接无效',
+        icon: 'none'
+      })
+      return
+    }
+    
+    // 格式化时长显示
+    const duration = formatDuration(video.duration)
+    
+    this.setData({
+      currentVideo: {
+        ...video,
+        duration: duration
       },
-      success: () => {
-        console.log('视频播放记录已上传');
+      showVideoModal: true
+    })
+    
+    // 增加观看次数
+    this.incrementVideoViews(video.id)
+    
+    // 记录观看活动
+    wx.cloud.callFunction({
+      name: 'activity',
+      data: {
+        action: 'createActivity',
+        data: {
+          type: 'watch',
+          title: `观看了《${video.title}》`,
+          content: {
+            videoId: video.id,
+            videoTitle: video.title,
+            videoCover: video.coverUrl
+          }
+        }
       }
-    });
-  },
-
-  /**
-   * 文章日期选择变化处理
-   */
-  dateChange: function(e) {
-    const dateStr = e.detail.value; // 格式为：YYYY-MM-DD
-    const [year, month, day] = dateStr.split('-');
-    
-    const formattedDate = `${year}.${month}.${day}`;
-    this.setData({
-      currentDate: formattedDate,
-      // 重置分页数据
-      newsPage: 1,
-      reviewPage: 1,
-      hasMore: {
-        ...this.data.hasMore,
-        news: true,
-        review: true
-      }
-    });
-    
-    // 根据当前选中的标签和日期加载数据
-    if (this.data.currentTab === 'news') {
-      this.loadNewsArticles(dateStr);
-    } else {
-      this.loadReviewArticles(dateStr);
-    }
-  },
-
-  /**
-   * 视频日期选择变化处理
-   */
-  videoDateChange: function(e) {
-    const dateStr = e.detail.value; // 格式为：YYYY-MM-DD
-    const [year, month, day] = dateStr.split('-');
-    
-    this.setData({
-      currentDate: `${year}.${month}.${day}`,
-      // 重置分页数据
-      videoPage: 1,
-      hasMore: {
-        ...this.data.hasMore,
-        video: true
-      }
-    });
-    
-    // 加载对应日期的视频数据
-    this.loadVideos(dateStr);
-  },
-
-  /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad: function () {
-    // 设置当前日期
-    const today = new Date();
-    const formattedDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-    
-    this.setData({
-      currentDate: formattedDate
-    });
-    
-    // 由于已经预先设置了mock数据，不需要在这里加载
-    // 真实环境下，这里会调用loadNewsArticles等方法从API获取数据
+    }).catch(err => {
+      console.error('记录观看活动失败:', err)
+    })
   },
   
-  /**
-   * 初始加载数据
-   */
-  loadInitialData: function() {
-    // 加载天文时事文章
-    this.loadNewsArticles();
+  // 增加视频观看次数
+  async incrementVideoViews(videoId) {
+    if (!videoId) return
     
-    // 加载视频列表
-    this.loadVideos();
-  },
-
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom: function() {
-    // 根据当前标签加载更多数据
-    if (this.data.currentTab === 'news') {
-      this.loadNewsArticles();
-    } else if (this.data.currentTab === 'review') {
-      this.loadReviewArticles();
+    try {
+      await cloud.callFunction({
+        name: 'explore',
+        data: {
+          action: 'incrementVideoViews',
+          videoId: videoId
+        }
+      })
+      console.log('视频观看次数已更新')
+    } catch (error) {
+      console.error('更新视频观看次数失败:', error)
     }
   },
 
-  /**
-   * 视频列表触底加载更多
-   */
-  loadMoreVideos: function() {
-    this.loadVideos();
+  // 关闭视频模态框
+  closeVideoModal() {
+    this.setData({
+      showVideoModal: false,
+      currentVideo: null
+    })
   },
 
-  /**
-   * 生命周期函数--监听页面显示
-   */
-  onShow: function() {
-    // 页面显示时的逻辑
+  // 视频播放事件处理
+  onVideoPlay() {
+    // 当视频开始播放时已经在playVideo中增加了观看次数，不需要再次增加
+    console.log('视频开始播放')
   },
 
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage: function() {
-    return {
-      title: '探索宇宙的奥秘',
-      path: '/pages/explore/explore',
-      imageUrl: '/assets/images/share/explore_share.jpg'
-    };
+  onVideoPause() {
+    // 可以添加暂停时的处理逻辑
+  },
+
+  // 视频播放结束事件
+  onVideoEnded() {
+    // 获取视频上下文
+    const videoContext = wx.createVideoContext('fullscreen-video')
+    // 将视频跳回到开始位置
+    videoContext.seek(0)
+    // 暂停播放，保持在第一帧
+    videoContext.pause()
+  },
+
+  onVideoError(e) {
+    console.error('视频播放错误:', e)
+    wx.showToast({
+      title: '视频播放失败',
+      icon: 'none'
+    })
+  },
+
+  onVideoReady() {
+    // 可以添加视频准备就绪时的处理逻辑
+  },
+
+  // 视频时间更新事件
+  onTimeUpdate(e) {
+    const duration = e.detail.duration
+    if (duration && duration > 0 && (!this.data.currentVideo.duration || this.data.currentVideo.duration === '00:00')) {
+      console.log('获取到视频时长:', duration)
+      const formattedDuration = formatDuration(duration)
+      
+      // 更新当前播放视频的时长
+      this.setData({
+        'currentVideo.duration': formattedDuration
+      })
+      
+      // 更新列表中对应视频的时长
+      const videoList = this.data.videoList.map(video => {
+        if (video.id === this.data.currentVideo.id) {
+          return { ...video, duration: formattedDuration }
+        }
+        return video
+      })
+      this.setData({ videoList })
+      
+      // 更新数据库中的时长
+      wx.cloud.callFunction({
+        name: 'explore',
+        data: {
+          action: 'updateVideoDuration',
+          videoId: this.data.currentVideo.id,
+          duration: Math.floor(duration)
+        }
+      }).then(() => {
+        console.log('视频时长已更新到数据库')
+      }).catch(error => {
+        console.error('更新视频时长失败:', error)
+      })
+    }
+  },
+
+  // 处理图片加载错误
+  handleImageError(e) {
+    const index = e.currentTarget.dataset.index
+    console.error('图片加载失败:', e)
+    
+    // 可以在这里设置一个默认图片
+    const key = `articles[${index}].coverUrl`
+    this.setData({
+      [key]: ''  // 如果图片加载失败，清空URL
+    })
+  },
+
+  // 下拉刷新
+  onPullDownRefresh() {
+    this.setData({
+      articles: [],
+      videoList: [],
+      'page.article': 1,
+      'page.video': 1,
+      'hasMore.article': true,
+      'hasMore.video': true
+    }, async () => {
+      await Promise.all([
+        this.loadArticles(),
+        this.loadVideos()
+      ])
+      wx.stopPullDownRefresh()
+    })
+  },
+
+  // 触底加载更多
+  onReachBottom() {
+    if (!this.data.isLoading) {
+      if (this.data.hasMore.article) {
+        this.loadArticles()
+      }
+      if (this.data.hasMore.video) {
+        this.loadVideos()
+      }
+    }
   }
-}) 
+})

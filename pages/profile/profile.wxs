@@ -1,0 +1,19 @@
+// 格式化会员到期日期
+function formatExpireDate(timestamp) {
+  if (!timestamp) return '';
+  var date = getDate(timestamp);
+  var year = date.getFullYear();
+  var month = date.getMonth() + 1;
+  var day = date.getDate();
+  
+  // 补零函数
+  function padZero(num) {
+    return num < 10 ? '0' + num : num.toString();
+  }
+  
+  return year + '年' + padZero(month) + '月' + padZero(day) + '日';
+}
+
+module.exports = {
+  formatExpireDate: formatExpireDate
+};

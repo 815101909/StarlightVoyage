@@ -1,3 +1,9 @@
 {
-  "usingComponents": {}
+  "navigationBarTitleText": "练习题",
+  "navigationBarBackgroundColor": "#0F1A38",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#0F1A38",
+  "backgroundTextStyle": "light",
+  "usingComponents": {},
+  "enablePullDownRefresh": true
 }

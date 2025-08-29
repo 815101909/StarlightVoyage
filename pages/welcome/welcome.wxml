@@ -17,7 +17,8 @@
   <!-- 欢迎文字 -->
   <view class="welcome-text">
     <view class="text-line line-1 visible">星汉灿烂，若出其里</view>
-    <view class="text-line line-2 visible">一起「<text class="gradient-text">晓</text>」视界</view>
+    <view class="text-line line-2 visible">小舟「<text class="gradient-text">摇</text>」星河</view>
+
     <view class="text-line line-3 visible">探索无垠宇宙，从指尖开始</view>
   </view>
-</view> 
+</view>

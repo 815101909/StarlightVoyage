@@ -1,0 +1,52 @@
+<!--pages/planet_wheel/planet_wheel.wxml-->
+<view class="starry-wish-page" catchtap="onSkyTap">
+  <!-- 星空背景 -->
+  <view class="star-bg"></view>
+  
+  <!-- 渲染所有星星 -->
+  <block wx:for="{{stars}}" wx:key="id">
+    <view 
+      class="star-item {{item.isWished ? 'wished' : ''}} {{item.id === activeStarId ? 'active' : ''}}" 
+      style="left: {{item.x}}%; top: {{item.y}}%; width: {{item.size}}rpx; height: {{item.size}}rpx; z-index: {{item.id === activeStarId ? 10 : 2}};"
+      catchtap="onStarTap"
+      data-id="{{item.id}}"
+    >
+      <text class="star-icon">⭐</text>
+      <view wx:if="{{item.isWished}}" class="wish-content">
+        <view class="wish-text">{{item.wish.length > 10 ? item.wish.substring(0, 10) + '...' : item.wish}}</view>
+        <view class="wish-info">
+          <view class="wish-date">{{item.date}}</view>
+          <view wx:if="{{item.isCompleted}}" class="wish-completed">已实现</view>
+        </view>
+      </view>
+    </view>
+  </block>
+</view>
+
+<!-- 引导提示 -->
+<view class="wish-guide-tip">点击空白添加星星\n点击星星记录愿望</view>
+
+<!-- 愿望详情弹窗 -->
+<view wx:if="{{showWishDetail}}" class="wish-modal" catchtap="closeWishDetail">
+  <view class="wish-modal-content wish-detail" catchtap="stopTap">
+    <view class="wish-detail-text">{{currentWish.wish}}</view>
+    <view class="wish-detail-date">{{currentWish.date}}</view>
+    <view class="wish-detail-status" wx:if="{{currentWish.isCompleted}}">✨ 愿望已实现</view>
+    <view class="wish-modal-actions">
+      <button class="wish-btn" wx:if="{{!currentWish.isCompleted}}" bindtap="markAsCompleted">标记已实现</button>
+      <button class="delete-btn" bindtap="deleteWish">删除</button>
+      <button class="cancel-btn" bindtap="closeWishDetail">关闭</button>
+    </view>
+  </view>
+</view>
+
+<!-- 许愿弹窗 -->
+<view wx:if="{{showWishInput}}" class="wish-modal" catchtap="cancelWish">
+  <view class="wish-modal-content" catchtap="stopTap">
+    <textarea class="wish-input" placeholder="写下你的愿望..." value="{{wishText}}" bindinput="onWishInput"></textarea>
+    <view class="wish-modal-actions">
+      <button class="wish-btn" bindtap="confirmWish">许愿</button>
+      <button class="cancel-btn" bindtap="cancelWish">取消</button>
+    </view>
+  </view>
+</view> 

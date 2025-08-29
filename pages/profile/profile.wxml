@@ -1,15 +1,18 @@
+<wxs module="utils" src="./profile.wxs"></wxs>
+
 <view class="container profile-page">
   <!-- 星空背景 -->
   <view class="profile-bg"></view>
   
   <!-- 用户信息卡片 -->
   <view class="user-card">
-    <view class="avatar-section">
-      <view wx:if="{{!isLoggedIn || !userInfo.avatarUrl}}" class="default-avatar">
-        <text class="avatar-text">界</text>
+    <view class="avatar-section" bindtap="handleAvatarTap">
+      <image wx:if="{{userInfo.avatar}}" class="avatar" src="{{userInfo.avatar}}" mode="aspectFill"></image>
+      <view wx:else class="default-avatar" style="background-color: {{defaultAvatarBgColor}};">
+        <text class="avatar-text">舟</text>
       </view>
-      <image wx:else class="avatar" src="{{userInfo.avatarUrl}}"></image>
     </view>
+
     <view class="user-info">
       <!-- 已登录显示用户名 -->
       <view wx:if="{{isLoggedIn}}" class="username">{{userInfo.nickName}}</view>
@@ -17,10 +20,11 @@
       <view wx:else class="login-btn" bindtap="navigateToLogin">注册/登录</view>
       
       <!-- 已登录显示标签 -->
-      <view wx:if="{{isLoggedIn}}" class="user-tags">
+      <view wx:if="{{isLoggedIn && userInfo.tags.length > 0}}" class="user-tags">
         <view class="user-tag" wx:for="{{userInfo.tags}}" wx:key="*this">{{tagNames[item]}}</view>
       </view>
     </view>
+
     <view class="edit-profile" bindtap="{{isLoggedIn ? 'editProfile' : 'showLoginTip'}}">编辑</view>
   </view>
   
@@ -32,7 +36,7 @@
     <!-- 已登录且有学习目标时显示 -->
     <view wx:if="{{isLoggedIn && userInfo.learningGoal}}" class="goal-content">
       <text class="goal-icon">🎯</text>
-      <text class="goal-content-text">{{userInfo.learningGoal}}</text>
+      <text class="goal-content-text">{{goalNames[userInfo.learningGoal]}}</text>
     </view>
     <!-- 已登录但无学习目标 -->
     <view wx:elif="{{isLoggedIn && !userInfo.learningGoal}}" class="goal-content goal-empty">
@@ -71,21 +75,21 @@
     </view>
   </view>
   
-  <!-- 会员和星球转盘按钮 -->
+  <!-- 会员星空许愿按钮 -->
   <view class="action-buttons">
     <view class="action-button full-width membership-button" bindtap="openMemberCenter">
       <image class="action-icon" src="/pages/profile/images/会员中心.jpg" mode="aspectFit"></image>
       <view class="action-content">
         <text class="action-text">会员中心</text>
-        <text class="action-desc">{{userInfo.memberLevel > 0 ? '已开通 · 有效期至 ' + userInfo.expireDate : '未开通 · 立即加入会员学习'}}</text>
+        <text class="action-desc">{{userInfo.memberLevel > 0 ? '已开通 · 有效期至 ' + utils.formatExpireDate(userInfo.expireDate) : '未开通 · 立即加入会员学习'}}</text>
       </view>
     </view>
     
-    <view class="action-button full-width starcard-button" bindtap="openStarCheckin">
+    <view class="action-button full-width {{hasCheckedInToday ? 'starcard-button' : 'starcard-button-unchecked'}}" bindtap="openStarCheckin">
       <image class="action-icon" src="/pages/profile/images/星空打卡.jpg" mode="aspectFit"></image>
       <view class="action-content">
         <text class="action-text">星空打卡</text>
-        <text class="action-desc">{{hasCheckedInToday ? '今日已打卡 · 已连续打卡' + userInfo.checkinDays + '天' : '今日未打卡 · 已连续打卡' + userInfo.checkinDays + '天'}}</text>
+        <text class="action-desc {{!hasCheckedInToday ? 'unchecked-desc' : ''}}">{{hasCheckedInToday ? '今日已打卡 · 已连续打卡' + userInfo.checkinDays + '天' : '今日未打卡 · 已连续打卡' + userInfo.checkinDays + '天'}}</text>
       </view>
       <view class="checkin-badge" wx:if="{{!hasCheckedInToday}}">今日未打卡</view>
     </view>
@@ -93,23 +97,24 @@
     <view class="action-button full-width planet-wheel-button" bindtap="navigateToPlanetWheel">
       <image class="action-icon" src="/pages/profile/images/星球转盘.jpg" mode="aspectFit"></image>
       <view class="action-content">
-        <text class="action-text">星球转盘</text>
-        <text class="action-desc">转动转盘，发现你的专属星球</text>
+        <text class="action-text">星空许愿</text>
+        <text class="action-desc">星空许愿，标记你的愿望</text>
       </view>
     </view>
   </view>
   
   <!-- 近期活动记录 -->
   <view class="activity-section">
+    <!-- 近期活动标题栏 -->
     <view class="section-header">
       <text class="section-title">近期活动</text>
-      <text class="section-more" bindtap="navigateTo" data-path="/pages/activity-history/activity-history">查看全部</text>
+      <text class="view-all" bindtap="showActivityModal">查看全部</text>
     </view>
     
     <view class="activity-list">
       <block wx:if="{{activities.length > 0}}">
         <view wx:for="{{activities}}" wx:key="id" class="activity-item">
-          <view class="activity-icon {{item.type === 'collection' ? 'activity-collection-icon' : item.type === 'community' ? 'activity-community-icon' : item.type + '-icon'}}"></view>
+          <view class="activity-icon">{{activityIcons[item.type]}}</view>
           <view class="activity-content">
             <view class="activity-title">{{item.title}}</view>
             <view class="activity-time">{{item.time}}</view>
@@ -135,7 +140,7 @@
         <text class="setting-value">></text>
       </view>
       <view class="setting-item" bindtap="aboutApp">
-        <text class="setting-label">关于晓视界</text>
+        <text class="setting-label">关于小舟摇星河</text>
         <text class="setting-value">></text>
       </view>
       <view wx:if="{{isLoggedIn}}" class="setting-item logout-item" bindtap="logout">
@@ -154,5 +159,37 @@
   <view class="loading-container" wx:if="{{isLoading}}">
     <view class="loading-icon"></view>
     <text class="loading-text">加载中...</text>
+  </view>
+</view>
+
+<!-- 活动列表弹窗 -->
+<view class="activity-modal {{showAllActivities ? 'show' : ''}}" catchtouchmove="preventTouchMove">
+  <view class="activity-modal-mask" bindtap="closeActivityModal"></view>
+  <view class="activity-modal-content">
+    <view class="activity-modal-header">
+      <text class="activity-modal-title">近期活动</text>
+      <view class="activity-modal-close" bindtap="closeActivityModal">×</view>
+    </view>
+    <scroll-view 
+      scroll-y 
+      class="activity-modal-list" 
+      bindscrolltolower="loadMoreActivities"
+      lower-threshold="50">
+      <view class="activity-item" wx:for="{{allActivities}}" wx:key="id">
+        <view class="activity-icon {{item.type}}-icon">{{activityIcons[item.type]}}</view>
+        <view class="activity-info">
+          <text class="activity-title">{{item.title}}</text>
+          <text class="activity-time">{{item.timeStr}}</text>
+        </view>
+      </view>
+      <!-- 加载更多 -->
+      <view class="loading-more" wx:if="{{isLoadingMore}}">
+        <text class="loading-text">加载中...</text>
+      </view>
+      <!-- 没有更多数据 -->
+      <view class="no-more" wx:if="{{!hasMore && allActivities.length > 0}}">
+        <text class="no-more-text">没有更多了</text>
+      </view>
+    </scroll-view>
   </view>
 </view>

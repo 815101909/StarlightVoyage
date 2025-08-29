@@ -39,13 +39,19 @@
       </view>
     </view>
   </view>
+  <!-- 服务时间信息 -->
+  <view class="service-hours">
+    <view class="section-title">服务时间</view>
+    <view class="service-time">周一至周五：9:00 - 19:00</view>
+    <view class="service-time">周六至周日：10:00 - 18:00</view>
+    <view class="service-note">节假日客服时间可能有调整，请以公众号通知为准</view>
+  </view>
   
   <!-- 微信公众号二维码 -->
   <view class="qrcode-section">
-    <view class="section-title">扫码关注公众号</view>
     <view class="qrcode-container" bindtap="previewQRCode">
       <block wx:if="{{!isLoading && qrCodeUrl}}">
-        <image class="qrcode-image" src="{{qrCodeUrl}}" mode="aspectFit"></image>
+        <image class="qrcode-image" src="{{qrCodeUrl}}" mode="aspectFill"></image>
       </block>
       <view wx:elif="{{isLoading}}" class="qrcode-loading">
         <view class="loading-icon"></view>
@@ -58,16 +64,10 @@
     <view class="qrcode-tip">长按二维码可保存图片</view>
   </view>
   
-  <!-- 服务时间信息 -->
-  <view class="service-hours">
-    <view class="section-title">服务时间</view>
-    <view class="service-time">周一至周五：9:00 - 19:00</view>
-    <view class="service-time">周六至周日：10:00 - 18:00</view>
-    <view class="service-note">节假日客服时间可能有调整，请以公众号通知为准</view>
-  </view>
+  
   
   <!-- 页脚 -->
   <view class="footer">
-    <text class="footer-text">晓视界客服中心竭诚为您服务</text>
+    <text class="footer-text">小舟摇星河客服中心竭诚为您服务</text>
   </view>
-</view> 
+</view>

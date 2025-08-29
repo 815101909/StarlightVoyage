@@ -5,10 +5,10 @@ Page({
    */
   data: {
     appInfo: {
-      name: '晓视界',
+      name: '小舟摇星河',
       version: '1.0.3',
-      buildNumber: '20230515',
-      lastUpdate: '2023-05-15'
+      buildNumber: '20250515',
+      lastUpdate: '2025-05-15'
     },
     developer: {
       name: '星空科技',
@@ -167,7 +167,7 @@ Page({
    */
   onShareAppMessage: function () {
     return {
-      title: '发现晓视界，探索浩瀚星空',
+      title: '乘小舟摇星河，探索浩瀚星空',
       path: '/pages/welcome/welcome',
       imageUrl: '/assets/images/share-cover.jpg' // 分享封面图
     };

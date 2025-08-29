@@ -4,8 +4,8 @@ Page({
    */
   data: {
     contactInfo: {
-      email: 'xiao_shi_jie@126.com',
-      wechat: 'xiaoshijie_wx'
+      email: 'xiaoxiaovision@foxmail.com',
+      wechat: 'xiaovisiontogether'
     },
     qrCodeUrl: '', // 微信客服二维码URL
     isLoading: true
@@ -21,35 +21,28 @@ Page({
   /**
    * 加载微信公众号二维码
    */
-  loadQRCode: function() {
-    // 预留API接口，从后台获取二维码
-    // wx.request({
-    //   url: 'https://your-api-domain.com/api/qrcode/customer-service',
-    //   method: 'GET',
-    //   success: (res) => {
-    //     if (res.statusCode === 200 && res.data.success) {
-    //       this.setData({
-    //         qrCodeUrl: res.data.data.qrCodeUrl,
-    //         isLoading: false
-    //       });
-    //     } else {
-    //       this.handleLoadError();
-    //     }
-    //   },
-    //   fail: (err) => {
-    //     console.error('获取二维码失败：', err);
-    //     this.handleLoadError();
-    //   }
-    // });
-
-    // 开发阶段使用本地图片
-    // 注意：实际项目中应该从API获取二维码
-    setTimeout(() => {
-      this.setData({
-        qrCodeUrl: '/assets/images/wechat_qrcode.jpg',
-        isLoading: false
+  loadQRCode: async function() {
+    try {
+      // 使用云存储文件链接
+      const cloudFileId = 'cloud://cloud1-1gsyt78b92c539ef.636c-cloud1-1gsyt78b92c539ef-1370520707/wx_QR/20250810-155526.png';
+      
+      // 获取临时链接
+      const result = await wx.cloud.getTempFileURL({
+        fileList: [cloudFileId]
       });
-    }, 500);
+      
+      if (result.fileList && result.fileList[0] && result.fileList[0].tempFileURL) {
+        this.setData({
+          qrCodeUrl: result.fileList[0].tempFileURL,
+          isLoading: false
+        });
+      } else {
+        this.handleLoadError();
+      }
+    } catch (error) {
+      console.error('获取二维码临时链接失败：', error);
+      this.handleLoadError();
+    }
   },
 
   /**
@@ -104,4 +97,4 @@ Page({
       });
     }
   }
-}) 
+})

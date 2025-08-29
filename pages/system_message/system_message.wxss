@@ -1,3 +1,4 @@
+/* pages/system_message/system_message.wxss */
 .system-message-page {
   width: 100%;
   min-height: 100vh;
@@ -40,6 +41,12 @@
   justify-content: center;
   align-items: center;
   box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.refresh-btn:active {
+  transform: scale(0.95);
+  opacity: 0.8;
 }
 
 .refresh-icon {
@@ -60,10 +67,11 @@
   position: relative;
   overflow: hidden;
   box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
 }
 
-.message-item.unread {
-  background-color: rgba(30, 45, 75, 0.8);
+.message-item:active {
+  transform: scale(0.98);
 }
 
 .message-indicator {
@@ -72,22 +80,7 @@
   top: 0;
   left: 0;
   bottom: 0;
-}
-
-.notice-message .message-indicator {
-  background-color: #3a79fe;
-}
-
-.activity-message .message-indicator {
-  background-color: #9C27B0;
-}
-
-.feature-message .message-indicator {
-  background-color: #4CAF50;
-}
-
-.reminder-message .message-indicator {
-  background-color: #FFC107;
+  transition: background-color 0.3s ease;
 }
 
 .message-content {
@@ -122,10 +115,6 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.message-item.read .message-preview {
-  color: rgba(255, 255, 255, 0.6);
 }
 
 /* 空消息提示 */

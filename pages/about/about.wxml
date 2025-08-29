@@ -88,7 +88,7 @@
   
   <!-- 底部版权 -->
   <view class="footer">
-    <text class="copyright">© 2022-2023 晓视界 保留所有权利</text>
+    <text class="copyright">© 2024-2025 小舟摇星河 保留所有权利</text>
     <text class="update-date">最后更新：{{appInfo.lastUpdate}}</text>
   </view>
 </view> 

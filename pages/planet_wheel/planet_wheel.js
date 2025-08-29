@@ -38,7 +38,11 @@ Page({
   onSkyTap(e) {
     // 获取点击位置（百分比）
     const { pageX, pageY } = e.touches ? e.touches[0] : { pageX: 200, pageY: 200 };
-    const sys = wx.getSystemInfoSync();
+    const sys = {
+      ...wx.getAppBaseInfo(),
+      ...wx.getDeviceInfo(),
+      ...wx.getWindowInfo()
+    };
     const x = (pageX / sys.windowWidth) * 100;
     const y = (pageY / sys.windowHeight) * 100;
     // 新增一颗星星

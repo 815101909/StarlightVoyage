@@ -8,6 +8,8 @@
     <text class="page-subtitle">先秦 · 屈原·《天问》</text>
   </view>
   
+
+  
   <!-- 太空地图组件 -->
   <view class="space-map">
     <view class="map-header">
@@ -21,22 +23,39 @@
     </view>
     
     <view class="map-content">
-      <!-- 预留视频播放区域 -->
-      <video wx:if="{{mapVideos[currentMap]}}" 
+      <!-- 视频播放区域 -->
+      <video wx:if="{{mapVideos[currentMap] && !mapVideos[currentMap].error}}" 
              class="map-video" 
-             src="{{mapVideos[currentMap]}}" 
+             src="{{mapVideos[currentMap].videoUrl}}" 
+             poster="{{mapVideos[currentMap].coverUrl}}"
+             title="{{mapVideos[currentMap].title}}"
              object-fit="cover"
-             controls="{{false}}"
-             autoplay="{{true}}"
-             loop="{{true}}"
-             muted="{{true}}">
+             controls="{{true}}"
+             autoplay="{{false}}"
+             loop="{{false}}"
+             muted="{{false}}"
+             show-center-play-btn="{{true}}"
+             play-btn-position="center"
+             show-play-btn="{{true}}"
+             show-progress="{{true}}"
+             show-fullscreen-btn="{{false}}"
+             enable-progress-gesture="{{true}}">
       </video>
-      <!-- 无视频时的占位图 -->
+      <!-- 无视频或视频错误时的占位图 -->
       <view wx:else class="map-placeholder">
-        <image class="placeholder-img" src="pic/{{currentMap}}.jpg" mode="aspectFill"></image>
+        <image class="placeholder-img" 
+               src="pic/{{currentMap === 'universe' ? 'universe' : currentMap === 'galaxy' ? '我们在哪' : currentMap === 'celestial' ? '天体类型' : '宇宙结构'}}.jpg" 
+               mode="aspectFill"></image>
         <view class="placeholder-mask">
-          <text class="placeholder-text">太空探索中...</text>
+          <text class="placeholder-text">{{mapVideos[currentMap] && mapVideos[currentMap].error ? '视频暂时无法播放' : '太空探索中...'}}</text>
         </view>
+      </view>
+      
+      <!-- 视频信息 -->
+      <view wx:if="{{mapVideos[currentMap]}}" class="video-info">
+        <view class="video-title">{{mapVideos[currentMap].title}}</view>
+        <view wx:if="{{mapVideos[currentMap].description}}" class="video-desc">{{mapVideos[currentMap].description}}</view>
+        <view wx:if="{{mapVideos[currentMap].duration}}" class="video-duration">时长: {{mapVideos[currentMap].duration}}秒</view>
       </view>
     </view>
   </view>

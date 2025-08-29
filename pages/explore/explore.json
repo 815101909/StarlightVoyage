@@ -1,7 +1,10 @@
 {
-  "navigationBarTitleText": "探索宇宙",
+  "navigationBarTitleText": "探索",
   "navigationBarBackgroundColor": "#081020",
   "navigationBarTextStyle": "white",
   "disableScroll": false,
-  "usingComponents": {}
+  "usingComponents": {},
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#1a1a2e",
+  "backgroundTextStyle": "light"
 } 

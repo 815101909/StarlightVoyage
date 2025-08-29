@@ -1,3 +1,22 @@
+<wxs module="util">
+  function formatDate(dateStr) {
+    if (!dateStr) return '';
+    var date = getDate(dateStr);
+    var year = date.getFullYear();
+    var month = padZero(date.getMonth() + 1);
+    var day = padZero(date.getDate());
+    return year + '-' + month + '-' + day;
+  }
+  
+  function padZero(num) {
+    return num < 10 ? '0' + num : '' + num;
+  }
+  
+  module.exports = {
+    formatDate: formatDate
+  };
+</wxs>
+
 <view class="container collection-page">
   <!-- 页面背景 -->
   <view class="page-bg"></view>
@@ -18,27 +37,22 @@
   <view wx:elif="{{bookmarkedArticles.length > 0}}" class="bookmarks-container">
     <view 
       wx:for="{{bookmarkedArticles}}" 
-      wx:key="id" 
+      wx:key="articleId" 
       class="article-card"
       bindtap="navigateToArticle"
-      data-id="{{item.id}}"
+      data-id="{{item.articleId}}"
     >
       <view class="article-cover-container">
-        <image class="article-cover" src="{{item.coverUrl || '/assets/images/default_cover.jpg'}}" mode="aspectFill"></image>
+        <image class="article-cover" src="{{item.coverUrl || '/assets/images/default_cover.jpg'}}" mode="aspectFill" lazy-load="true"></image>
       </view>
       <view class="article-info">
         <view class="article-title">{{item.title}}</view>
         <view class="article-meta">
-          <text class="article-author">{{item.author}}</text>
-          <text class="article-date">{{item.date}}</text>
-        </view>
-        <view class="article-stats">
-          <text class="article-views">{{item.views}} 浏览</text>
-          <text class="article-likes">{{item.likes}} 喜欢</text>
+          <text class="article-date">{{item.addTime ? util.formatDate(item.addTime) : ''}}</text>
         </view>
       </view>
       <view class="article-actions" catchtap="stopPropagation">
-        <view class="remove-btn" catchtap="removeBookmark" data-id="{{item.id}}">
+        <view class="remove-btn" catchtap="removeBookmark" data-id="{{item.articleId}}" data-title="{{item.title}}">
           <text class="remove-icon">×</text>
         </view>
       </view>

@@ -173,18 +173,28 @@
       <view class="user-photos-container">
         <block wx:if="{{userPhotos.length > 0}}">
           <view class="photos-grid">
-            <view class="photo-item" wx:for="{{userPhotos}}" wx:key="id" bindtap="previewPhoto" data-photo="{{item}}">
-              <image class="photo-image" src="{{item.url}}" mode="aspectFill"></image>
+            <view class="photo-item" wx:for="{{userPhotos}}" wx:key="id" 
+                  bindlongpress="onPhotoLongPress"
+                  data-photo="{{item}}">
+              <image class="photo-image" src="{{item.tempUrl || item.url}}" mode="aspectFill"></image>
               <view class="photo-info">
                 <text class="photo-name">{{item.name}}</text>
-                <text class="photo-date">{{item.date}}</text>
+                <text class="photo-date">{{item.date}} {{item.time}}</text>
+              </view>
+              <view class="photo-overlay">
+                <view class="overlay-icon camera-overlay"></view>
               </view>
             </view>
           </view>
+          <view class="photos-summary">
+            <text class="summary-text">共 {{userPhotos.length}} 张观测照片</text>
+            <text class="summary-tip">长按照片可进行更多操作</text>
+          </view>
         </block>
         <view wx:else class="empty-photos">
-          <view class="empty-icon"></view>
-          <text class="empty-text">暂无观测照片，拍摄一张吧</text>
+          <view class="empty-icon camera-empty"></view>
+          <text class="empty-text">暂无观测照片</text>
+          <text class="empty-subtext">拍摄一张开始你的星空记录吧</text>
         </view>
       </view>
       
@@ -194,13 +204,12 @@
           <view class="btn-icon camera-icon"></view>
           <text>拍照观测</text>
         </button>
-        <button class="share-community-btn" bindtap="shareToCommunity">
+        <button class="share-community-btn" bindtap="shareToCommunity" disabled="{{userPhotos.length === 0}}">
           <view class="btn-icon share-icon"></view>
-          <text>记录一下</text>
+          <text>分享一下</text>
         </button>
       </view>
+      
     </view>
   </view>
-  
-  <!-- 其余内容部分待添加 -->
 </scroll-view> 

@@ -1,13 +1,14 @@
 // app.js
 App({
-  onLaunch() {
-    // 展示本地存储能力
-    const logs = wx.getStorageSync('logs') || []
-    logs.unshift(Date.now())
-    wx.setStorageSync('logs', logs)
-    
-    // 初始化检查登录状态
-    this.checkLoginStatus();
+  onLaunch: function () {
+    if (!wx.cloud) {
+      console.error('请使用 2.2.3 或以上的基础库以使用云能力')
+    } else {
+      wx.cloud.init({
+        env: 'cloud1-1gsyt78b92c539ef', // 替换为您的云环境ID
+        traceUser: true,
+      })
+    }
   },
   
   onShow() {
@@ -93,6 +94,11 @@ App({
   globalData: {
     userInfo: null,
     isLoggedIn: false,
+    // 使用云开发模式 (环境ID已配置，现在启用云开发)
+    useCloudAPI: true,
+    // API基础URL (备用方案)
+    apiBaseUrl: 'http://localhost:3000/api', // 开发环境 - 修改为包含/api的路径
+    // apiBaseUrl: 'https://api.xingxing.com', // 生产环境
     // 星座数据
     constellations: [],
     // 天文事件

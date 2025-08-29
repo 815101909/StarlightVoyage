@@ -47,6 +47,119 @@
   color: #ffffff;
 }
 
+/* 会员状态区域 */
+.member-status {
+  margin: 40rpx 30rpx 30rpx;
+}
+
+.status-card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20rpx;
+  padding: 30rpx;
+  backdrop-filter: blur(10rpx);
+  border: 1rpx solid rgba(255, 255, 255, 0.2);
+}
+
+.status-header {
+  margin-bottom: 20rpx;
+}
+
+.status-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.status-content {
+  display: flex;
+  flex-direction: column;
+  gap: 15rpx;
+}
+
+.member-level {
+  display: flex;
+  align-items: center;
+}
+
+.level-label {
+  font-size: 28rpx;
+  color: #cccccc;
+  margin-right: 10rpx;
+  width: 140rpx;
+  flex-shrink: 0;
+}
+
+.level-value {
+  font-size: 28rpx;
+  font-weight: bold;
+}
+
+.level-value.normal {
+  transform: translateY(-20rpx);
+  color: #999999;
+}
+
+.level-value.vip {
+  color: #ffd700;
+  background: linear-gradient(45deg, #ffd700, #ffed4e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  transform: translateY(-20rpx);
+}
+
+.expire-date {
+  display: flex;
+  align-items: center;
+}
+
+.expire-label {
+  font-size: 28rpx;
+  color: #cccccc;
+  margin-right: 10rpx;
+  width: 140rpx;
+  flex-shrink: 0;
+}
+
+.expire-value {
+  font-size: 28rpx;
+  color: #3a79fe;
+  font-weight: bold;
+}
+
+.member-privileges {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.privileges-row {
+  display: flex;
+  align-items: flex-start;
+}
+
+.privileges-label {
+  font-size: 28rpx;
+  color: #cccccc;
+  width: 140rpx;
+  flex-shrink: 0;
+  margin-right: 10rpx;
+}
+
+.privileges-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+}
+
+.privilege-item {
+  font-size: 24rpx;
+  color: #3a79fe;
+  background: rgba(58, 121, 254, 0.1);
+  padding: 8rpx 16rpx;
+  border-radius: 20rpx;
+  border: 1rpx solid rgba(58, 121, 254, 0.3);
+}
+
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
@@ -174,8 +287,7 @@
 
 /* 宣传海报区域 */
 .promotion-area {
-  margin: 30rpx 30rpx 40rpx;
-  padding: 20rpx 30rpx 30rpx;
+  margin: 30rpx 50rpx 40rpx;
   background-color: rgba(30, 45, 75, 0.7);
   border-radius: 15rpx;
   box-shadow: 0 6rpx 12rpx rgba(0, 0, 0, 0.3);
@@ -435,4 +547,4 @@
   background: linear-gradient(90deg, #3a79fe, #7d9ff4);
   color: #ffffff;
   font-weight: bold;
-} 
+}

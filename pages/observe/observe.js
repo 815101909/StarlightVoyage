@@ -19,8 +19,11 @@
 Page({
   data: {
     // 初始数据
-    loading: true,
+    loading: false,  // 改为默认不显示loading
     showInfo: false,
+    latitude: null,
+    longitude: null,
+    locationStatus: '',
     currentStarInfo: {
       title: '',
       content: ''
@@ -164,27 +167,67 @@ Page({
   },
 
   onLoad() {
-    // 模拟数据加载
-    setTimeout(() => {
+    // 开启分享功能
+    wx.showShareMenu({
+      withShareTicket: true,
+      menus: ['shareAppMessage', 'shareTimeline']
+    });
+    
+    // 获取用户位置
+    this.getUserLocation();
+  },
+    
+  onShow() {
+    // 每次显示页面时都清空数据
       this.setData({
+      userPhotos: [],
         loading: false
       });
-      
-      // 初始化照片观测数据
-      this.loadUserPhotos();
-    }, 1000)
   },
 
-  onShow() {
-    // 页面显示时的逻辑
+  onHide() {
+    this.setData({
+      userPhotos: []
+    });
   },
 
   onShareAppMessage() {
-    // 用户点击右上角分享
-    return {
-      title: '江月何年初照人？',
-      path: '/pages/observe/observe'
+    // 检查是否有要分享的照片
+    const sharePhoto = getApp().globalData.sharePhoto;
+    
+    if (sharePhoto && sharePhoto.name && (sharePhoto.tempUrl || sharePhoto.url)) {
+      return {
+        title: `我的星空观测 - ${sharePhoto.name}`,
+        path: '/pages/observe/observe',
+        imageUrl: sharePhoto.tempUrl || sharePhoto.url
+      };
     }
+    
+    // 默认分享
+    return {
+      title: '江月何年初照人？- 星空观测记录',
+      path: '/pages/observe/observe'
+    };
+  },
+
+  // 分享到朋友圈
+  onShareTimeline() {
+    // 检查是否有要分享的照片
+    const sharePhoto = getApp().globalData.sharePhoto;
+    
+    if (sharePhoto && sharePhoto.name && (sharePhoto.tempUrl || sharePhoto.url)) {
+      return {
+        title: `我的星空观测 - ${sharePhoto.name}`,
+        query: '',
+        imageUrl: sharePhoto.tempUrl || sharePhoto.url
+      };
+    }
+    
+    // 默认分享到朋友圈
+    return {
+      title: '江月何年初照人？- 星空观测记录',
+      query: ''
+    };
   },
 
   // 处理星星点击事件
@@ -195,7 +238,8 @@ Page({
     this.setData({
       showInfo: true,
       currentStarInfo: starInfo,
-      activeStar: starId
+      activeStar: starId,
+      userPhotos: [] // 清空照片
     });
     
     // 添加震动反馈
@@ -222,7 +266,8 @@ Page({
     this.setData({
       testSection: "question",
       currentQuestion: 0,
-      userAnswers: []
+      userAnswers: [],
+      userPhotos: [] // 清空照片
     });
   },
 
@@ -458,167 +503,616 @@ Page({
     // 获取当前星星的名称
     const starName = starNameMap[starId] || '北斗七星';
     
+    // 隐藏星星信息卡片
+    this.hideStarInfo();
+    
+    // 显示加载状态
+    wx.showLoading({
+      title: '加载知识卡片...',
+    });
+    
     // 导航到详情页面，传递星星ID和名称参数
-    // 后台通过starId可以获取该星星的所有相关图片和音频
     wx.navigateTo({
       url: `../detail/detail?section=beidou-star&title=${starName}&starId=${starId}`
     });
     
-    // 隐藏星星信息卡片
-    this.hideStarInfo();
+    // 隐藏加载状态
+    wx.hideLoading();
   },
 
   // 照片观测相关函数
   
   // 加载用户照片
-  loadUserPhotos() {
-    // 这里可以从服务器/云存储获取用户的照片
-    // 示例数据
-    const mockPhotos = wx.getStorageSync('userObservationPhotos');
-    
-    if (mockPhotos) {
-      this.setData({
-        userPhotos: JSON.parse(mockPhotos)
+  async loadUserPhotos() {
+    try {
+      wx.showLoading({
+        title: '加载照片...'
       });
+
+      const { result } = await wx.cloud.callFunction({
+        name: 'observation',
+        data: {
+          action: 'getObservations',
+          type: 'photo',
+          limit: 20,
+          skip: 0
+        }
+      });
+
+      if (result.success) {
+        this.setData({
+          userPhotos: result.data || []
+        });
+      } else {
+        console.error('加载照片失败:', result.message);
+        wx.showToast({
+          title: '加载失败',
+          icon: 'none'
+        });
+      }
+    } catch (error) {
+      console.error('加载照片失败:', error);
+      wx.showToast({
+        title: '加载失败',
+        icon: 'none'
+      });
+    } finally {
+      wx.hideLoading();
     }
   },
   
-  // 上传照片
+  // 上传图片
   uploadPhoto: function() {
     const that = this;
-    wx.chooseImage({
-      count: 1,
-      sizeType: ['compressed'],
-      sourceType: ['camera', 'album'],
+    
+    wx.showActionSheet({
+      itemList: ['拍照', '从相册选择'],
       success: function(res) {
-        wx.showLoading({
-          title: '上传中...',
-        });
+        const sourceType = res.tapIndex === 0 ? ['camera'] : ['album'];
         
-        const tempFilePath = res.tempFilePaths[0];
-        
-        // 图片内容审核
-        wx.cloud.callFunction({
-          name: 'checkImageContent',
-          data: {
-            fileID: tempFilePath
+        wx.chooseImage({
+          count: 1,
+          sizeType: ['compressed', 'original'],
+          sourceType: sourceType,
+          success: function(res) {
+            const tempFilePath = res.tempFilePaths[0];
+            // 先进行A4横向比例裁剪，再命名
+            that.cropToA4Landscape(tempFilePath);
           },
-          success: res => {
-            if (res.result && res.result.errCode === 0) {
-              // 图片通过审核，继续上传流程
-              that.processUpload(tempFilePath);
-            } else {
-              // 图片未通过审核
-              wx.hideLoading();
-              wx.showModal({
-                title: '内容提示',
-                content: '您上传的图片包含不适宜的内容，请上传符合要求的天文观测照片。',
-                showCancel: false
-              });
-            }
-          },
-          fail: err => {
-            console.error('内容审核失败', err);
-            wx.hideLoading();
+          fail: function() {
             wx.showToast({
-              title: '上传失败，请重试',
-              icon: 'none'
+              title: '取消选择',
+              icon: 'none',
+              duration: 1000
             });
           }
         });
       }
     });
   },
-  
-  // 处理通过审核的图片上传
-  processUpload: function(tempFilePath) {
+
+  // 裁剪照片为横向A4比例 (297:210 = 1.414:1)
+  cropToA4Landscape: function(tempFilePath) {
     const that = this;
-    // 生成文件名
-    const timestamp = Date.now();
-    const randomStr = Math.floor(Math.random() * 1000);
-    const cloudPath = `user_photos/${timestamp}_${randomStr}.jpg`;
     
-    // 上传到云存储
-    wx.cloud.uploadFile({
-      cloudPath: cloudPath,
-      filePath: tempFilePath,
-      success: res => {
-        // 上传成功后将信息存入数据库
-        const fileID = res.fileID;
-        wx.cloud.database().collection('userPhotos').add({
-          data: {
-            fileID: fileID,
-            name: '我的星空观测',
-            date: new Date().toISOString().split('T')[0],
-            createTime: new Date()
-          },
-          success: function() {
-            wx.hideLoading();
-            wx.showToast({
-              title: '上传成功',
-              icon: 'success'
-            });
-            // 刷新照片列表
-            that.loadUserPhotos();
-          },
-          fail: function(err) {
-            console.error('添加记录失败', err);
-            wx.hideLoading();
-            wx.showToast({
-              title: '上传失败，请重试',
-              icon: 'none'
-            });
-          }
-        });
+    // 获取图片信息
+    wx.getImageInfo({
+      src: tempFilePath,
+      success: function(imgInfo) {
+        const originalWidth = imgInfo.width;
+        const originalHeight = imgInfo.height;
+        const targetRatio = 297 / 210; // A4横向比例约1.414
+        
+        let cropWidth, cropHeight;
+        
+        // 计算裁剪尺寸，保持A4横向比例
+        if (originalWidth / originalHeight > targetRatio) {
+          // 原图太宽，以高度为准
+          cropHeight = originalHeight;
+          cropWidth = Math.round(originalHeight * targetRatio);
+        } else {
+          // 原图太高，以宽度为准
+          cropWidth = originalWidth;
+          cropHeight = Math.round(originalWidth / targetRatio);
+        }
+        
+        // 计算居中裁剪的起始位置
+        const cropX = Math.round((originalWidth - cropWidth) / 2);
+        const cropY = Math.round((originalHeight - cropHeight) / 2);
+        
+        // 使用canvas裁剪图片
+        const canvas = wx.createCanvasContext('crop-canvas');
+        
+        // 由于小程序限制，我们使用简化的处理方式
+        // 直接使用原图，在显示时通过CSS控制比例
+        that.showPhotoNamingDialog(tempFilePath);
       },
-      fail: err => {
-        console.error('上传失败', err);
-        wx.hideLoading();
+      fail: function(error) {
+        console.error('获取图片信息失败:', error);
+        // 如果获取失败，直接使用原图
+        that.showPhotoNamingDialog(tempFilePath);
+      }
+    });
+  },
+
+  // 显示照片命名对话框
+  showPhotoNamingDialog(tempFilePath) {
+    const that = this;
+    const now = new Date();
+    const defaultName = `星空观测 ${now.getMonth() + 1}-${now.getDate()}`;
+    
+    wx.showModal({
+      title: '为照片命名',
+      content: '请为这张观测照片起个名字',
+      editable: true,
+      placeholderText: defaultName,
+      success(res) {
+        if (res.confirm) {
+          const photoName = res.content || defaultName;
+          // 添加到照片列表
+          const newPhoto = {
+            id: Date.now().toString(),
+            tempUrl: tempFilePath,
+            url: tempFilePath,
+            name: photoName,
+            date: `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`,
+            time: `${now.getHours()}:${now.getMinutes()}`
+          };
+          
+          that.setData({
+            userPhotos: [newPhoto, ...that.data.userPhotos]
+          });
+        }
+      }
+    });
+  },
+
+  // 保存照片到云端
+  async savePhotoToLocal(tempFilePath, photoName, options = {}) {
+    const that = this;
+    
+    wx.showLoading({
+      title: '保存中...',
+    });
+
+    try {
+      // 上传图片到云存储
+      const uploadResult = await wx.cloud.uploadFile({
+        cloudPath: `observations/${Date.now()}_${photoName}.jpg`,
+        filePath: tempFilePath
+      });
+
+      if (!uploadResult.fileID) {
+        throw new Error('上传失败');
+      }
+
+      // 创建观测记录
+      const { result } = await wx.cloud.callFunction({
+        name: 'observation',
+        data: {
+          action: 'createObservation',
+          observationData: {
+            type: 'photo',
+          name: photoName,
+            fileID: uploadResult.fileID,
+          date: that.formatDate(new Date()),
+          time: that.formatTime(new Date()),
+            cropInfo: options.cropInfo || null,
+            isA4Landscape: true
+          }
+        }
+      });
+
+      if (!result.success) {
+        throw new Error(result.message || '保存失败');
+      }
+
+      // 保存成功后，只添加新上传的照片到列表
+      const newPhoto = {
+        ...result.data,
+        fileID: uploadResult.fileID,
+        name: photoName
+      };
+      
+      const updatedPhotos = [...this.data.userPhotos];
+      updatedPhotos.unshift(newPhoto);  // 将新照片添加到列表开头
+      
+      this.setData({
+        userPhotos: updatedPhotos
+        });
+
         wx.showToast({
-          title: '上传失败，请重试',
+          title: '保存成功',
+          icon: 'success'
+        });
+
+      // 添加到个人记录
+      await this.addToPersonalRecord(newPhoto);
+
+    } catch (error) {
+      console.error('保存照片失败:', error);
+        wx.showToast({
+          title: '保存失败',
+          icon: 'none'
+        });
+    } finally {
+      wx.hideLoading();
+      }
+  },
+
+  // 预览照片
+  previewPhoto: function(e) {
+    const photo = e.currentTarget.dataset.photo;
+    const urls = this.data.userPhotos.map(p => p.tempUrl || p.url);
+    const current = photo.tempUrl || photo.url;
+    
+    wx.previewImage({
+      current: current,
+      urls: urls,
+      showmenu: true,
+      success: () => {
+        // 预览成功
+      },
+      fail: (error) => {
+        console.error('预览失败:', error);
+        wx.showToast({
+          title: '预览失败',
           icon: 'none'
         });
       }
     });
   },
-  
-  // 预览照片
-  previewPhoto(e) {
+
+  // 长按照片显示操作菜单
+  onPhotoLongPress: function(e) {
     const photo = e.currentTarget.dataset.photo;
+    const that = this;
     
-    wx.previewImage({
-      current: photo.url,
-      urls: this.data.userPhotos.map(p => p.url),
-      showmenu: true
+    wx.showActionSheet({
+      itemList: ['重命名', '删除照片', '添加到记录', '分享'],
+      success: function(res) {
+        switch(res.tapIndex) {
+          case 0:
+            that.renamePhoto(photo);
+            break;
+          case 1:
+            that.deletePhoto(photo);
+            break;
+          case 2:
+            that.addToPersonalRecord(photo);
+            break;
+          case 3:
+            that.sharePhoto(photo);
+            break;
+        }
+      }
     });
   },
-  
-  // 导航到社区页面
-  navigateToCommunity() {
+
+  // 重命名照片
+  renamePhoto: function(photo) {
+    const that = this;
+    
+    wx.showModal({
+      title: '重命名照片',
+      content: '请输入新的照片名称',
+      editable: true,
+      placeholderText: photo.name,
+      success: function(res) {
+        if (res.confirm && res.content) {
+          // 更新照片名称
+          let userPhotos = [...that.data.userPhotos];
+          const photoIndex = userPhotos.findIndex(p => p.id === photo.id);
+          
+          if (photoIndex !== -1) {
+            userPhotos[photoIndex].name = res.content;
+            
+            // 保存更新
+            wx.setStorageSync('userObservationPhotos', JSON.stringify(userPhotos));
+            
+            that.setData({
+              userPhotos: userPhotos
+            });
+            
+            wx.showToast({
+              title: '重命名成功',
+              icon: 'success'
+            });
+          }
+        }
+      }
+    });
+  },
+
+  // 删除照片
+  deletePhoto: function(photo) {
+    const that = this;
+    
+    wx.showModal({
+      title: '删除照片',
+      content: `确定要删除"${photo.name}"吗？此操作不可恢复。`,
+      confirmText: '删除',
+      confirmColor: '#ff4444',
+      success: function(res) {
+        if (res.confirm) {
+          // 从数组中移除
+          let userPhotos = that.data.userPhotos.filter(p => p.id !== photo.id);
+          
+          // 保存更新
+          wx.setStorageSync('userObservationPhotos', JSON.stringify(userPhotos));
+          
+          that.setData({
+            userPhotos: userPhotos
+          });
+          
+          // 尝试删除本地文件
+          if (photo.url && photo.url.includes(wx.env.USER_DATA_PATH)) {
+            wx.getFileSystemManager().unlink({
+              filePath: photo.url,
+              success: () => console.log('本地文件删除成功'),
+              fail: (error) => console.log('本地文件删除失败:', error)
+            });
+          }
+          
+          wx.showToast({
+            title: '删除成功',
+            icon: 'success'
+          });
+        }
+      }
+    });
+  },
+
+  // 分享照片
+  sharePhoto: function(photo) {
+    const that = this;
+    // 保存要分享的照片信息到全局数据
+    getApp().globalData.sharePhoto = photo;
+    
+    wx.showActionSheet({
+      itemList: ['分享给好友', '分享到朋友圈', '保存到相册'],
+      success: function(res) {
+        if (res.tapIndex === 0) {
+          // 分享给好友
+          that.shareToFriend(photo);
+        } else if (res.tapIndex === 1) {
+          // 分享到朋友圈
+          that.shareToTimeline(photo);
+        } else if (res.tapIndex === 2) {
+          // 保存到相册
+          that.saveToAlbum(photo);
+        }
+      }
+    });
+  },
+
+  // 保存照片到相册
+  saveToAlbum: function(photo) {
+    const that = this;
+    
+    // 先获取保存到相册的权限
+    wx.getSetting({
+      success: function(res) {
+        if (!res.authSetting['scope.writePhotosAlbum']) {
+          // 如果没有权限，先申请权限
+          wx.authorize({
+            scope: 'scope.writePhotosAlbum',
+            success: function() {
+              that.doSaveToAlbum(photo);
+            },
+            fail: function() {
+              // 用户拒绝授权，引导用户设置
+              wx.showModal({
+                title: '需要相册权限',
+                content: '保存照片需要您授权访问相册',
+                confirmText: '去设置',
+                success: function(modalRes) {
+                  if (modalRes.confirm) {
+                    wx.openSetting();
+                  }
+                }
+              });
+            }
+          });
+        } else {
+          // 已有权限，直接保存
+          that.doSaveToAlbum(photo);
+        }
+      }
+    });
+  },
+
+  // 执行保存到相册
+  doSaveToAlbum: function(photo) {
+    wx.showLoading({
+      title: '保存中...'
+    });
+    
+    wx.saveImageToPhotosAlbum({
+      filePath: photo.tempUrl || photo.url,
+      success: function() {
+        wx.hideLoading();
+        wx.showToast({
+          title: '保存成功',
+          icon: 'success'
+        });
+      },
+      fail: function(error) {
+        wx.hideLoading();
+        console.error('保存到相册失败:', error);
+        wx.showToast({
+          title: '保存失败',
+          icon: 'none'
+        });
+      }
+    });
+  },
+
+  // 分享给好友  
+  shareToFriend: function(photo) {
+    if (photo) {
+      getApp().globalData.sharePhoto = photo;
+    }
+    
+    // 确保分享菜单可用，然后引导用户
+    wx.showShareMenu({
+      withShareTicket: true,
+      success: function() {
+        // 显示模态框，更明确地指引用户
+        wx.showModal({
+          title: '分享给好友',
+          content: '照片已准备好！\n请点击右上角的"●●●"按钮\n然后选择"转发"即可分享',
+          showCancel: false,
+          confirmText: '我知道了'
+        });
+      }
+    });
+  },
+
+  // 分享到朋友圈
+  shareToTimeline: function(photo) {
+    if (photo) {
+      getApp().globalData.sharePhoto = photo;
+    }
+    
+    // 确保分享菜单可用，然后引导用户
+    wx.showShareMenu({
+      withShareTicket: true,
+      menus: ['shareAppMessage', 'shareTimeline'],
+      success: function() {
+        // 显示模态框，更明确地指引用户
+        wx.showModal({
+          title: '分享到朋友圈',
+          content: '照片已准备好！\n请点击右上角的"●●●"按钮\n然后选择"分享到朋友圈"',
+          showCancel: false,
+          confirmText: '我知道了'
+        });
+      }
+    });
+  },
+
+  // 上传图片到云存储
+  async uploadPhotoToCloud(tempFilePath) {
+    try {
+      const cloudPath = `observations/${Date.now()}_${Math.random().toString(36).substring(7)}.jpg`;
+      const uploadResult = await wx.cloud.uploadFile({
+        cloudPath: cloudPath,
+        filePath: tempFilePath
+      });
+      console.log('图片上传成功:', uploadResult);
+      return uploadResult.fileID;
+    } catch (error) {
+      console.error('图片上传失败:', error);
+      wx.showToast({
+        title: '图片上传失败',
+        icon: 'none'
+      });
+      throw error;
+    }
+  },
+
+  // 获取地理位置
+  async getLocation() {
+    try {
+      return new Promise((resolve, reject) => {
+        wx.getLocation({
+          type: 'gcj02',
+          success(res) {
+            if (res && typeof res.latitude !== 'undefined' && typeof res.longitude !== 'undefined') {
+              resolve({
+                latitude: res.latitude,
+                longitude: res.longitude
+              });
+            } else {
+              resolve(null);
+            }
+          },
+          fail(error) {
+            console.error('获取位置失败:', error);
+            resolve(null);  // 失败时返回null而不是reject
+          }
+        });
+      });
+    } catch (error) {
+      console.error('获取位置异常:', error);
+      return null;
+    }
+  },
+
+  // 添加到个人记录
+  async addToPersonalRecord(photo) {
+    try {
+      // 先上传图片到云存储
+      const fileID = await this.uploadPhotoToCloud(photo.tempUrl);
+      
+      // 获取位置信息
+      let location = null;
+      try {
+        location = await this.getLocation();
+      } catch (error) {
+        console.error('获取位置出错:', error);
+      }
+    
+      // 准备观测记录数据
+      const observationData = {
+        name: photo.name,
+        image: fileID,
+        type: 'photo',
+        createTime: new Date(),
+        updateTime: new Date()
+      };
+
+      // 如果成功获取到位置信息，添加到记录中
+      if (location && typeof location.latitude === 'number' && typeof location.longitude === 'number') {
+        observationData.location = {
+          latitude: location.latitude,
+          longitude: location.longitude
+        };
+      }
+
+      // 调用云函数创建观测记录
+      const result = await wx.cloud.callFunction({
+        name: 'observation',
+        data: {
+          action: 'createObservation',
+          observationData: observationData
+        }
+      });
+
+      if (result.result.success) {
     wx.showToast({
-      title: '社区功能开发中',
-      icon: 'none'
+          title: '添加成功',
+      icon: 'success'
     });
-    
-    // 实际应用中可以导航到社区页面
-    // wx.navigateTo({
-    //   url: '../community/community'
-    // });
+        
+        // 清空临时照片
+        this.setData({
+          userPhotos: []
+        });
+      } else {
+        throw new Error(result.result.message || '添加失败');
+      }
+    } catch (error) {
+      console.error('添加到记录失败:', error);
+      wx.showToast({
+        title: '添加失败',
+        icon: 'none'
+      });
+    }
   },
-  
-  // 日期格式化
-  formatDate(date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+
+  // 时间格式化
+  formatTime: function(date) {
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
   },
-  
+
   // 记录观测内容到个人记录
-  shareToCommunity() {
+  shareToCommunity: function() {
     // 检查登录状态
-    const token = wx.getStorageSync('token');
-    if (!token) {
+    const app = getApp();
+    if (!app.isUserLoggedIn()) {
       wx.showModal({
         title: '需要登录',
         content: '记录功能需要先登录账号',
@@ -649,53 +1143,153 @@ Page({
       return;
     }
     
-    // 获取当前时间作为记录时间
-    const now = new Date();
-    const currentDate = this.formatDate(now);
-    const currentTime = now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0');
+    // 显示分享选项
+    const that = this;
+    const latestPhoto = this.data.userPhotos[0]; // 获取最新照片
     
-    // 生成记录内容
-    const recordContent = {
-      id: 'rec_' + Date.now(),
-      type: 'observation',
-      title: '北斗七星观测记录',
-      content: '今天我进行了北斗七星观测，记录下这美妙的星空瞬间！',
-      date: currentDate,
-      time: currentTime,
-      images: [this.data.userPhotos[0].url], // 直接使用第一张照片
-      tags: ['北斗七星', '观测记录', '星空']
-    };
-    
-    // 从存储中获取现有记录
-    let existingRecords = wx.getStorageSync('userRecords') || [];
-    if (typeof existingRecords === 'string') {
-      try {
-        existingRecords = JSON.parse(existingRecords);
-      } catch (e) {
-        existingRecords = [];
+    wx.showActionSheet({
+      itemList: [
+        '分享给好友',
+        '分享到朋友圈'
+      ],
+      success: function(res) {
+        switch(res.tapIndex) {
+          case 0:
+            that.shareToFriend(latestPhoto);
+            break;
+          case 1:
+            that.shareToTimeline(latestPhoto);
+            break;
+        }
       }
+    });
+  },
+
+  // 分享给好友
+  shareToFriend: function() {
+    // 设置分享信息
+    if (this.data.userPhotos.length > 0) {
+      getApp().globalData.sharePhoto = this.data.userPhotos[0];
+      wx.showModal({
+        title: '分享给好友',
+        content: '请点击右上角的"..."按钮，选择"转发"分享给好友。\n\n已为您准备好最新的观测照片！',
+        showCancel: false,
+        confirmText: '知道了'
+      });
+    } else {
+      // 没有照片时清除分享照片信息
+      getApp().globalData.sharePhoto = null;
+      wx.showModal({
+        title: '分享给好友',
+        content: '请点击右上角的"..."按钮，选择"转发"分享给好友。\n\n分享这个精彩的观测页面吧！',
+        showCancel: false,
+        confirmText: '知道了'
+      });
     }
+  },
+
+  // 分享到朋友圈
+  shareToTimeline: function() {
+    // 设置分享信息
+    if (this.data.userPhotos.length > 0) {
+      getApp().globalData.sharePhoto = this.data.userPhotos[0];
+      wx.showModal({
+        title: '分享到朋友圈',
+        content: '请点击右上角的"..."按钮，选择"分享到朋友圈"。\n\n已为您准备好最新的观测照片！',
+        showCancel: false,
+        confirmText: '知道了'
+      });
+    } else {
+      // 没有照片时清除分享照片信息
+      getApp().globalData.sharePhoto = null;
+      wx.showModal({
+        title: '分享到朋友圈',
+        content: '请点击右上角的"..."按钮，选择"分享到朋友圈"。\n\n分享这个精彩的观测页面吧！',
+        showCancel: false,
+        confirmText: '知道了'
+      });
+    }
+  },
+
+  // 分享到微信（保留兼容）
+  shareToWechat: function() {
+    if (this.data.userPhotos.length === 0) {
+      wx.showToast({
+        title: '请先拍摄照片',
+        icon: 'none'
+      });
+      return;
+    }
+
+    // 设置分享信息
+    getApp().globalData.sharePhoto = this.data.userPhotos[0];
     
-    // 添加新记录
-    existingRecords.unshift(recordContent);
-    
-    // 保存回存储
-    wx.setStorageSync('userRecords', JSON.stringify(existingRecords));
-    
+    wx.showActionSheet({
+      itemList: ['分享给好友', '分享到朋友圈'],
+      success: function(res) {
+        if (res.tapIndex === 0) {
+          // 分享给好友
+          wx.showModal({
+            title: '分享给好友',
+            content: '请点击右上角的"..."按钮，选择"转发"分享给好友。\n\n已为您准备好最新的观测照片！',
+            showCancel: false,
+            confirmText: '知道了'
+          });
+        } else if (res.tapIndex === 1) {
+          // 分享到朋友圈
+          wx.showModal({
+            title: '分享到朋友圈',
+            content: '请点击右上角的"..."按钮，选择"分享到朋友圈"。\n\n已为您准备好最新的观测照片！',
+            showCancel: false,
+            confirmText: '知道了'
+          });
+        }
+      }
+    });
+  },
+
+  // 日期格式化
+  formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  },
+  
+  // 导航到社区页面
+  navigateToCommunity() {
     wx.showToast({
-      title: '记录成功',
-      icon: 'success',
-      duration: 2000
+      title: '社区功能开发中',
+      icon: 'none'
     });
     
-    // 可选：导航到记录页面
-    setTimeout(() => {
-      wx.navigateTo({
-        url: '/pages/record/record',
-        fail: () => {
-          console.log('导航到记录页面失败');
-        }
-      });
-    }, 1500);
+    // 实际应用中可以导航到社区页面
+    // wx.navigateTo({
+    //   url: '../community/community'
+    // });
+  },
+
+  // 获取用户位置信息
+  getUserLocation: function() {
+    const self = this;
+    wx.getLocation({
+      type: 'wgs84',  // 返回 GPS 坐标
+      success(res) {
+        const latitude = res.latitude;   // 获取纬度
+        const longitude = res.longitude; // 获取经度
+        
+        self.setData({
+          latitude: latitude,
+          longitude: longitude,
+          locationStatus: '定位成功！'
+        });
+      },
+      fail(error) {
+        console.error('获取位置失败：', error);
+        self.setData({
+          locationStatus: '定位失败！请检查定位权限设置。'
+        });
+      }
+    });
   }
 }) 

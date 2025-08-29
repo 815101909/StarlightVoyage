@@ -2,27 +2,28 @@ Page({
   data: {
     pageTitle: '学习内容',  // 页面标题，根据类型设置
     section: '',       // 当前查看的区域
-    contentList: [],   // 内容列表 - A4图片
-    isPlaying: false,  // 是否正在播放音频
-    currentPlayingId: '', // 当前播放的内容ID
-    audioContext: null,   // 音频上下文
+    contentList: [],   // 内容列表 - 知识点
     isLoading: true,    // 是否正在加载内容
     apiBase: 'https://api.yourdomain.com/v1', // API基础URL - 实际项目中需要替换
     starId: '',         // 保存星星ID
+    showDescriptions: true, // 始终显示描述
+    currentImageIndex: 0,  // 当前显示的图片索引
+    cardData: {
+      title: '',
+      imageUrl: '',
+      imageUrls: [],      // 支持多图片
+      videoUrls: [],      // 支持多视频
+      mediaItems: []      // 支持混合媒体
+    }
   },
   
   // 页面加载
   onLoad: function(options) {
-    console.log('detail页面加载，接收到参数：', options);
-    
-    // 设置默认内容
+    // 初始化空的内容列表和加载状态
     this.setData({
-      contentList: [{
-        id: 'default-beidou',
-        mediaUrl: '/pages/star/pic/北斗七星.jpg',
-        audioUrl: '/audio/beidou/default.mp3',
-        title: '北斗七星'
-      }]
+      contentList: [],
+      isLoading: true,
+      showDescriptions: true
     });
     
     // 获取页面参数
@@ -34,15 +35,23 @@ Page({
         starId: options.starId || '' // 保存星星ID
       });
       
-      // 创建音频上下文
-      this.initAudioContext();
-      
       // 北斗七星特殊处理
       if (section === 'beidou-star') {
         this.loadBeiDouStarContent(options.starId);
       } else {
         // 获取该分类下的内容列表
         this.fetchContentList(section);
+      }
+    } else {
+      const cardId = options.cardId;
+      if (cardId) {
+        this.loadCardData(cardId);
+      } else {
+        wx.showToast({
+          title: '卡片ID不存在',
+          icon: 'none',
+          duration: 2000
+        });
       }
     }
   },
@@ -66,49 +75,6 @@ Page({
     }, 1000);
   },
   
-  // 初始化音频上下文
-  initAudioContext: function() {
-    const audioContext = wx.createInnerAudioContext();
-    
-    audioContext.onPlay(() => {
-      console.log('开始播放音频');
-    });
-    
-    audioContext.onPause(() => {
-      console.log('音频暂停');
-    });
-    
-    audioContext.onStop(() => {
-      console.log('音频停止');
-      this.setData({
-        isPlaying: false,
-        currentPlayingId: ''
-      });
-    });
-    
-    audioContext.onEnded(() => {
-      console.log('音频自然播放结束');
-      this.setData({
-        isPlaying: false,
-        currentPlayingId: ''
-      });
-    });
-    
-    audioContext.onError((res) => {
-      console.error('音频播放错误：', res);
-      wx.showToast({
-        title: '音频播放失败',
-        icon: 'none'
-      });
-      this.setData({
-        isPlaying: false,
-        currentPlayingId: ''
-      });
-    });
-    
-    this.audioContext = audioContext;
-  },
-  
   // 获取分类标题
   getSectionTitle: function(section, customTitle) {
     // 如果有自定义标题，优先使用
@@ -127,7 +93,7 @@ Page({
     return sectionTitles[section] || '学习内容';
   },
   
-  // 获取内容列表 - 支持后台动态上传的A4图片和音频
+  // 获取内容列表 - 使用云开发API
   fetchContentList: function(section, isRefresh = false) {
     if (isRefresh) {
       wx.showLoading({
@@ -142,52 +108,192 @@ Page({
     // 设置加载状态
     this.setData({ isLoading: true });
     
-    // API请求 - 实际项目中需要替换为正确的API接口
-    const apiUrl = `${this.data.apiBase}/content/${section}`;
+    // 获取categoryKey（section ID 到中文类别的映射）
+    const categoryMap = {
+      'universe-structure': '宇宙结构',
+      'celestial-types': '天体类型',
+      'energy-fields': '能量与场',
+      'where-we-are': '我们在哪'
+    };
     
-    // 实际项目中应调用后端API获取数据
-    wx.request({
-      url: apiUrl,
-      method: 'GET',
-      header: {
-        'content-type': 'application/json'
-      },
-      success: (res) => {
-        // 检查响应状态和数据格式
-        if (res.statusCode === 200 && res.data) {
-          // 格式化API返回的数据
-          let contentList = this.formatContentData(res.data, section);
-          this.setData({ 
-            contentList: contentList,
-            isLoading: false
-          });
-        } else {
-          // 使用模拟数据（开发阶段使用）
-          this.loadMockData(section);
-          console.warn('API返回错误或格式不正确，使用模拟数据');
-        }
-      },
-      fail: (err) => {
-        console.error('API请求失败：', err);
-        // API请求失败时使用模拟数据（开发阶段使用）
-        this.loadMockData(section);
-        
-        wx.showToast({
-          title: '获取内容失败，使用本地数据',
-          icon: 'none'
-        });
-      },
-      complete: () => {
-        wx.hideLoading();
-        this.setData({ isLoading: false });
+    // 根据section确定是哪种类型的内容
+    if (['universe-structure', 'celestial-types', 'energy-fields', 'where-we-are'].includes(section)) {
+      // 检查是否启用云开发
+      const app = getApp();
+      if (app.globalData.useCloudAPI) {
+        // 使用云开发API
+        this.fetchContentFromCloud(section, categoryMap[section]);
+      } else {
+        // 使用传统API
+        this.fetchContentFromTraditionalAPI(section, categoryMap[section]);
       }
-    });
+    } else {
+      // 其他类型的内容，使用模拟数据
+      this.loadMockData(section);
+      wx.hideLoading();
+      this.setData({ isLoading: false });
+    }
+  },
 
-    // 在实际项目中，启用返回首页功能
-    wx.enableAlwaysBackToHome({
-      success: (res) => {
-        console.log('启用了返回首页功能');
+  // 从云开发获取内容
+  fetchContentFromCloud: function(section, category) {
+    const { videoAPI } = require('../../utils/cloudApi');
+    
+    // 使用section作为category查询
+    videoAPI.getA4Content(section).then(async (response) => {
+      // 检查返回格式并获取内容
+      if (!response.success) {
+        throw new Error(response.message || '获取内容失败');
       }
+      
+      // 获取第一条内容
+      const content = response.data[0];
+      if (!content) {
+        throw new Error('未找到相关内容');
+      }
+      
+      // 转换云存储URL为HTTP URL
+      let imageUrls = [];
+      if (content.imageUrls && content.imageUrls.length > 0) {
+        try {
+          const result = await wx.cloud.getTempFileURL({
+            fileList: content.imageUrls
+          });
+          imageUrls = result.fileList.map(item => item.tempFileURL);
+        } catch (error) {
+          wx.showToast({
+            title: '图片URL转换失败',
+            icon: 'none',
+            duration: 2000
+          });
+        }
+      }
+      
+      // 转换封面图URL
+      let coverUrl = content.coverUrl;
+      if (coverUrl && coverUrl.startsWith('cloud://')) {
+        try {
+          const result = await wx.cloud.getTempFileURL({
+            fileList: [coverUrl]
+          });
+          coverUrl = result.fileList[0].tempFileURL;
+        } catch (error) {
+          wx.showToast({
+            title: '封面图URL转换失败',
+            icon: 'none',
+            duration: 2000
+          });
+        }
+      }
+      
+      // 构建contentList，使用转换后的URL
+      const contentList = [{
+        id: content._id,
+        title: content.title,
+        description: content.description,
+        imageUrls: imageUrls,  // 使用转换后的URL数组
+        imageUrl: coverUrl,    // 使用转换后的封面URL
+        category: content.category
+      }];
+      
+      // 更新页面数据
+      this.setData({ 
+        contentList: contentList,
+        isLoading: false,
+        showDescriptions: true,
+        currentImageIndex: 0
+      }, () => {
+        wx.hideLoading();
+      });
+    }).catch((error) => {
+      this.setData({ isLoading: false }, () => {
+        wx.hideLoading();
+        wx.showToast({
+          title: error.message || '获取内容失败',
+          icon: 'none',
+          duration: 2000
+        });
+      });
+    });
+  },
+
+  // 从传统API获取内容
+  fetchContentFromTraditionalAPI: function(section, category) {
+      // 宇宙知识A4页面API
+      wx.request({
+        url: `${getApp().globalData.apiBaseUrl}/star/a4content`,
+        method: 'GET',
+        data: {
+          category: category
+        },
+        timeout: 10000, // 设置10秒超时
+        success: (res) => {
+          if (res.data && res.data.success && res.data.data) {
+            // 获取API返回的数据
+            let content = res.data.data;
+            
+            // 确保description字段存在
+            let description = content.description || '';
+            if (!description && typeof content === 'object') {
+              // 尝试从其他可能的字段获取描述
+              description = content.desc || content.text || '';
+            }
+            
+            // 转换为contentList格式
+            const contentList = [{
+              id: `${section}-1`,
+              title: content.title || category,
+              description: description || "宇宙知识内容描述",
+              imageUrl: content.imageUrl || ''
+            }];
+            
+            this.setData({ 
+              contentList: contentList,
+              isLoading: false,
+              showDescriptions: true
+            });
+            
+            wx.hideLoading();
+          } else {
+            // API返回错误时使用模拟数据
+            this.loadMockData(section);
+          }
+        },
+        fail: (err) => {
+          // API请求失败时使用模拟数据
+          this.loadMockData(section);
+          
+          if (err.errMsg.includes('timeout')) {
+            wx.showToast({
+              title: '请求超时',
+              icon: 'none',
+              duration: 2000
+            });
+          } else {
+            wx.showToast({
+              title: '网络错误',
+              icon: 'none',
+              duration: 2000
+            });
+          }
+        },
+        complete: () => {
+          wx.hideLoading();
+        }
+      });
+  },
+
+  // 图片加载成功
+  onImageLoad: function(e) {
+    // 图片加载成功，不需要特殊处理
+  },
+
+  // 图片加载失败
+  onImageError: function(e) {
+    wx.showToast({
+      title: '图片加载失败',
+      icon: 'none',
+      duration: 2000
     });
   },
   
@@ -219,7 +325,6 @@ Page({
       }
       return [];
     } catch (e) {
-      console.error('数据格式化错误：', e);
       return [];
     }
   },
@@ -233,189 +338,200 @@ Page({
       mockContent = [
         {
           id: 'us1',
-          mediaUrl: '/pages/star/pic/宇宙结构.jpg',
-          audioUrl: null,
+          title: '宇宙结构全图',
+          description: '从微观粒子到宏观宇宙，探索宇宙的层次结构与演化历程，包括量子领域、恒星系统、星系团和宇宙大尺度结构。',
+          imageUrl: '/uploads/images/universe_structure_a4.jpg'
         }
       ];
     } else if (section === 'celestial-types') {
       mockContent = [
         {
           id: 'ct1',
-          mediaUrl: '/pages/star/pic/天体类型.jpg',
-          audioUrl: null,
+          title: '天体分类与特性',
+          description: '恒星、行星、彗星、黑洞等天体的详细分类、形成过程及物理特性介绍。',
+          imageUrl: '/uploads/images/天体类型.jpg'
         }
       ];
     } else if (section === 'energy-fields') {
       mockContent = [
         {
           id: 'ef1',
-          mediaUrl: '/pages/star/pic/能量与场.jpg',
-          audioUrl: null,
+          title: '宇宙四大基本力',
+          description: '引力、电磁力、强弱核力等宇宙基本作用力的详细解析，以及它们如何塑造宇宙。',
+          imageUrl: '/uploads/images/能量与场.jpg'
         }
       ];
     } else if (section === 'where-we-are') {
       mockContent = [
         {
           id: 'wwa1',
-          mediaUrl: '/pages/star/pic/我们在哪.jpg',
-          audioUrl: null,
+          title: '人类在宇宙中的位置',
+          description: '从地球、太阳系、银河系到本星系群，探索人类在浩瀚宇宙中的位置。',
+          imageUrl: '/uploads/images/我们在哪.jpg'
         }
       ];
     }
     
-    this.setData({ contentList: mockContent });
-  },
-  
-  // 播放音频
-  playAudio: function(e) {
-    const audioId = e.currentTarget.dataset.id;
-    const audioUrl = e.currentTarget.dataset.url;
-    
-    // 如果没有音频URL，提示用户
-    if (!audioUrl) {
-      console.log('该内容暂无音频');
-      wx.showToast({
-        title: '该内容暂无音频',
-        icon: 'none'
-      });
-      return;
-    }
-    
-    try {
-      // 如果是当前正在播放的音频
-      if (this.data.isPlaying && this.data.currentPlayingId === audioId) {
-        // 暂停播放
-        this.audioContext.pause();
-        this.setData({ isPlaying: false });
-      } else {
-        // 先停止之前可能在播放的音频
-        if (this.data.isPlaying) {
-          this.audioContext.stop();
-        }
-        
-        // 设置新的音频URL并播放
-        this.audioContext.src = audioUrl;
-        
-        // 尝试播放音频
-        try {
-          this.audioContext.play();
-          
-          this.setData({
-            isPlaying: true,
-            currentPlayingId: audioId
-          });
-        } catch (error) {
-          console.error('音频播放失败:', error);
-          wx.showToast({
-            title: '音频播放失败',
-            icon: 'none'
-          });
-        }
-      }
-    } catch (error) {
-      console.error('音频操作失败:', error);
-      wx.showToast({
-        title: '音频播放异常',
-        icon: 'none'
-      });
-    }
-  },
-  
-  // 预览图片
-  previewImage: function(e) {
-    const url = e.currentTarget.dataset.url;
-    wx.previewImage({
-      urls: [url],
-      current: url
+    this.setData({ 
+      contentList: mockContent,
+      showDescriptions: true
     });
   },
   
   // 返回上一页
+  // 返回上一页
   navigateBack: function() {
-    wx.navigateBack({
-      fail: function() {
-        // 如果navigateBack失败，则跳转到首页
-        wx.switchTab({
-          url: '/pages/index/index'
-        });
-      }
-    });
+  wx.navigateBack({
+  delta: 1,
+  fail: function() {
+  // 如果返回失败，则跳转到首页
+  wx.switchTab({
+  url: '/pages/index/index'
+  });
+  }
+  });
   },
   
   // 页面卸载
   onUnload: function() {
-    // 停止音频播放
-    if (this.audioContext) {
-      this.audioContext.stop();
-    }
+    // 音频功能已移除
   },
   
   // 加载北斗七星内容
   loadBeiDouStarContent: function(starId) {
+    if (!starId) {
+      this.useDefaultContent(starId);
+      return;
+    }
+    
     wx.showLoading({
-      title: '加载内容中...',
+      title: '加载知识卡片...',
     });
     
-    // 此处应该调用API获取后台上传的A4图片
-    // 示例API调用，使用starId参数获取特定星星的多张图片
-    const apiUrl = `${this.data.apiBase}/content/beidou-star?star=${starId}`;
-    // 由于API可能不可用，我们直接使用默认内容
-    this.useDefaultContent(starId);
-    wx.hideLoading();
-    
-    // API调用保留，但先注释掉，确保页面始终显示内容
-    /*
-    wx.request({
-      url: apiUrl,
-      method: 'GET',
-      success: (res) => {
-        if (res.statusCode === 200 && res.data && res.data.success) {
-          // 后台返回的多张图片和音频处理
-          const contentList = res.data.data.map((item, index) => {
-            return {
-              id: item.id || `beidou-${index}`,
-              mediaUrl: item.imageUrl, // 图片URL
-              audioUrl: item.audioUrl, // 音频URL
-              title: item.title || this.data.pageTitle
-            };
-          });
+    // 检查是否启用云开发
+    const app = getApp();
+    if (app.globalData.useCloudAPI) {
+      // 使用云开发API获取北斗星知识卡片
+      const { observationAPI } = require('../../utils/cloudApi');
+      
+      console.log('正在调用云函数获取北斗星数据，starId:', starId);
+      
+      observationAPI.getBeidouCard(starId).then((response) => {
+        console.log('云函数返回结果:', response);
+        
+        // 检查返回结果的结构
+        if (response && response.success && response.data) {
+          const cardData = response.data;
+          console.log('获取到的卡片数据:', cardData);
+          
+          if (cardData && cardData._id && cardData.title) {
+          // 构建媒体内容数组
+          let mediaItems = [];
+          
+          // 处理混合媒体数组（优先）
+          if (cardData.mediaUrls && Array.isArray(cardData.mediaUrls) && cardData.mediaUrls.length > 0) {
+            mediaItems = cardData.mediaUrls.map(item => ({
+              url: item.url,
+              type: item.type || 'image'
+            }));
+          } else {
+            // 处理图片
+            if (cardData.imageUrls && Array.isArray(cardData.imageUrls)) {
+              mediaItems = cardData.imageUrls.map(url => ({
+                url: url,
+                type: 'image'
+              }));
+            } else if (cardData.imageUrl) {
+              mediaItems.push({
+                url: cardData.imageUrl,
+                type: 'image'
+              });
+            }
+            
+            // 处理视频
+            if (cardData.videoUrls && Array.isArray(cardData.videoUrls)) {
+              const videoItems = cardData.videoUrls.map(url => ({
+                url: url,
+                type: 'video'
+              }));
+              mediaItems = [...mediaItems, ...videoItems];
+            }
+          }
+          
+          // 兼容旧的图片格式
+          let imageUrls = mediaItems.filter(item => item.type === 'image').map(item => item.url);
+          
+          // 转换为页面需要的格式
+          const contentList = [{
+            id: cardData._id,
+            title: cardData.title,
+            description: cardData.description,
+            content: cardData.content,
+            imageUrl: imageUrls.length > 0 ? imageUrls[0] : '',  // 兼容单图格式
+            imageUrls: imageUrls,  // 支持多图格式（兼容）
+            mediaItems: mediaItems,  // 新的媒体数组（图片+视频）
+            tags: cardData.tags || [],
+            difficulty: cardData.difficulty || '',
+            readTime: cardData.readTime || '',
+            category: cardData.category || '',
+            starName: cardData.starName || '',
+            relatedTopics: cardData.relatedTopics || []
+          }];
           
           this.setData({
             contentList: contentList,
-            isLoading: false
+            isLoading: false,
+            showDescriptions: true,
+            currentImageIndex: 0  // 重置图片索引
           });
+          
+          wx.hideLoading();
         } else {
-          // API请求失败时使用默认内容
+          console.log('卡片数据不完整或获取失败');
           this.useDefaultContent(starId);
+          wx.hideLoading();
         }
-      },
-      fail: (err) => {
-        console.error('获取北斗七星内容失败:', err);
-        // API请求失败时使用默认内容
+      } else {
+        console.log('云函数调用失败或返回格式错误:', response);
         this.useDefaultContent(starId);
-      },
-      complete: () => {
         wx.hideLoading();
       }
-    });
-    */
+      }).catch((err) => {
+        console.error('云函数调用异常:', err);
+        this.useDefaultContent(starId);
+        wx.hideLoading();
+      });
+    } else {
+      // 使用传统API（暂时使用默认内容）
+      this.useDefaultContent(starId);
+      wx.hideLoading();
+    }
   },
   
-  // 使用默认内容
+  // 使用默认内容（云数据库无数据时）
   useDefaultContent: function(starId) {
     // 根据星星ID提供默认映射
     const starName = this.getStarName(starId);
-    console.log('使用默认内容，星星ID:', starId, '星星名称:', starName);
     
-    // 设置默认内容
+    // 设置提示内容，引导用户检查云数据库
     this.setData({
       contentList: [{
-        id: `default-${starId || 'beidou'}`,
-        mediaUrl: '/pages/star/pic/北斗七星.jpg', // 默认使用同一张图片，实际项目中应替换为对应图片
-        audioUrl: '/audio/beidou/default.mp3',
-        title: starName || '北斗七星'
+        id: `nodata-${starId || 'beidou'}`,
+        title: starName || '北斗七星',
+        description: '正在从云数据库获取数据，请确保云数据库中已上传北斗七星图片数据。如果长时间无响应，请联系管理员检查云数据库连接。',
+        imageUrl: '',
+        imageUrls: [],
+        mediaItems: []
       }],
-      isLoading: false
+      isLoading: false,
+      showDescriptions: true
+    });
+    
+    // 显示提示
+    wx.showToast({
+      title: '数据加载中，请稍后重试',
+      icon: 'none',
+      duration: 2000
     });
   },
   
@@ -433,4 +549,87 @@ Page({
     
     return starId ? starNameMap[starId] || '北斗七星' : '北斗七星';
   },
+
+  loadCardData: function (cardId) {
+    // 现在只使用云数据库，不加载本地数据
+    wx.showToast({
+      title: '请使用云数据库获取卡片数据',
+      icon: 'none',
+      duration: 2000
+    });
+    
+    // 清空数据，等待云数据库加载
+    this.setData({
+      cardData: {
+        title: '数据加载中',
+        imageUrl: '',
+        imageUrls: [],
+        videoUrls: [],
+        mediaItems: []
+      },
+      currentImageIndex: 0
+    });
+  },
+
+  // 图片加载成功
+  onImageLoad: function(e) {
+    // 图片加载成功，不需要特殊处理
+  },
+
+  // 图片加载失败
+  onImageError: function(e) {
+    wx.showToast({
+      title: '图片加载失败',
+      icon: 'none',
+      duration: 2000
+    });
+  },
+
+  // 轮播图片改变事件
+  onSwiperChange: function(e) {
+    this.setData({
+      currentImageIndex: e.detail.current
+    });
+  },
+
+  // 图片点击预览
+  onImageTap: function(e) {
+    const { url, urls, index } = e.currentTarget.dataset;
+    
+    if (!urls || urls.length === 0) {
+      return;
+    }
+    
+    // 过滤掉空的URL
+    const validUrls = urls.filter(imgUrl => imgUrl && imgUrl.trim() !== '');
+    
+    if (validUrls.length === 0) {
+      return;
+    }
+    
+    // 使用微信小程序的图片预览API
+    wx.previewImage({
+      current: url || validUrls[index] || validUrls[0], // 当前显示的图片
+      urls: validUrls // 所有图片URL数组
+    });
+  },
+
+  // 视频播放事件
+  onVideoPlay: function(e) {
+    // 视频开始播放，不需要特殊处理
+  },
+
+  // 视频暂停事件
+  onVideoPause: function(e) {
+    // 视频暂停，不需要特殊处理
+  },
+
+  // 视频错误事件
+  onVideoError: function(e) {
+    wx.showToast({
+      title: '视频播放失败',
+      icon: 'none',
+      duration: 2000
+    });
+  }
 })

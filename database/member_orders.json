@@ -1,0 +1,67 @@
+{
+  "name": "member_orders",
+  "description": "会员订单集合",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "_id": {
+        "type": "string",
+        "description": "订单ID"
+      },
+      "_openid": {
+        "type": "string",
+        "description": "用户openid"
+      },
+      "planId": {
+        "type": "string",
+        "description": "会员方案ID"
+      },
+      "planName": {
+        "type": "string",
+        "description": "会员方案名称"
+      },
+      "amount": {
+        "type": "number",
+        "description": "支付金额"
+      },
+      "status": {
+        "type": "string",
+        "enum": ["pending", "success", "failed"],
+        "description": "订单状态"
+      },
+      "createTime": {
+        "type": "date",
+        "description": "创建时间"
+      },
+      "updateTime": {
+        "type": "date",
+        "description": "更新时间"
+      },
+      "paymentInfo": {
+        "type": "object",
+        "description": "支付信息",
+        "properties": {
+          "transactionId": {
+            "type": "string",
+            "description": "微信支付交易号"
+          },
+          "payTime": {
+            "type": "date",
+            "description": "支付时间"
+          }
+        }
+      }
+    },
+    "required": ["_openid", "planId", "planName", "amount", "status", "createTime", "updateTime"]
+  },
+  "indexes": [
+    {
+      "name": "ordersByUser",
+      "fields": ["_openid", "createTime"]
+    },
+    {
+      "name": "ordersByStatus",
+      "fields": ["status", "createTime"]
+    }
+  ]
+} 

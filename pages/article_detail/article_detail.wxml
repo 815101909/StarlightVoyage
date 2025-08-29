@@ -1,4 +1,19 @@
 <!--pages/article_detail/article_detail.wxml-->
+<wxs module="utils">
+  function formatTime(seconds) {
+    if (!seconds || isNaN(seconds)) return '00:00';
+    var mins = Math.floor(seconds / 60);
+    var secs = Math.floor(seconds % 60);
+    var minStr = mins < 10 ? '0' + mins : mins.toString();
+    var secStr = secs < 10 ? '0' + secs : secs.toString();
+    return minStr + ':' + secStr;
+  }
+  
+  module.exports = {
+    formatTime: formatTime
+  };
+</wxs>
+
 <view class="article-container">
   <!-- Star background animation -->
   <view class="star-bg"></view>
@@ -6,17 +21,22 @@
   <!-- Article header with cover -->
   <view class="article-header">
     <view class="header-content">
-      <image class="article-cover" src="{{article.coverUrl}}" mode="aspectFill"></image>
+      <image class="article-cover" 
+             src="{{article.coverUrl}}" 
+             mode="aspectFill"
+             wx:if="{{article.coverUrl}}"
+             binderror="handleCoverError"
+             lazy-load="{{true}}"></image>
       <view class="article-info">
         <view class="article-title">{{article.title}}</view>
         <view class="article-meta">
           <text class="article-date">{{article.date}}</text>
-          <text class="article-tag">{{article.tag}}</text>
+          <text class="article-tag" wx:if="{{article.category}}">{{article.category}}</text>
         </view>
-        <!-- Wavy line divider with 晓视界 text -->
+        <!-- Wavy line divider with 小舟摇星河 text -->
         <view class="wavy-divider">
           <view class="wavy-line left"></view>
-          <text class="divider-text">晓视界</text>
+          <text class="divider-text">小舟摇星河</text>
           <view class="wavy-line right"></view>
         </view>
       </view>
@@ -26,21 +46,26 @@
   <!-- Control bar -->
   <view class="control-bar">
     <view class="button-row">
-      <view class="action-btn read-btn" bindtap="readArticle" hover-class="hover">
-        <text class="icon-read">🔊</text>
-        <text>朗读</text>
-      </view>
-      <view class="action-btn bookmark-btn" bindtap="bookmarkArticle" hover-class="hover">
-        <text class="icon-bookmark">{{isBookmarked ? '★' : '☆'}}</text>
-        <text>收藏</text>
-      </view>
-      <view class="action-btn print-btn" bindtap="printArticle" hover-class="hover">
-        <text class="icon-print">🖨️</text>
-        <text>打印</text>
-      </view>
-      <view class="action-btn exercise-btn" bindtap="showExercises" hover-class="hover">
-        <text class="icon-exercise">📝</text>
-        <text>习题</text>
+      <!-- 所有按钮统一放在一起 -->
+      <view class="left-buttons">
+        <view class="action-btn read-btn" bindtap="toggleBgm" hover-class="hover">
+          <text class="icon-read">🔊</text>
+        </view>
+        <view class="action-btn bookmark-btn {{isBookmarked ? 'bookmarked' : ''}}" bindtap="bookmarkArticle" hover-class="hover">
+          <text class="icon-bookmark">{{isBookmarked ? '★' : '☆'}}</text>
+        </view>
+        <view class="action-btn print-btn" bindtap="printArticle" hover-class="hover">
+          <text class="icon-print">🖨️</text>
+        </view>
+        <view class="action-btn exercise-btn" bindtap="showExercises" hover-class="hover">
+          <text class="icon-exercise">📝</text>
+        </view>
+        <view class="action-btn font-decrease-btn" bindtap="decreaseFontSize" hover-class="hover">
+          <text>A-</text>
+        </view>
+        <view class="action-btn font-increase-btn" bindtap="increaseFontSize" hover-class="hover">
+          <text>A+</text>
+        </view>
       </view>
     </view>
   </view>
@@ -59,54 +84,113 @@
     </view>
   </view>
   
-  <!-- Article content -->
-  <scroll-view scroll-y class="article-content" style="font-size: {{fontSize}}rpx">
-    <!-- Text box 1 -->
-    <view class="content-box intro-box">
-      <view class="indented-paragraph">
-        <text class="first-char">{{article.introFirstChar}}</text>
-        <text>{{article.introRest}}</text>
+  <!-- 朗读播放器 -->
+  <view class="audio-player" wx:if="{{article.voice}}">
+    <view class="audio-player-header">
+      <text class="audio-title">🎧 文章朗读</text>
+    </view>
+    <view class="audio-controls">
+      <view class="audio-info">
+        <text class="audio-status">{{article.title}}</text>
       </view>
-    </view>
-    
-    <!-- First image between text box 1 and 2 -->
-    <view class="standalone-image-container">
-      <image 
-        src="{{article.firstContentImage}}" 
-        mode="widthFix" 
-        class="standalone-image"
-        bindtap="previewImage"
-        data-image="{{article.firstContentImage}}"></image>
-      <view class="image-caption">{{article.firstImageCaption}}</view>
-    </view>
-    
-    <!-- Text box 2 without image -->
-    <view class="content-box main-content-box">
-      <view class="content-section">
-        <view class="indented-paragraph">
-          <text class="first-char">{{article.contentPart1FirstChar}}</text>
-          <text>{{article.contentPart1Rest}}</text>
+      <view class="audio-buttons">
+        <view class="speed-btn" bindtap="togglePlaybackRate">
+          <text class="speed-text">{{playbackRate}}x</text>
+        </view>
+        <view class="play-btn {{isReading ? 'playing' : ''}}" bindtap="toggleReading">
+          <text class="play-icon">{{isReading ? '❚❚' : '▶'}}</text>
         </view>
       </view>
     </view>
-    
-    <!-- Second image between text box 2 and 3 -->
-    <view class="standalone-image-container">
-      <image 
-        src="{{article.contentImage}}" 
-        mode="widthFix" 
-        class="standalone-image"
-        bindtap="previewImage"
-        data-image="{{article.contentImage}}"></image>
-      <view class="image-caption">{{article.imageCaption}}</view>
+    <!-- 进度条和时间显示 -->
+     <view class="audio-progress">
+       <text class="time-text">{{utils.formatTime(audioCurrentTime)}}</text>
+       <view class="progress-container">
+         <view class="progress-bar">
+           <view class="progress-bg"></view>
+           <view class="progress-fill" style="width: {{audioProgress}}%"></view>
+           <view class="progress-thumb" style="left: {{audioProgress}}%"></view>
+         </view>
+       </view>
+       <text class="time-text">{{utils.formatTime(audioDuration)}}</text>
+     </view>
+  </view>
+  
+  <!-- Article content -->
+  <view class="article-wrapper" style="position: relative;">
+    <scroll-view scroll-y="{{!showMemberLock}}" class="article-content {{showMemberLock ? 'locked' : ''}}" style="font-size: {{fontSize}}rpx">
+    <!-- 引言部分 -->
+    <view class="content-box intro-box" style="font-size: {{fontSize}}rpx;" wx:if="{{article.introNodes}}">
+      <rich-text nodes="{{article.introNodes}}" class="rich-content" bindtap="onRichTextTap"></rich-text>
+    </view>
+    <!-- 引言图片 -->
+    <view class="image-group" wx:if="{{article.introImages && article.introImages.length > 0}}">
+      <block wx:for="{{article.introImages}}" wx:key="url">
+        <image 
+          src="{{item.url}}"
+          mode="widthFix"
+          class="content-image"
+          lazy-load="true"
+          bindtap="previewImage"
+          data-url="{{item.url}}"
+        ></image>
+        <view class="image-desc-box">{{item.description}}</view>
+      </block>
     </view>
     
-    <!-- Text box 3 -->
-    <view class="content-box conclusion-box">
-      <view class="indented-paragraph">
-        <text class="first-char">{{article.conclusionFirstChar}}</text>
-        <text>{{article.conclusionRest}}</text>
-      </view>
+    <!-- 主要内容部分 -->
+    <view class="content-box main-content-box" style="font-size: {{fontSize}}rpx;" wx:if="{{article.contentNodes}}">
+      <rich-text nodes="{{article.contentNodes}}" class="rich-content" bindtap="onRichTextTap"></rich-text>
+    </view>
+    <!-- 主要内容图片 -->
+    <view class="image-group" wx:if="{{article.contentImages && article.contentImages.length > 0}}">
+      <block wx:for="{{article.contentImages}}" wx:key="url">
+        <image 
+          src="{{item.url}}"
+          mode="widthFix"
+          class="content-image"
+          lazy-load="true"
+          bindtap="previewImage"
+          data-url="{{item.url}}"
+        ></image>
+        <view class="image-desc-box">{{item.description}}</view>
+      </block>
+    </view>
+    
+    <!-- 结论部分 -->
+    <view class="content-box conclusion-box" style="font-size: {{fontSize}}rpx;" wx:if="{{article.conclusionNodes}}">
+      <rich-text nodes="{{article.conclusionNodes}}" class="rich-content" bindtap="onRichTextTap"></rich-text>
+    </view>
+    <!-- 结论图片 -->
+    <view class="image-group" wx:if="{{article.conclusionImages && article.conclusionImages.length > 0}}">
+      <block wx:for="{{article.conclusionImages}}" wx:key="url">
+        <image 
+          src="{{item.url}}"
+          mode="widthFix"
+          class="content-image"
+          lazy-load="true"
+          bindtap="previewImage"
+          data-url="{{item.url}}"
+        ></image>
+        <view class="image-desc-box">{{item.description}}</view>
+      </block>
     </view>
   </scroll-view>
-</view> 
+  
+  <!-- 会员锁定遮罩 -->
+  <view class="member-lock-overlay" wx:if="{{showMemberLock}}">
+    <view class="lock-content">
+      <text class="lock-icon">🔒</text>
+      <text class="lock-title">会员专享内容</text>
+      <text class="lock-desc">查看完整文章需要开通会员</text>
+      <view class="unlock-btn" bindtap="goToMemberCenter">
+        <text class="unlock-text">立即开通会员</text>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 播放器占位空白区域 -->
+  <view class="player-spacer"></view>
+  
+  </view>
+</view>

@@ -1,105 +1,88 @@
+// pages/system_message/system_message.js
 Page({
-  /**
-   * 页面的初始数据
-   */
   data: {
     messages: [],
-    isLoading: true
+    isLoading: true,
+    colors: ['#3a79fe', '#9C27B0', '#4CAF50', '#FFC107', '#FF5722', '#2196F3', '#E91E63', '#009688']
   },
 
-  /**
-   * 生命周期函数--监听页面加载
-   */
   onLoad: function (options) {
     this.loadSystemMessages();
   },
 
-  /**
-   * 生命周期函数--监听页面显示
-   */
-  onShow: function () {
-    // 可以在这里刷新已读状态
-  },
+  // 加载系统消息
+  async loadSystemMessages() {
+    try {
+      this.setData({ isLoading: true });
 
-  /**
-   * 加载系统消息
-   */
-  loadSystemMessages: function() {
-    this.setData({ isLoading: true });
-    
-    // 模拟加载系统消息
-    setTimeout(() => {
-      const systemMessages = [
-        {
-          id: 'sys001',
-          title: '系统公告',
-          content: '天文观测小程序已更新至1.0.2版本，新增观测记录功能，现在你可以在观测页面记录你的观星体验。',
-          date: '2023-12-05',
-          time: '15:30',
-          isRead: false,
-          type: 'notice'
-        },
-        {
-          id: 'sys002',
-          title: '天文活动',
-          content: '12月14日将迎来双子座流星雨极大，流星体数量预计为每小时120颗，建议当晚前往郊外观测。最佳观测时间为22:00-次日04:00。',
-          date: '2023-12-10',
-          time: '09:15',
-          isRead: true,
-          type: 'activity'
-        },
-        {
-          id: 'sys003',
-          title: '新功能提醒',
-          content: '现在您可以通过观测页面拍照并记录您的星空体验，记录将显示在个人中心的记录页面。同时支持查看历史记录和分享给好友。',
-          date: '2023-12-12',
-          time: '18:45',
-          isRead: false,
-          type: 'feature'
-        },
-        {
-          id: 'sys004',
-          title: '观测提醒',
-          content: '今晚将有ISS国际空间站过境，可在21:40-21:46期间在西北方向上空观测到明亮的移动光点。',
-          date: '2023-12-15',
-          time: '14:20',
-          isRead: false,
-          type: 'reminder'
+      const { result } = await wx.cloud.callFunction({
+        name: 'system',
+        data: {
+          action: 'getSystemMessages'
         }
-      ];
-      
-      this.setData({
-        messages: systemMessages,
-        isLoading: false
       });
-    }, 600);
-  },
 
-  /**
-   * 标记消息为已读
-   */
-  markAsRead: function(e) {
-    const messageId = e.currentTarget.dataset.id;
-    const messages = this.data.messages;
-    
-    const messageIndex = messages.findIndex(msg => msg.id === messageId);
-    if (messageIndex >= 0) {
-      // 更新本地状态
-      messages[messageIndex].isRead = true;
-      this.setData({ messages });
-      
-      // 可以添加API调用，更新服务器上的已读状态
-      // wx.request({ ... });
-      
-      // 查看消息详情
-      this.viewMessageDetail(messages[messageIndex]);
+      if (result.success) {
+        // 处理消息数据
+        const messages = result.data.map(msg => ({
+          ...msg,
+          timeStr: this.formatDateTime(msg.createdAt),
+          type: this.getMessageType(msg.title), // 根据标题判断消息类型
+          color: this.getRandomColor() // 为每条消息分配随机颜色
+        }));
+
+        this.setData({
+          messages: messages,
+          isLoading: false
+        });
+      } else {
+        wx.showToast({
+          title: result.message || '加载失败',
+          icon: 'none'
+        });
+      }
+    } catch (error) {
+      console.error('加载系统消息失败：', error);
+      wx.showToast({
+        title: '加载失败',
+        icon: 'none'
+      });
+    } finally {
+      this.setData({ isLoading: false });
+      wx.stopPullDownRefresh();
     }
   },
 
-  /**
-   * 查看消息详情
-   */
-  viewMessageDetail: function(message) {
+  // 获取随机颜色
+  getRandomColor() {
+    const { colors } = this.data;
+    const randomIndex = Math.floor(Math.random() * colors.length);
+    return colors[randomIndex];
+  },
+
+  // 根据标题判断消息类型
+  getMessageType(title) {
+    if (title.includes('系统公告')) return 'notice';
+    if (title.includes('天文活动')) return 'activity';
+    if (title.includes('新功能')) return 'feature';
+    if (title.includes('观测')) return 'reminder';
+    return 'notice'; // 默认类型
+  },
+
+  // 格式化日期时间
+  formatDateTime(dateStr) {
+    const date = new Date(dateStr);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hour = String(date.getHours()).padStart(2, '0');
+    const minute = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hour}:${minute}`;
+  },
+
+  // 查看消息详情
+  viewMessageDetail(e) {
+    const message = e.currentTarget.dataset.message;
     wx.showModal({
       title: message.title,
       content: message.content,
@@ -108,10 +91,18 @@ Page({
     });
   },
 
-  /**
-   * 刷新消息列表
-   */
-  refreshMessages: function() {
+  // 刷新消息
+  refreshMessages() {
+    wx.showLoading({
+      title: '刷新中...',
+    });
+    this.loadSystemMessages().then(() => {
+      wx.hideLoading();
+    });
+  },
+
+  // 下拉刷新
+  onPullDownRefresh() {
     this.loadSystemMessages();
   }
-}) 
+}); 

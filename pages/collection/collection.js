@@ -20,7 +20,9 @@ Page({
    */
   onShow: function() {
     this.checkLoginStatus();
-    this.loadBookmarkedArticles();
+    if (this.data.isLoggedIn) {
+      this.loadBookmarkedArticles();
+    }
   },
 
   /**
@@ -48,102 +50,51 @@ Page({
   /**
    * 加载收藏的文章
    */
-  loadBookmarkedArticles: function() {
+  loadBookmarkedArticles: async function() {
+    if (!this.data.isLoggedIn) {
+      return;
+    }
+    
     this.setData({ isLoading: true });
 
-    // 获取收藏的文章ID列表
-    wx.getStorage({
-      key: 'bookmarkedArticles',
-      success: (res) => {
-        const bookmarkIds = res.data || [];
-        
-        if (bookmarkIds.length === 0) {
-          this.setData({
-            bookmarkedArticles: [],
-            isLoading: false
-          });
-          return;
+    try {
+      // 调用云函数获取用户收藏列表
+      const result = await wx.cloud.callFunction({
+        name: 'profile',
+        data: {
+          action: 'getFavorites'
         }
-        
-        // 获取收藏文章的详细信息
-        this.getArticlesByIds(bookmarkIds);
-      },
-      fail: () => {
-        // 没有收藏文章
+      });
+      
+      if (result.result.success) {
+        const favorites = result.result.data || [];
+        this.setData({
+          bookmarkedArticles: favorites,
+          isLoading: false
+        });
+      } else {
         this.setData({
           bookmarkedArticles: [],
           isLoading: false
         });
+        
+        wx.showToast({
+          title: '获取收藏失败',
+          icon: 'none'
+        });
       }
-    });
-  },
-
-  /**
-   * 根据ID列表获取文章详细信息
-   */
-  getArticlesByIds: function(articleIds) {
-    // 在实际项目中，应该通过API获取文章详情
-    // wx.request({
-    //   url: 'https://your-api-domain.com/api/articles/batch',
-    //   method: 'POST',
-    //   data: { ids: articleIds },
-    //   success: (res) => {
-    //     if (res.statusCode === 200 && res.data.success) {
-    //       this.setData({
-    //         bookmarkedArticles: res.data.data,
-    //         isLoading: false
-    //       });
-    //     }
-    //   },
-    //   fail: () => {
-    //     this.setData({ isLoading: false });
-    //   }
-    // });
-
-    // 开发阶段使用模拟数据
-    setTimeout(() => {
-      // 模拟文章标题列表
-      const articleTitles = {
-        'art1': '韦伯望远镜发现系外行星含有水分子',
-        'art2': '探索宇宙奥秘：从星辰大海到深空探索',
-        'art3': '2023年10月猎户座流星雨观测指南',
-        'art4': '银河系中心黑洞的最新研究成果',
-        'art5': '如何用智能手机拍摄星空',
-        'art6': '天文摄影入门：器材选择与使用技巧',
-        'art7': '太阳系外行星探测的新方法',
-        'art8': '黑洞照片背后的故事：事件视界望远镜项目',
-        'art9': '2023年值得关注的天文现象',
-        'art10': '业余天文学家如何参与科学研究'
-      };
-      
-      const mockArticles = articleIds.map((id, index) => {
-        return {
-          id: id,
-          title: articleTitles[id] || `天文文章 ${index + 1}：关于宇宙的探索`,
-          coverUrl: '/assets/images/article_cover_' + (Math.floor(Math.random() * 5) + 1) + '.jpg',
-          author: '晓视界编辑',
-          date: this.getRandomDate(),
-          intro: '这是一篇关于宇宙探索的精彩文章，探讨了最新的天文发现和科学研究进展...',
-          views: Math.floor(Math.random() * 10000) + 100,
-          likes: Math.floor(Math.random() * 500) + 10
-        };
-      });
-
+    } catch (error) {
+      console.error('获取收藏列表失败:', error);
       this.setData({
-        bookmarkedArticles: mockArticles,
+        bookmarkedArticles: [],
         isLoading: false
       });
-    }, 500);
-  },
-
-  /**
-   * 生成随机日期
-   */
-  getRandomDate: function() {
-    const now = new Date();
-    const days = Math.floor(Math.random() * 30);
-    const date = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      
+      wx.showToast({
+        title: '获取收藏失败',
+        icon: 'none'
+      });
+    }
   },
 
   /**
@@ -152,7 +103,7 @@ Page({
   navigateToArticle: function(e) {
     const articleId = e.currentTarget.dataset.id;
     wx.navigateTo({
-      url: `/pages/article_detail/article_detail?id=${articleId}`,
+      url: `/pages/article_detail/article_detail?articleId=${articleId}`,
       fail: () => {
         wx.showToast({
           title: '页面开发中',
@@ -165,39 +116,49 @@ Page({
   /**
    * 移除收藏
    */
-  removeBookmark: function(e) {
+  removeBookmark: async function(e) {
     const articleId = e.currentTarget.dataset.id;
+    const articleTitle = e.currentTarget.dataset.title || '';
     
     wx.showModal({
       title: '取消收藏',
       content: '确定要取消收藏这篇文章吗？',
-      success: (res) => {
+      success: async (res) => {
         if (res.confirm) {
-          // 获取当前收藏文章列表
-          wx.getStorage({
-            key: 'bookmarkedArticles',
-            success: (res) => {
-              let bookmarkedArticles = res.data || [];
-              
-              // 移除选中的文章
-              bookmarkedArticles = bookmarkedArticles.filter(id => id !== articleId);
-              
-              // 更新存储
-              wx.setStorage({
-                key: 'bookmarkedArticles',
-                data: bookmarkedArticles,
-                success: () => {
-                  // 更新显示
-                  this.loadBookmarkedArticles();
-                  
-                  wx.showToast({
-                    title: '已取消收藏',
-                    icon: 'success'
-                  });
+          try {
+            // 调用云函数取消收藏
+            const result = await wx.cloud.callFunction({
+              name: 'profile',
+              data: {
+                action: 'toggleFavorite',
+                data: {
+                  articleId,
+                  title: articleTitle
                 }
+              }
+            });
+            
+            if (result.result.success) {
+              // 重新加载收藏列表
+              this.loadBookmarkedArticles();
+              
+              wx.showToast({
+                title: '已取消收藏',
+                icon: 'success'
+              });
+            } else {
+              wx.showToast({
+                title: result.result.message || '操作失败',
+                icon: 'none'
               });
             }
-          });
+          } catch (error) {
+            console.error('取消收藏失败:', error);
+            wx.showToast({
+              title: '操作失败，请稍后再试',
+              icon: 'none'
+            });
+          }
         }
       }
     });

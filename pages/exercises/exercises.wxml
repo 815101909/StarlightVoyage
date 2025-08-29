@@ -18,26 +18,35 @@
       <view class="exercise-list">
         <block wx:for="{{exercises}}" wx:key="id">
           <view class="exercise-item">
+            <!-- 题目类型标签 -->
+            <view class="question-type">{{item.type === 'multiple' ? '多选题' : '单选题'}}</view>
+            
             <view class="exercise-question">{{index + 1}}. {{item.question}}</view>
             
-            <!-- 选择题 -->
+            <!-- 选择题选项 -->
             <view class="options-list">
               <view 
                 wx:for="{{item.options}}" 
                 wx:for-item="option" 
                 wx:for-index="optionIndex" 
                 wx:key="optionIndex"
-                class="option-item {{userAnswers[item.id] === optionIndex ? 'selected' : ''}} {{showResult && item.correctAnswer === optionIndex ? 'correct' : ''}} {{showResult && userAnswers[item.id] === optionIndex && userAnswers[item.id] !== item.correctAnswer ? 'wrong' : ''}}"
+                class="option-item {{!showResult && (item.type === 'multiple' ? (userAnswers[item.id] && userAnswers[item.id][optionIndex] ? 'selected' : '') : (userAnswers[item.id] === optionIndex ? 'selected' : ''))}} {{showResult ? ((item.type === 'multiple' && item.correctAnswer && (item.correctAnswer[0] === optionIndex || item.correctAnswer[1] === optionIndex)) || (item.type === 'single' && item.correctAnswer && item.correctAnswer[0] === optionIndex) ? 'correct' : ((item.type === 'multiple' && userAnswers[item.id] && userAnswers[item.id][optionIndex] && !(item.correctAnswer[0] === optionIndex || item.correctAnswer[1] === optionIndex)) || (item.type === 'single' && userAnswers[item.id] === optionIndex && item.correctAnswer[0] !== optionIndex) ? 'wrong' : '')) : ''}}"
                 bindtap="selectOption"
                 data-question-id="{{item.id}}"
-                data-option-index="{{optionIndex}}">
+                data-option-index="{{optionIndex}}"
+                data-type="{{item.type}}">
                 {{optionIndex === 0 ? 'A' : optionIndex === 1 ? 'B' : optionIndex === 2 ? 'C' : 'D'}}. {{option}}
               </view>
             </view>
             
             <!-- 答案解析 -->
             <view class="answer-explanation" wx:if="{{showResult}}">
-              <view class="correct-answer">正确答案：{{item.correctAnswer === 0 ? 'A' : item.correctAnswer === 1 ? 'B' : item.correctAnswer === 2 ? 'C' : 'D'}}</view>
+              <view class="correct-answer">
+                正确答案：
+                <block wx:for="{{item.correctAnswer}}" wx:for-item="ans" wx:key="*this">
+                  <text>{{ans === 0 ? 'A' : ans === 1 ? 'B' : ans === 2 ? 'C' : 'D'}}{{index < item.correctAnswer.length - 1 ? '、' : ''}}</text>
+                </block>
+              </view>
               <view class="explanation-text">{{item.explanation}}</view>
             </view>
           </view>

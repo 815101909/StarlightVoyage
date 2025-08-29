@@ -1,20 +1,33 @@
 /* pages/account/account.wxss */
 
 .account-page {
-  padding-bottom: 40rpx;
-  background-color: #f7f9fc;
+  min-height: 100vh;
+  background-color: #0F1A38;
+  color: white;
+  padding: 30rpx;
+  position: relative;
+}
+
+.page-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, #0F1A38, #142447 30%, #0F1A38 100%);
+  z-index: -1;
 }
 
 .page-header {
-  padding: 30rpx;
-  background-color: #fff;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 20rpx 0;
+  margin-bottom: 30rpx;
 }
 
 .page-title {
   font-size: 34rpx;
   font-weight: bold;
-  color: #333;
+  color: white;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.2);
 }
 
 .loading-container {
@@ -28,8 +41,8 @@
 .loading-icon {
   width: 80rpx;
   height: 80rpx;
-  border: 6rpx solid #e9ecef;
-  border-top: 6rpx solid #3778FF;
+  border: 6rpx solid rgba(125, 161, 255, 0.2);
+  border-top: 6rpx solid #7D9FF4;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -42,23 +55,23 @@
 .loading-text {
   margin-top: 20rpx;
   font-size: 28rpx;
-  color: #666;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .section-title {
-  margin: 20rpx 0;
-  padding: 0 30rpx;
   font-size: 28rpx;
-  color: #666;
-  font-weight: 500;
+  color: #ABB2C9;
+  margin: 30rpx 0 20rpx;
+  padding-left: 20rpx;
 }
 
 /* 基本信息区域 */
 .info-section {
-  margin: 20rpx 0;
-  background-color: #fff;
-  border-radius: 10rpx;
+  background-color: rgba(29, 41, 81, 0.7);
+  border-radius: 20rpx;
   overflow: hidden;
+  backdrop-filter: blur(10px);
+  margin-bottom: 30rpx;
 }
 
 .info-item {
@@ -66,7 +79,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 30rpx;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid rgba(125, 161, 255, 0.1);
 }
 
 .info-item:last-child {
@@ -75,12 +88,42 @@
 
 .info-label {
   font-size: 28rpx;
-  color: #333;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .info-value {
   font-size: 28rpx;
-  color: #666;
+  color: #ABB2C9;
+}
+
+/* 用户ID容器 */
+.user-id-container {
+  display: flex;
+  align-items: center;
+  margin-top: 8rpx;
+  padding: 8rpx 16rpx;
+  background: rgba(125, 159, 244, 0.1);
+  border-radius: 20rpx;
+  border: 1px solid rgba(125, 159, 244, 0.2);
+  transition: all 0.3s ease;
+}
+
+.user-id-container:active {
+  background: rgba(125, 159, 244, 0.2);
+  transform: scale(0.98);
+}
+
+.user-id {
+  font-size: 24rpx;
+  color: #7D9FF4;
+  font-family: 'Courier New', monospace;
+  margin-right: 12rpx;
+}
+
+.copy-hint {
+  font-size: 20rpx;
+  color: rgba(125, 159, 244, 0.7);
+  opacity: 0.8;
 }
 
 .info-value-container {
@@ -90,53 +133,20 @@
 
 .action-text {
   margin-left: 20rpx;
-  font-size: 26rpx;
-  color: #3778FF;
-}
-
-/* 安全设置区域 */
-.security-section {
-  margin: 20rpx 0;
-  background-color: #fff;
-  border-radius: 10rpx;
-  overflow: hidden;
-}
-
-.security-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 30rpx;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.security-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.security-label {
-  font-size: 28rpx;
-  color: #333;
-  margin-bottom: 6rpx;
-}
-
-.security-desc {
   font-size: 24rpx;
-  color: #999;
+  color: #7D9FF4;
+  background: rgba(125, 159, 244, 0.1);
+  padding: 6rpx 16rpx;
+  border-radius: 20rpx;
 }
 
-.action-arrow {
-  font-size: 30rpx;
-  color: #ccc;
-}
-
-/* 登录设备区域 */
+/* 设备信息区域 */
 .devices-section {
-  margin: 20rpx 0;
-  background-color: #fff;
-  border-radius: 10rpx;
+  background-color: rgba(29, 41, 81, 0.7);
+  border-radius: 20rpx;
   overflow: hidden;
+  backdrop-filter: blur(10px);
+  margin-bottom: 20rpx;
 }
 
 .devices-list {
@@ -147,12 +157,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 30rpx 10rpx;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.device-item:last-child {
-  border-bottom: none;
+  padding: 20rpx 10rpx;
 }
 
 .device-info {
@@ -162,34 +167,30 @@
 
 .device-name {
   font-size: 28rpx;
-  color: #333;
+  color: rgba(255, 255, 255, 0.9);
   margin-bottom: 8rpx;
 }
 
 .device-time {
   font-size: 24rpx;
-  color: #999;
+  color: #ABB2C9;
   margin-bottom: 6rpx;
 }
 
 .device-current {
   font-size: 22rpx;
-  color: #3778FF;
-  background-color: rgba(55, 120, 255, 0.1);
-  padding: 4rpx 12rpx;
-  border-radius: 4rpx;
+  color: #7D9FF4;
+  background: rgba(125, 159, 244, 0.1);
+  padding: 2rpx 12rpx;
+  text-align: center;
+  width: 280rpx;
+  border-radius: 16rpx;
   display: inline-block;
-}
-
-.device-logout {
-  font-size: 26rpx;
-  color: #f56c6c;
 }
 
 /* 账号注销区域 */
 .deactivate-section {
   margin: 40rpx 0;
-  padding: 0 30rpx;
   text-align: center;
 }
 
@@ -197,15 +198,18 @@
   display: inline-block;
   padding: 20rpx 40rpx;
   font-size: 28rpx;
-  color: #f56c6c;
-  border: 1px solid #f56c6c;
-  border-radius: 8rpx;
-  background-color: #fff;
+  color: #FF6B6B;
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  border-radius: 30rpx;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.2);
 }
 
 .deactivate-hint {
   display: block;
   margin-top: 20rpx;
   font-size: 24rpx;
-  color: #999;
-} 
+  color: #ABB2C9;
+}
+
+/* 手机号按钮样式 */

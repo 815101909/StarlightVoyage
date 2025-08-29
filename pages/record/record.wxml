@@ -26,8 +26,8 @@
       <!-- 记录图片显示 -->
       <view class="record-image-container">
         <image 
-          wx:if="{{item.images && item.images.length > 0}}"
-          src="{{item.images[0]}}" 
+          wx:if="{{item.image}}"
+          src="{{item.image}}" 
           mode="aspectFill" 
           class="record-main-image"
         ></image>

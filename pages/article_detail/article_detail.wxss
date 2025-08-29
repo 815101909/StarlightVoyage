@@ -98,123 +98,257 @@
   align-self: flex-start;
 }
 
+.article-tag.premium {
+  color: #FFD700;
+  background-color: rgba(255, 215, 0, 0.15);
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  font-weight: bold;
+  text-shadow: 0 0 4rpx rgba(255, 215, 0, 0.3);
+}
+
+/* 封面图片占位符样式 */
+.no-cover-placeholder {
+  width: calc(100% - 328rpx);
+  height: 260rpx;
+  border-radius: 16rpx;
+  background-color: rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 28rpx;
+  border: 2rpx dashed rgba(255, 255, 255, 0.3);
+  flex-shrink: 0;
+}
+
 /* Control bar */
 .control-bar {
-  padding: 16rpx 20rpx;
+  padding: 20rpx 0;  /* 增加上下padding */
   background-color: rgba(20, 35, 65, 0.7);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(5px);
+
   margin-bottom: 20rpx;
 }
 
 .button-row {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   width: 100%;
   position: relative;
-  height: 60rpx;
-  gap: 30rpx;
+  height: 80rpx;
+  padding: 0 30rpx;  /* 减小两侧padding */
+  box-sizing: border-box;
 }
 
-.font-btn {
-  width: 60rpx;
-  height: 60rpx;
+.left-buttons {
   display: flex;
+  gap: 85rpx;  /* 进一步增加按钮间距 */
   align-items: center;
-  justify-content: center;
-  background-color: rgba(125, 159, 244, 0.2);
-  border-radius: 8rpx;
-  color: #ffffff;
-  font-weight: bold;
-  font-size: 28rpx;
-  transition: all 0.2s;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  position: absolute;
-  top: 0;
-  font-family: "Source Han Serif", "思源宋体", "Noto Serif SC", serif;
-  box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.2);
+  margin-left: 20rpx;  /* 整体左移 */
 }
 
-.font-increase-btn {
-  left: 40rpx;
+
+
+/* 字体大小按钮特殊宽度 */
+.font-decrease-btn, .font-increase-btn {
+  width: 72rpx;  /* 保持一致的宽度 */
+  font-size: 32rpx;  /* 调整字体大小 */
+  font-weight: 500;
 }
 
-.font-decrease-btn {
-  left: 118rpx;
-}
+/* 移除不再需要的font-btn样式 */
+/* 移除.right-buttons样式 */
 
-.action-btn {
-  height: 60rpx;
-  width: 100rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4rpx;
-  border-radius: 8rpx;
-  color: #ffffff;
-  font-size: 22rpx;
-  transition: all 0.2s;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  font-family: "Source Han Serif", "思源宋体", "Noto Serif SC", serif;
-  background-color: rgba(125, 159, 244, 0.2);
-  box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.2);
-}
-
-.read-btn, .bookmark-btn, .print-btn, .exercise-btn {
+.read-btn, .bookmark-btn, .print-btn, .exercise-btn, .font-decrease-btn, .font-increase-btn {
   position: static;
 }
 
 .action-btn:active, .action-btn.hover {
   transform: scale(0.95);
-  background-color: rgba(125, 159, 244, 0.4);
-  box-shadow: 0 1rpx 2rpx rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.6);  /* hover时边框更明显 */
+  box-shadow: 0 0 4rpx rgba(255, 255, 255, 0.2);  /* 添加微弱发光效果 */
 }
 
 /* Emoji icons */
 .icon-read, .icon-print, .icon-exercise, .icon-bookmark {
-  font-size: 22rpx;
-  margin-right: 2rpx;
+  font-size: 28rpx;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 }
 
 .icon-bookmark {
   color: #FFCC66;
 }
 
-/* Article content */
-.article-content {
-  flex: 1;
-  padding: 0 30rpx 40rpx;
-  box-sizing: border-box;
-  overflow-x: hidden;
-  font-family: "Source Han Serif", "思源宋体", "Noto Serif SC", serif;
+/* 收藏按钮样式 */
+.bookmark-btn.bookmarked .icon-bookmark {
+  color: #FFCC66;
+  text-shadow: 0 0 10rpx rgba(255, 204, 102, 0.8);
 }
 
-.content-box {
-  background-color: rgba(20, 35, 65, 0.6);
-  border-radius: 16rpx;
+/* Article content */
+/* 文章内容区域 */
+.article-content {
+  width: 100%;
+  box-sizing: border-box;
+  background: #081020;
+  min-height: 100vh;
+  padding: 10rpx 10rpx 120rpx 10rpx;
+  border-radius: 20rpx;
+  margin: 10rpx;
+  min-height: 300rpx;
+  position: relative;
+}
+
+/* 会员锁定样式 */
+.article-content.locked {
+  opacity: 1;
+  pointer-events: none;
+}
+
+.member-lock-overlay {
+  position: absolute;
+  top: 30%;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, 
+    rgba(0, 0, 0, 0) 0%, 
+    rgba(0, 0, 0, 0.1) 10%, 
+    rgba(0, 0, 0, 0.3) 25%, 
+    rgba(0, 0, 0, 0.6) 50%, 
+    rgba(0, 0, 0, 0.8) 75%, 
+    rgba(0, 0, 0, 0.95) 100%);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  border-radius: 20rpx;
   backdrop-filter: blur(5px);
+  z-index: 100;
+  padding-top: 50rpx;
+}
+
+.lock-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 30rpx 80rpx;
+  background: rgba(15, 26, 56, 0.9);
+  border-radius: 20rpx;
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.lock-icon {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+  filter: drop-shadow(0 0 16rpx rgba(255, 215, 0, 0.8));
+}
+
+.lock-title {
+  font-size: 36rpx;
+  color: #FFD700;
+  font-weight: bold;
+  margin-bottom: 16rpx;
+  text-shadow: 0 0 12rpx rgba(255, 215, 0, 0.5);
+}
+
+.lock-desc {
+  font-size: 28rpx;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 40rpx;
+  line-height: 1.5;
+  text-shadow: 0 0 8rpx rgba(0, 0, 0, 0.8);
+}
+
+.unlock-btn {
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  padding: 20rpx 40rpx;
+  border-radius: 50rpx;
+  box-shadow: 0 4px 16px rgba(255, 215, 0, 0.4);
+  transition: all 0.3s ease;
+}
+
+.unlock-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.6);
+}
+
+.unlock-text {
+  font-size: 32rpx;
+  color: #0F1A38;
+  font-weight: bold;
+}
+
+/* 文本内容样式 */
+.text-content {
+  margin: 20rpx 0;
+  padding: 30rpx;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  line-height: 1.8;
+  color: #333;
+}
+
+/* 图片样式 */
+.section-image {
+  width: 100%;
+  max-width: 600rpx;
+  margin: 20rpx auto;
+  display: block;
+  border-radius: 12rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+/* 内容框基础样式 */
+.content-box {
+  background-color: rgba(20, 35, 65, 0.7);
+  border-radius: 16rpx;
+
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  padding: 24rpx;
-  margin-bottom: 24rpx;
+  padding: 16rpx;
+  margin: 10rpx;
   color: rgba(255, 255, 255, 0.9);
   line-height: 1.8;
-  font-size: 28rpx;
+  font-size: inherit;
   position: relative;
   box-sizing: border-box;
-  width: 100%;
-  font-family: "Source Han Serif", "思源宋体", "Noto Serif SC", serif;
+  width: calc(100% - 20rpx);
+}
+
+/* 空的内容框不显示 */
+.content-box:empty {
+  display: none;
+}
+
+/* 内容框变体样式 */
+.intro-box {
+  border-left: 4rpx solid #7D9FF4;
+}
+
+.main-content-box {
+  border-left: 4rpx solid #7DC8F4;
+}
+
+.conclusion-box {
+  border-left: 4rpx solid #F49F7D;
 }
 
 /* Paragraph styling */
 .indented-paragraph {
-  text-indent: 1em;
-  margin: 0;
-  padding: 0;
+  margin: 20rpx 0;
+  position: relative;
+  color: #ffffff;
   line-height: 1.8;
-  word-wrap: break-word;
-  word-break: break-all;
 }
 
 .indented-paragraph + .indented-paragraph {
@@ -222,17 +356,22 @@
 }
 
 .first-char {
-  font-size: 1.8em;
-  font-weight: bold;
-  margin-right: 2rpx;
-  color: #7D9FF4;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  font-family: "Source Han Serif", "思源宋体", "Noto Serif SC", serif;
+  float: left;
+  font-size: 72rpx;
   line-height: 1;
-  display: inline-block;
-  vertical-align: text-top;
-  margin-top: 0;
-  padding-right: 2rpx;
+  padding: 10rpx 10rpx 10rpx 0;
+  color: #7D9FF4;
+  font-weight: bold;
+  font-family: "Source Han Serif", "思源宋体", "Noto Serif SC", serif;
+}
+
+.paragraph-text {
+  display: block;
+  text-indent: 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 30rpx;
+  line-height: 1.8;
+  font-family: "Source Han Serif", "思源宋体", "Noto Serif SC", serif;
 }
 
 /* Text with floating image */
@@ -259,19 +398,6 @@
 }
 
 /* Conditional box styling */
-.intro-box {
-  border-left: 4rpx solid #7D9FF4;
-}
-
-.main-content-box {
-  border-left: 4rpx solid #7DC8F4;
-}
-
-.conclusion-box {
-  border-left: 4rpx solid #F49F7D;
-}
-
-/* Standalone image between text boxes */
 .standalone-image-container {
   width: 100%;
   padding: 0;
@@ -479,4 +605,357 @@
   font-size: 22rpx;
   color: rgba(255, 255, 255, 0.6);
   font-style: italic;
+}
+
+/* 朗读播放器样式 */
+.audio-player {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: 0;
+  background: linear-gradient(135deg, rgba(30, 45, 85, 0.95) 0%, rgba(55, 85, 155, 0.95) 100%);
+  border-radius: 0;
+  padding: 20rpx 30rpx;
+  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.4);
+  border-top: 1px solid rgba(125, 159, 244, 0.5);
+  overflow: hidden;
+  font-family: "Source Han Serif", "思源宋体", "Noto Serif SC", serif;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+}
+
+.audio-player::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(1px 1px at 20px 20px, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0)),
+    radial-gradient(1px 1px at 60px 80px, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0)),
+    radial-gradient(1.5px 1.5px at 120px 50px, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0));
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  opacity: 0.3;
+  z-index: 0;
+}
+
+.audio-player-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12rpx;
+  position: relative;
+  z-index: 1;
+}
+
+.audio-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.audio-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+  position: relative;
+  z-index: 1;
+}
+
+.play-btn {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(125, 159, 244, 0.8) 0%, rgba(100, 140, 220, 0.8) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.play-btn.playing {
+  background: linear-gradient(135deg, rgba(125, 159, 244, 0.8) 0%, rgba(100, 140, 220, 0.8) 100%);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.3);
+}
+
+.play-icon {
+  font-size: 32rpx;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.audio-info {
+  flex: 1;
+}
+
+.audio-status {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.8);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* 音频按钮容器 */
+.audio-buttons {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+/* 速度调节按钮 */
+.speed-btn {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.speed-btn:active {
+  transform: scale(0.95);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%);
+}
+
+.speed-text {
+  font-size: 20rpx;
+  color: #ffffff;
+  font-weight: bold;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* 音频进度条样式 */
+.audio-progress {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  margin-top: 16rpx;
+  position: relative;
+  z-index: 1;
+}
+
+.time-text {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.7);
+  min-width: 80rpx;
+  text-align: center;
+  font-family: 'Courier New', monospace;
+}
+
+.progress-container {
+  flex: 1;
+  height: 40rpx;
+  display: flex;
+  align-items: center;
+}
+
+.progress-bar {
+  position: relative;
+  width: 100%;
+  height: 8rpx;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4rpx;
+  overflow: visible;
+  cursor: pointer;
+}
+
+.progress-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4rpx;
+}
+
+.progress-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(125, 159, 244, 0.8) 0%, rgba(100, 140, 220, 0.9) 100%);
+  border-radius: 4rpx;
+  transition: width 0.1s ease;
+}
+
+ 
+
+/* 富文本内容统一样式 */
+.rich-content {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  line-height: 1.8;
+  color: #ffffff;
+  font-size: inherit;
+  height: auto;
+  overflow: visible;
+  word-wrap: break-word;
+  white-space: normal;
+  box-sizing: border-box;
+}
+
+/* 富文本段落样式 */
+.rich-content p,
+.rich-content view {
+  display: block;
+  margin: 0.3em 0;
+  min-height: 1.2em;
+  text-align: justify;
+  line-height: 1.8;
+  word-break: break-all;
+  white-space: pre-wrap;
+}
+
+.rich-content p:first-child,
+.rich-content view:first-child {
+  margin-top: 0;
+}
+
+.rich-content p:last-child,
+.rich-content view:last-child {
+  margin-bottom: 0;
+}
+
+.rich-content p + p,
+.rich-content view + view {
+  margin-top: 0.5em;
+}
+
+/* 富文本图片样式 */
+.rich-content image,
+.rich-content img {
+  max-width: 100% !important;
+  width: auto !important;
+  height: auto !important;
+  display: block !important;
+  margin: 12rpx auto !important;
+  border-radius: 12rpx !important;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.3);
+}
+
+.rich-image-container {
+  margin: 30rpx 0;
+  padding: 0 20rpx;
+}
+
+.rich-image {
+  width: 100%;
+  border-radius: 12rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.3);
 } 
+
+.left-buttons {
+  display: flex;
+  gap: 8rpx;
+}
+
+.exercise-btn {
+  margin-left: 0;
+}
+
+.article-actions {
+  position: fixed;
+  bottom: 30rpx;
+  right: 30rpx;
+  z-index: 100;
+}
+
+
+
+.exercise-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-text {
+  margin-left: 8rpx;
+}
+
+/* 播放器占位空白区域 */
+.player-spacer {
+  height: 140rpx;
+  width: 100%;
+}
+
+.action-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 6px rgba(65, 105, 225, 0.2);
+}
+
+.bottom-actions {
+  position: fixed;
+  bottom: 20rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 20rpx;
+  z-index: 100;
+  background: rgba(15, 26, 56, 0.8);
+  padding: 10rpx 20rpx;
+  border-radius: 40rpx;
+
+}
+
+.action-btn {
+  height: 65rpx;
+  width: 95rpx;  /* 增加宽度，变成长方形 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 32rpx;  /* 调整字体大小 */
+  transition: all 0.2s;
+  font-family: "Source Han Serif", "思源宋体", "Noto Serif SC", serif;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 10rpx;
+  flex-direction: column;  /* 让图标和文字上下排列 */
+  padding: 5rpx;  /* 添加内边距 */
+}
+
+.btn-text {
+  font-size: 24rpx;
+}
+
+.action-btn:active {
+  transform: scale(0.95);
+  opacity: 0.9;
+}
+
+/* 内容图片样式 */
+.content-image {
+  width: calc(100% - 20rpx) !important;
+  margin: 10rpx 10rpx 2rpx;
+  border-radius: 12rpx;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  display: block;
+}
+
+.image-desc-box {
+  background-color: rgba(20, 35, 65, 0.7);
+  color: rgba(255, 255, 255, 0.9);
+  padding: 8rpx 24rpx;
+  margin: 2rpx 10rpx 10rpx;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  line-height: 1.6;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  display: block;
+}
+
+/* 图片组样式 */
+.image-group:not(:last-child) {
+  margin-bottom: 16rpx;
+}
