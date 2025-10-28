@@ -115,134 +115,246 @@
   padding: 10rpx 20rpx;
 }
 
-/* 会员和星空打卡按钮 */
-.action-buttons {
+/* 3D星球容器 */
+.planet-container {
+  position: relative;
+  min-height: 260rpx;
+  margin: 40rpx 0;
+  padding: 40rpx 20rpx;
   display: flex;
-  flex-direction: column;
-  margin: 30rpx 0 50rpx;
-  width: 100%;
-  box-sizing: border-box;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.action-button {
-  height: 160rpx;
-  border-radius: 16rpx;
+/* 连接线样式 - 已隐藏 */
+.connection-line {
+  display: none;
+}
+
+/* 星球卡片 */
+.planet-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 10;
+  transition: all 0.3s ease;
+  flex: 1;
+}
+
+.planet-card:active {
+  transform: scale(0.95);
+}
+
+/* 星球位置布局 */
+.planet-1 {
+  animation: float-1 4s ease-in-out infinite;
+}
+
+.planet-2 {
+  animation: float-2 4.5s ease-in-out infinite;
+}
+
+.planet-3 {
+  animation: float-3 5s ease-in-out infinite;
+}
+
+/* 上下浮动动画 */
+@keyframes float-1 {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20rpx);
+  }
+}
+
+@keyframes float-2 {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-15rpx);
+  }
+}
+
+@keyframes float-3 {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-25rpx);
+  }
+}
+
+/* 3D星球 */
+.planet-sphere {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 50%;
   display: flex;
   align-items: center;
-  padding: 0 30rpx 0 30rpx;
+  justify-content: center;
   position: relative;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
-  margin-bottom: 30rpx;
-  width: 100%;
-  box-sizing: border-box;
-  overflow: hidden;
+  box-shadow: 
+    0 8rpx 24rpx rgba(0, 0, 0, 0.3),
+    inset 0 -4rpx 12rpx rgba(0, 0, 0, 0.3),
+    inset 0 4rpx 12rpx rgba(255, 255, 255, 0.1);
+  overflow: visible;
+  margin-bottom: 20rpx;
+  perspective: 600rpx;
+  transform-style: preserve-3d;
 }
 
-.full-width {
-  width: 100%;
-}
-
-.action-button:active {
-  transform: scale(0.98);
-}
-
-.membership-button {
-  background: linear-gradient(135deg, #9B7F4B, #FFEAA0);
-}
-
-.starcard-button {
-  background: linear-gradient(135deg, #465B9A, #7D9FF4);
-}
-
-.starcard-button-unchecked {
-  background: linear-gradient(135deg, #7b4e5b, #f49d9d);
-  box-shadow: 0 4rpx 12rpx rgba(255, 107, 107, 0.4);
-}
-
-.unchecked-desc {
-  color: #ffdbdb !important;
-  font-weight: bold;
-}
-
-.planet-wheel-button {
-  background: linear-gradient(135deg, #2C7A7B, #81E6D9);
-}
-
-.community-button {
-  background: linear-gradient(135deg, #2C7A7B, #81E6D9);
-}
-
-.action-icon {
-  width: 120rpx;
-  height: 120rpx;
-  margin-right: 20rpx;
-  flex-shrink: 0;
-  background-color: rgba(255, 255, 255, 0.2);
+/* 卫星圈 - 像木星光环 使用椭圆模拟倾斜效果 */
+.planet-sphere::before {
+  content: '';
+  position: absolute;
+  width: 200rpx;
+  height: 60rpx;
+  border: 3rpx solid rgba(255, 255, 255, 0.2);
   border-radius: 50%;
-  padding: 0;
-  box-sizing: border-box;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-15deg);
+  box-shadow: 
+    inset 0 0 10rpx rgba(255, 255, 255, 0.15),
+    0 0 10rpx rgba(125, 159, 244, 0.3);
+}
+
+/* 星球光晕 */
+.planet-glow {
+  position: absolute;
+  top: -20%;
+  left: -20%;
+  width: 140%;
+  height: 140%;
+  border-radius: 50%;
+  opacity: 0.6;
+  filter: blur(15rpx);
+  animation: pulse-glow 3s ease-in-out infinite;
+  z-index: -1;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+/* 不同颜色的光晕 */
+.glow-gold {
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.6) 0%, transparent 70%);
+}
+
+.glow-blue {
+  background: radial-gradient(circle, rgba(125, 159, 244, 0.6) 0%, transparent 70%);
+}
+
+.glow-red {
+  background: radial-gradient(circle, rgba(255, 107, 107, 0.6) 0%, transparent 70%);
+}
+
+.glow-green {
+  background: radial-gradient(circle, rgba(129, 230, 217, 0.6) 0%, transparent 70%);
+}
+
+/* 星球背景色 */
+.sphere-member {
+  background: linear-gradient(135deg, #FFEAA0 0%, #9B7F4B 100%);
+}
+
+.sphere-checkin {
+  background: linear-gradient(135deg, #7D9FF4 0%, #465B9A 100%);
+}
+
+.sphere-unchecked {
+  background: linear-gradient(135deg, #f49d9d 0%, #7b4e5b 100%);
+  box-shadow: 
+    0 8rpx 24rpx rgba(255, 107, 107, 0.4),
+    inset 0 -4rpx 12rpx rgba(0, 0, 0, 0.3),
+    inset 0 4rpx 12rpx rgba(255, 255, 255, 0.1);
+}
+
+.sphere-wish {
+  background: linear-gradient(135deg, #81E6D9 0%, #2C7A7B 100%);
+}
+
+/* 星球内部容器 - 限制内容不溢出 */
+.planet-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
   overflow: hidden;
+  position: relative;
+  z-index: 2;
 }
 
-.action-icon.membership-icon {
-  background-image: url('/pages/profile/images/会员中心.jpg');
+/* 星球图标 */
+.planet-icon-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
-.action-icon.starcard-icon {
-  background-image: url('/pages/profile/images/星空打卡.jpg');
+/* 打卡提醒徽章 */
+.checkin-badge-new {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 36rpx;
+  height: 36rpx;
+  background-color: #FF6B6B;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24rpx;
+  font-weight: bold;
+  box-shadow: 0 2rpx 8rpx rgba(255, 107, 107, 0.6);
+  animation: pulse-badge 1.5s ease-in-out infinite;
+  z-index: 10;
 }
 
-.action-icon.planet-wheel-icon {
-  background-image: url('/pages/profile/images/星球转盘.jpg');
+@keyframes pulse-badge {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
 }
 
-.action-content {
+/* 星球信息 */
+.planet-info {
   display: flex;
   flex-direction: column;
-  flex: 1;
-  overflow: hidden;
+  align-items: center;
+  text-align: center;
+  width: 100%;
 }
 
-.action-text {
-  font-size: 34rpx;
+.planet-title {
+  font-size: 30rpx;
   font-weight: bold;
-  color: white;
-  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.2);
+  color: #ffffff;
+  margin-bottom: 6rpx;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.3);
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+.planet-desc {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.7);
   line-height: 1.3;
-}
-
-.action-desc {
-  font-size: 22rpx;
-  color: rgba(255, 255, 255, 0.8);
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-top: 8rpx;
-  line-height: 1.2;
-}
-
-.checkin-badge {
-  position: absolute;
-  top: -12rpx;
-  right: -12rpx;
-  background-color: #FF6B6B;
-  color: white;
-  font-size: 22rpx;
-  padding: 6rpx 14rpx;
-  border-radius: 20rpx;
-  box-shadow: 0 2rpx 6rpx rgba(255, 107, 107, 0.5);
-  animation: pulseBadge 1.5s infinite;
-  font-weight: bold;
-}
-
-@keyframes pulseBadge {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
 }
 
 /* 部分标题 */
@@ -277,7 +389,7 @@
   padding: 30rpx;
   background-color: #162048;
   border-radius: 15rpx;
-  margin: 30rpx 20rpx;
+  margin: 0rpx 20rpx 30rpx;
 }
 
 .function-item {

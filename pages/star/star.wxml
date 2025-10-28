@@ -41,11 +41,8 @@
              show-fullscreen-btn="{{false}}"
              enable-progress-gesture="{{true}}">
       </video>
-      <!-- 无视频或视频错误时的占位图 -->
+      <!-- 无视频或视频错误时的占位背景 -->
       <view wx:else class="map-placeholder">
-        <image class="placeholder-img" 
-               src="pic/{{currentMap === 'universe' ? 'universe' : currentMap === 'galaxy' ? '我们在哪' : currentMap === 'celestial' ? '天体类型' : '宇宙结构'}}.jpg" 
-               mode="aspectFill"></image>
         <view class="placeholder-mask">
           <text class="placeholder-text">{{mapVideos[currentMap] && mapVideos[currentMap].error ? '视频暂时无法播放' : '太空探索中...'}}</text>
         </view>
@@ -70,56 +67,14 @@
             current="{{current}}"
             bindchange="swiperChange">
             
-      <!-- 宇宙结构部分 -->
-      <swiper-item>
-        <view class="section-card" bindtap="navigateToDetail" data-section="universe-structure">
-          <image class="section-image" src="pic/宇宙结构.jpg" mode="aspectFill"></image>
+      <!-- 动态生成星宿卡片 -->
+      <swiper-item wx:for="{{sections}}" wx:key="id">
+        <view class="section-card" bindtap="navigateToDetail" data-section="{{item.id}}">
+          <image class="section-image" src="{{item.coverUrl}}" mode="aspectFill"></image>
           <view class="section-overlay">
             <view class="section-content">
-              <view class="section-title">宇宙结构</view>
-              <view class="section-desc">从微观粒子到宏观宇宙，探索宇宙的层次结构与演化历程</view>
-            </view>
-            <view class="section-icon">→</view>
-          </view>
-        </view>
-      </swiper-item>
-      
-      <!-- 天体类型部分 -->
-      <swiper-item>
-        <view class="section-card" bindtap="navigateToDetail" data-section="celestial-types">
-          <image class="section-image" src="pic/天体类型.jpg" mode="aspectFill"></image>
-          <view class="section-overlay">
-            <view class="section-content">
-              <view class="section-title">天体类型</view>
-              <view class="section-desc">恒星、行星、彗星、黑洞...了解宇宙中各种奇妙天体</view>
-            </view>
-            <view class="section-icon">→</view>
-          </view>
-        </view>
-      </swiper-item>
-      
-      <!-- 能量与场部分 -->
-      <swiper-item>
-        <view class="section-card" bindtap="navigateToDetail" data-section="energy-fields">
-          <image class="section-image" src="pic/能量与场.jpg" mode="aspectFill"></image>
-          <view class="section-overlay">
-            <view class="section-content">
-              <view class="section-title">能量与场</view>
-              <view class="section-desc">引力、电磁力、强弱核力...宇宙中的能量与场如何运作</view>
-            </view>
-            <view class="section-icon">→</view>
-          </view>
-        </view>
-      </swiper-item>
-      
-      <!-- 我们在哪部分 -->
-      <swiper-item>
-        <view class="section-card" bindtap="navigateToDetail" data-section="where-we-are">
-          <image class="section-image" src="pic/我们在哪.jpg" mode="aspectFill"></image>
-          <view class="section-overlay">
-            <view class="section-content">
-              <view class="section-title">我们在哪</view>
-              <view class="section-desc">太阳系、银河系、本星系群...人类在浩瀚宇宙中的位置</view>
+              <view class="section-title">{{item.title}}</view>
+              <view class="section-desc">{{item.description}}</view>
             </view>
             <view class="section-icon">→</view>
           </view>
@@ -141,4 +96,4 @@
   <view class="footer-decoration">
     <view class="footer-text">向宇宙深处探索</view>
   </view>
-</view> 
+</view>

@@ -1,12 +1,25 @@
 <view class="container login-page">
-  <!-- 星空背景 -->
+  <!-- 背景 -->
   <view class="page-bg"></view>
+  
+  <!-- 星空效果 -->
+  <view class="stars stars-small"></view>
+  <view class="stars stars-medium"></view>
+  <view class="stars stars-large"></view>
+  
+  <!-- 流星效果 -->
+  <view class="meteor meteor-1"></view>
+  <view class="meteor meteor-2"></view>
+  <view class="meteor meteor-3"></view>
+  <view class="meteor meteor-4"></view>
+  <view class="meteor meteor-5"></view>
   
   <!-- 头部Logo -->
   <view class="header">
     <view class="logo-container">
       <view class="logo-avatar">
-        <text class="logo-text">界</text>
+        <image class="logo-image" src="{{logoUrl}}" mode="aspectFill" wx:if="{{logoUrl}}"></image>
+        <text class="logo-text" wx:else>舟</text>
       </view>
     </view>
     <view class="app-name">小舟摇星河</view>
@@ -15,34 +28,25 @@
   
   <!-- 登录选项 -->
   <view class="login-options">
-    <!-- 微信一键登录 -->
     <button class="login-btn wechat-login" open-type="getUserInfo" bindgetuserinfo="getUserInfo">
-      <view style="display:flex; align-items:center; justify-content:center;">
-        <text>微信快捷登录</text>
-      </view>
+      微信一键登录
     </button>
     
-    <!-- 手机号登录 -->
     <button class="login-btn phone-login" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber">
-      <view style="display:flex; align-items:center; justify-content:center;">
-        <text>手机号快捷登录</text>
-      </view>
+      手机一键登录
     </button>
   </view>
   
-  <!-- 隐私政策声明 -->
+  <!-- 隐私政策 -->
   <view class="privacy-policy">
     <checkbox checked="{{policyChecked}}" bindtap="togglePolicy" color="#7D9FF4" />
     <view class="policy-text">
-      登录即代表您已阅读并同意
-      <text class="policy-link" bindtap="viewUserAgreement">《用户协议》</text>
-      和
-      <text class="policy-link" bindtap="viewPrivacyPolicy">《隐私政策》</text>
+      登录即代表您已阅读并同意<text class="policy-link" bindtap="viewUserAgreement">《用户协议》</text>和<text class="policy-link" bindtap="viewPrivacyPolicy">《隐私政策》</text>
     </view>
   </view>
   
   <!-- 游客模式 -->
   <view class="guest-login" bindtap="guestLogin">
-    <text>先逛逛，稍后再登录</text>
+    先逛逛，稍后再登录
   </view>
 </view>

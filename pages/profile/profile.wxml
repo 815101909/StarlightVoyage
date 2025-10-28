@@ -48,6 +48,56 @@
     </view>
   </view>
   
+  <!-- 3D星球式主功能区域 -->
+  <view class="planet-container">
+    <!-- 连接线 -->
+    <view class="connection-line line-1"></view>
+    <view class="connection-line line-2"></view>
+    
+    <!-- 星球1：会员中心 -->
+    <view class="planet-card planet-1" bindtap="openMemberCenter">
+      <view class="planet-sphere sphere-member">
+        <view class="planet-inner">
+          <image class="planet-icon-img" src="/pages/profile/images/会员中心.jpg" mode="aspectFill"></image>
+        </view>
+        <view class="planet-glow glow-gold"></view>
+      </view>
+      <view class="planet-info">
+        <view class="planet-title">会员中心</view>
+        <view class="planet-desc">{{userInfo.memberLevel > 0 ? '已开通会员' : '立即开通'}}</view>
+      </view>
+    </view>
+    
+    <!-- 星球2：星空打卡 -->
+    <view class="planet-card planet-2" bindtap="openStarCheckin">
+      <view class="planet-sphere sphere-checkin {{!hasCheckedInToday ? 'sphere-unchecked' : ''}}">
+        <view class="planet-inner">
+          <image class="planet-icon-img" src="/pages/profile/images/星空打卡.jpg" mode="aspectFill"></image>
+        </view>
+        <view class="planet-glow {{hasCheckedInToday ? 'glow-blue' : 'glow-red'}}"></view>
+        <view class="checkin-badge-new" wx:if="{{!hasCheckedInToday}}">!</view>
+      </view>
+      <view class="planet-info">
+        <view class="planet-title">星空打卡</view>
+        <view class="planet-desc">连续{{userInfo.checkinDays}}天</view>
+      </view>
+    </view>
+    
+    <!-- 星球3：星空许愿 -->
+    <view class="planet-card planet-3" bindtap="navigateToPlanetWheel">
+      <view class="planet-sphere sphere-wish">
+        <view class="planet-inner">
+          <image class="planet-icon-img" src="/pages/profile/images/星球转盘.jpg" mode="aspectFill"></image>
+        </view>
+        <view class="planet-glow glow-green"></view>
+      </view>
+      <view class="planet-info">
+        <view class="planet-title">星空许愿</view>
+        <view class="planet-desc">许下心愿</view>
+      </view>
+    </view>
+  </view>
+  
   <!-- 功能按钮区域 -->
   <view class="function-container">
     <!-- 收藏按钮 -->
@@ -72,34 +122,6 @@
     <view class="function-item" bindtap="aboutSystem">
       <text class="function-emoji">📱</text>
       <text class="function-text">系统</text>
-    </view>
-  </view>
-  
-  <!-- 会员星空许愿按钮 -->
-  <view class="action-buttons">
-    <view class="action-button full-width membership-button" bindtap="openMemberCenter">
-      <image class="action-icon" src="/pages/profile/images/会员中心.jpg" mode="aspectFit"></image>
-      <view class="action-content">
-        <text class="action-text">会员中心</text>
-        <text class="action-desc">{{userInfo.memberLevel > 0 ? '已开通 · 有效期至 ' + utils.formatExpireDate(userInfo.expireDate) : '未开通 · 立即加入会员学习'}}</text>
-      </view>
-    </view>
-    
-    <view class="action-button full-width {{hasCheckedInToday ? 'starcard-button' : 'starcard-button-unchecked'}}" bindtap="openStarCheckin">
-      <image class="action-icon" src="/pages/profile/images/星空打卡.jpg" mode="aspectFit"></image>
-      <view class="action-content">
-        <text class="action-text">星空打卡</text>
-        <text class="action-desc {{!hasCheckedInToday ? 'unchecked-desc' : ''}}">{{hasCheckedInToday ? '今日已打卡 · 已连续打卡' + userInfo.checkinDays + '天' : '今日未打卡 · 已连续打卡' + userInfo.checkinDays + '天'}}</text>
-      </view>
-      <view class="checkin-badge" wx:if="{{!hasCheckedInToday}}">今日未打卡</view>
-    </view>
-
-    <view class="action-button full-width planet-wheel-button" bindtap="navigateToPlanetWheel">
-      <image class="action-icon" src="/pages/profile/images/星球转盘.jpg" mode="aspectFit"></image>
-      <view class="action-content">
-        <text class="action-text">星空许愿</text>
-        <text class="action-desc">星空许愿，标记你的愿望</text>
-      </view>
     </view>
   </view>
   

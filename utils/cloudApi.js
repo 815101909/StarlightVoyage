@@ -304,17 +304,9 @@ const videoAPI = {
 
   // 根据类型获取视频
   getVideosByType(type) {
-    console.log('前端API调用 - getVideosByType - 输入参数:', { type });
-    
     return callCloudFunction('video', {
       action: 'getVideosByType',
       type: type
-    }).then(res => {
-      console.log('前端API调用 - getVideosByType - 云函数返回结果:', res);
-      return res;
-    }).catch(err => {
-      console.error('前端API调用 - getVideosByType - 调用失败:', err);
-      throw err;
     });
   },
 

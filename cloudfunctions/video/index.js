@@ -167,8 +167,6 @@ async function getA4Content(event) {
       .orderBy('order', 'asc')
       .get()
     
-    console.log('查询结果:', result)
-    
     if (!result || result.data.length === 0) {
       return {
         success: false,

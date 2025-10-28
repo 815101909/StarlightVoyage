@@ -26,7 +26,30 @@ Page({
     // 背景音乐相关
     bgmContext: null,
     isBgmPlaying: false,
-    bgmUrl: 'cloud://cloud1-1gsyt78b92c539ef.636c-cloud1-1gsyt78b92c539ef-1370520707/audio/bgm/科学-科技-先进 (99)_爱给网_aigei_com.mp3'
+    bgmUrl: 'cloud://cloud1-1gsyt78b92c539ef.636c-cloud1-1gsyt78b92c539ef-1370520707/audio/bgm/科学-科技-先进 (99)_爱给网_aigei_com.mp3',
+    // 杂志翻页相关
+    currentPage: 0, // 当前页码
+    totalPages: 3, // 总页数（引言、正文、结论）
+    // 3D翻页效果相关
+    isFlipping: false, // 是否正在翻页
+    pageWidth: 0, // 页面宽度
+    pageHeight: 0, // 页面高度
+    startX: 0, // 触摸起始X
+    startY: 0, // 触摸起始Y
+    canFlip: false, // 是否可以翻页
+    isSwipingBack: false, // 是否正在左滑返回
+    // 每一页的3D变换样式
+    page1Style: 'transform: rotateY(0deg)',
+    page2Style: 'transform: rotateY(0deg)',
+    page3Style: 'transform: rotateY(0deg)',
+    // 亲子讨论相关
+    showDiscussionBox: false, // 是否显示讨论弹窗
+    discussionQuestions: [
+      '文章中最让你惊讶的发现是什么？为什么？',
+      '如果你是科学家，你会想研究什么问题？',
+      '这个话题和我们的日常生活有什么联系？',
+      '你认为未来会有哪些新的发展？'
+    ]
   },
 
   onLoad: function(options) {
@@ -77,13 +100,28 @@ Page({
     }
   },
 
+  onReady: function() {
+    // 获取页面尺寸
+    const query = wx.createSelectorQuery();
+    query.select('.content-swiper').boundingClientRect();
+    query.exec((res) => {
+      if (res[0]) {
+        this.setData({
+          pageWidth: res[0].width,
+          pageHeight: res[0].height
+        });
+      }
+    });
+  },
+
   onShow: function() {
     // 页面显示时重新检查会员状态
     this.checkMemberStatus().then(() => {
-      // 重新计算是否显示会员锁定
-      if (this.data.article) {
-        const showMemberLock = !this.data.isMember;
-        this.setData({ showMemberLock });
+      // 如果当前在第二页及以后，且不是会员，则显示锁定
+      if (this.data.article && this.data.currentPage >= 1 && !this.data.isMember) {
+        this.setData({ showMemberLock: true });
+      } else {
+        this.setData({ showMemberLock: false });
       }
     });
   },
@@ -139,13 +177,18 @@ Page({
         this.setData({
           article: formattedArticle,
           isLoading: false,
-          showMemberLock: showMemberLock
+          showMemberLock: false, // 初始不锁定，第一页免费查看
+          // 从数据库读取讨论问题，如果没有则使用默认问题
+          discussionQuestions: formattedArticle.discussionQuestions
         });
 
         // 设置页面标题
         wx.setNavigationBarTitle({
           title: formattedArticle.title || '文章详情'
         });
+
+        // 计算实际页数
+        this.calculateTotalPages();
 
         // 记录阅读活动
         recordReadActivity(formattedArticle);
@@ -948,6 +991,355 @@ Page({
       title: `播放速度: ${newRate}x`,
       icon: 'none',
       duration: 1000
+    });
+  },
+
+  /**
+   * ============================================
+   * 3.1 核心事件监听 - 触摸事件
+   * ============================================
+   * 监听触摸开始、移动、结束事件
+   * 类似鼠标的 mousedown、mousemove、mouseup
+   */
+  
+  // 触摸开始 - 记录起始位置
+  onPageTouchStart: function(e) {
+    const touch = e.touches[0];
+    const { pageWidth, pageHeight, currentPage } = this.data;
+    
+    // 如果还没有获取到页面尺寸，先获取
+    if (!pageWidth || !pageHeight) {
+      this.initPageSize();
+      return;
+    }
+    
+    // 获取触摸点坐标
+    const clientX = touch.clientX || touch.x;
+    const clientY = touch.clientY || touch.y;
+    
+    // 记录起始位置
+    this.setData({
+      startX: clientX,
+      startY: clientY
+    });
+    
+    const edgeSize = 80; // 边缘区域大小（px）
+    
+    // 判断触摸区域并设置翻页方向
+    if (clientX < edgeSize && currentPage > 0) {
+      // 左侧边缘：返回上一页
+      this.setData({ isSwipingBack: true });
+    } else if (clientX > pageWidth - edgeSize && currentPage < 2) {
+      // 右侧边缘：翻到下一页
+      this.setData({
+        canFlip: true,
+        isFlipping: true
+      });
+    }
+  },
+
+  // 触摸移动 - 实时计算3D旋转角度
+  onPageTouchMove: function(e) {
+    const { isSwipingBack, canFlip, isFlipping } = this.data;
+    
+    // 如果是左滑返回，不处理翻页动画
+    if (isSwipingBack) return;
+    
+    // 只有在可翻页状态下才计算动画
+    if (!canFlip || !isFlipping) return;
+    
+    const touch = e.touches[0];
+    const clientX = touch.clientX || touch.x;
+    
+    // 计算并更新3D翻页效果
+    this.calculate3DFlipEffect(clientX);
+  },
+
+  // 触摸结束 - 判断是否完成翻页
+  onPageTouchEnd: function(e) {
+    const { pageWidth, startX, isSwipingBack, isFlipping, currentPage } = this.data;
+    const touch = e.changedTouches[0];
+    const endX = touch.clientX || touch.x;
+    const deltaX = endX - startX; // 滑动距离
+    
+    // 处理左滑返回上一页
+    if (isSwipingBack) {
+      this.handleSwipeBack(deltaX);
+      return;
+    }
+    
+    // 处理右滑翻到下一页
+    if (isFlipping) {
+      this.handleFlipNext(deltaX);
+    }
+  },
+
+  /**
+   * ============================================
+   * 3.2 辅助函数 - 初始化和判断
+   * ============================================
+   */
+  
+  // 初始化页面尺寸
+  initPageSize: function() {
+    const query = wx.createSelectorQuery();
+    query.select('.content-swiper').boundingClientRect();
+    query.exec((res) => {
+      if (res[0]) {
+        this.setData({
+          pageWidth: res[0].width,
+          pageHeight: res[0].height
+        });
+      }
+    });
+  },
+
+  // 处理向左滑动返回上一页
+  handleSwipeBack: function(deltaX) {
+    const { pageWidth, currentPage } = this.data;
+    
+    // 判断是否完成返回（向右滑动超过阈值）
+    if (deltaX > pageWidth / 4 && currentPage > 0) {
+      // 延迟更新避免闪烁
+      this.setData({ isSwipingBack: false });
+      setTimeout(() => {
+        this.turnToPreviousPage();
+      }, 30);
+    } else {
+      // 取消返回
+      this.setData({ isSwipingBack: false });
+    }
+  },
+
+  // 处理向右滑动翻到下一页
+  handleFlipNext: function(deltaX) {
+    const { pageWidth } = this.data;
+    
+    // 判断是否完成翻页（向左拖拽超过阈值）
+    if (-deltaX > pageWidth / 3) {
+      this.turnToNextPage();
+    } else {
+      this.cancelFlip();
+    }
+  },
+
+  /**
+   * ============================================
+   * 3.3 3D翻页效果 - 像真实的书一样翻页
+   * ============================================
+   * 根据拖动距离计算rotateY角度
+   */
+  
+  // 计算3D翻页效果（像HTML示例中的书页翻转）
+  calculate3DFlipEffect: function(clientX) {
+    const { pageWidth, startX, currentPage } = this.data;
+    
+    // 计算拖动距离（从右向左为正）
+    const deltaX = startX - clientX;
+    
+    // 如果没有向左拖动，不计算
+    if (deltaX <= 0) return;
+    
+    // 计算拖动进度（0-1）
+    let progress = deltaX / pageWidth;
+    progress = Math.max(0, Math.min(1, progress));
+    
+    // 将进度转换为旋转角度（0度 -> -180度）
+    // 负角度表示从右向左翻（rotateY从0到-180）
+    const angle = -180 * progress;
+    
+    // 更新当前页的样式
+    if (currentPage === 0) {
+      this.setData({
+        page1Style: `transform: rotateY(${angle}deg)`
+      });
+    } else if (currentPage === 1) {
+      this.setData({
+        page2Style: `transform: rotateY(${angle}deg)`
+      });
+    } else if (currentPage === 2) {
+      this.setData({
+        page3Style: `transform: rotateY(${angle}deg)`
+      });
+    }
+  },
+
+  /**
+   * ============================================
+   * 3.4 翻页控制函数 - 类似 touchLeft/touchRight
+   * ============================================
+   */
+  
+  // 翻到上一页（类似 touchRight）
+  turnToPreviousPage: function() {
+    const { currentPage } = this.data;
+    
+    if (currentPage <= 0) return; // 已经是第一页
+    
+    const prevPage = currentPage - 1;
+    const updateData = {
+      currentPage: prevPage
+    };
+    
+    // 将上一页从背面翻回正面
+    if (prevPage === 0) {
+      updateData.page1Style = 'transform: rotateY(0deg)';
+    } else if (prevPage === 1) {
+      updateData.page2Style = 'transform: rotateY(0deg)';
+    } else if (prevPage === 2) {
+      updateData.page3Style = 'transform: rotateY(0deg)';
+    }
+    
+    this.setData(updateData);
+  },
+
+  // 翻到下一页（类似 touchLeft）
+  turnToNextPage: function() {
+    const { currentPage, totalPages, isMember } = this.data;
+    
+    if (currentPage >= totalPages - 1) {
+      this.cancelFlip();
+      return; // 已经是最后一页
+    }
+    
+    const nextPage = currentPage + 1;
+    
+    // 检查会员权限
+    if (nextPage >= 1 && !isMember) {
+      wx.showToast({
+        title: '后续内容需要开通会员',
+        icon: 'none',
+        duration: 2000
+      });
+      this.cancelFlip();
+      this.setData({ showMemberLock: true });
+      return;
+    }
+    
+    // 完成翻页动画：将当前页完全翻到背面
+    const updateData = {
+      isFlipping: false,
+      canFlip: false
+    };
+    
+    if (currentPage === 0) {
+      updateData.page1Style = 'transform: rotateY(-180deg)';
+    } else if (currentPage === 1) {
+      updateData.page2Style = 'transform: rotateY(-180deg)';
+    } else if (currentPage === 2) {
+      updateData.page3Style = 'transform: rotateY(-180deg)';
+    }
+    
+    // 先完成翻页动画，再更新页码
+    this.setData(updateData);
+    
+    setTimeout(() => {
+      this.setData({
+        currentPage: nextPage
+      });
+    }, 600); // 等待CSS transition完成（0.6s）
+  },
+
+  // 取消翻页（还原动画）
+  cancelFlip: function() {
+    const { currentPage } = this.data;
+    const updateData = {
+      isFlipping: false,
+      canFlip: false
+    };
+    
+    // 还原当前页的角度
+    if (currentPage === 0) {
+      updateData.page1Style = 'transform: rotateY(0deg)';
+    } else if (currentPage === 1) {
+      updateData.page2Style = 'transform: rotateY(0deg)';
+    } else if (currentPage === 2) {
+      updateData.page3Style = 'transform: rotateY(0deg)';
+    }
+    
+    this.setData(updateData);
+  },
+
+  // 翻页事件处理（保留原有的swiper翻页）
+  onPageChange: function(e) {
+    const newPage = e.detail.current;
+    
+    // 检查会员状态：如果翻到第二页及以后，且不是会员，则显示会员锁定
+    if (newPage >= 1 && !this.data.isMember) {
+      // 显示会员锁定提示
+      this.setData({
+        showMemberLock: true,
+        currentPage: 0 // 保持在第一页
+      });
+      
+      // 提示用户
+      wx.showToast({
+        title: '后续内容需要开通会员',
+        icon: 'none',
+        duration: 2000
+      });
+      
+      return;
+    }
+    
+    this.setData({
+      currentPage: newPage
+    });
+    
+    // 记录翻页行为
+    console.log('翻到第', newPage + 1, '页');
+  },
+
+
+  // 计算实际页数
+  calculateTotalPages: function() {
+    const article = this.data.article;
+    let count = 0;
+    
+    if (article.introNodes || (article.introImages && article.introImages.length > 0)) {
+      count++;
+    }
+    if (article.contentNodes || (article.contentImages && article.contentImages.length > 0)) {
+      count++;
+    }
+    if (article.conclusionNodes || (article.conclusionImages && article.conclusionImages.length > 0)) {
+      count++;
+    }
+    
+    this.setData({
+      totalPages: count
+    });
+  },
+
+  // 关闭会员锁定遮罩
+  closeMemberLock: function() {
+    this.setData({
+      showMemberLock: false,
+      currentPage: 0 // 返回第一页
+    });
+  },
+
+  // 点击遮罩背景关闭
+  handleLockOverlayTap: function() {
+    this.closeMemberLock();
+  },
+
+  // 阻止事件冒泡
+  stopPropagation: function() {
+    // 阻止点击内容区域时关闭遮罩
+  },
+
+  // 切换讨论框显示
+  toggleDiscussionBox: function() {
+    this.setData({
+      showDiscussionBox: !this.data.showDiscussionBox
+    });
+  },
+
+  // 关闭讨论框
+  closeDiscussionBox: function() {
+    this.setData({
+      showDiscussionBox: false
     });
   }
 }); 

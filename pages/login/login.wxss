@@ -2,131 +2,559 @@
 .login-page {
   min-height: 100vh;
   background-color: #0F1A38;
-  padding: 30rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   position: relative;
+  padding: 40rpx 48rpx 60rpx;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .page-bg {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(to bottom, #0F1A38, #142447 30%, #0F1A38 100%);
+  background-color: #0F1A38;
   z-index: -1;
+  overflow: hidden;
+}
+
+/* 动态背景装饰 */
+.page-bg::before {
+  content: '';
+  position: absolute;
+  top: -10%;
+  right: -10%;
+  width: 500rpx;
+  height: 500rpx;
+  background-color: rgba(125, 159, 244, 0.06);
+  border-radius: 50%;
+  filter: blur(80rpx);
+  animation: float1 8s ease-in-out infinite;
+}
+
+.page-bg::after {
+  content: '';
+  position: absolute;
+  bottom: -10%;
+  left: -10%;
+  width: 400rpx;
+  height: 400rpx;
+  background-color: rgba(125, 159, 244, 0.04);
+  border-radius: 50%;
+  filter: blur(60rpx);
+  animation: float2 10s ease-in-out infinite;
+}
+
+@keyframes float1 {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(-50rpx, 50rpx);
+  }
+}
+
+@keyframes float2 {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(50rpx, -30rpx);
+  }
+}
+
+/* 星空效果 */
+.stars {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 1rpx;
+  height: 1rpx;
+  background: transparent;
+  z-index: 100;
+  pointer-events: none;
+}
+
+/* 微小星星 - 密集分布，营造星空深度 */
+.stars-small {
+  width: 2rpx;
+  height: 2rpx;
+  border-radius: 50%;
+  box-shadow: 
+    80rpx 120rpx 0 0 rgba(255, 255, 255, 0.7),
+    180rpx 80rpx 0 0 rgba(255, 255, 255, 0.6),
+    280rpx 160rpx 0 0 rgba(255, 255, 255, 0.8),
+    380rpx 100rpx 0 0 rgba(255, 255, 255, 0.6),
+    480rpx 220rpx 0 0 rgba(255, 255, 255, 0.7),
+    580rpx 140rpx 0 0 rgba(255, 255, 255, 0.6),
+    680rpx 200rpx 0 0 rgba(255, 255, 255, 0.8),
+    130rpx 320rpx 0 0 rgba(255, 255, 255, 0.7),
+    230rpx 420rpx 0 0 rgba(255, 255, 255, 0.6),
+    330rpx 520rpx 0 0 rgba(255, 255, 255, 0.6),
+    430rpx 380rpx 0 0 rgba(255, 255, 255, 0.7),
+    530rpx 480rpx 0 0 rgba(255, 255, 255, 0.8),
+    630rpx 580rpx 0 0 rgba(255, 255, 255, 0.6),
+    100rpx 620rpx 0 0 rgba(255, 255, 255, 0.7),
+    200rpx 720rpx 0 0 rgba(255, 255, 255, 0.6),
+    300rpx 820rpx 0 0 rgba(255, 255, 255, 0.8),
+    400rpx 680rpx 0 0 rgba(255, 255, 255, 0.6),
+    500rpx 780rpx 0 0 rgba(255, 255, 255, 0.7),
+    600rpx 880rpx 0 0 rgba(255, 255, 255, 0.6),
+    700rpx 720rpx 0 0 rgba(255, 255, 255, 0.8),
+    150rpx 950rpx 0 0 rgba(255, 255, 255, 0.7),
+    250rpx 1050rpx 0 0 rgba(255, 255, 255, 0.6),
+    350rpx 1150rpx 0 0 rgba(255, 255, 255, 0.7),
+    450rpx 980rpx 0 0 rgba(255, 255, 255, 0.8),
+    550rpx 1080rpx 0 0 rgba(255, 255, 255, 0.6),
+    650rpx 1180rpx 0 0 rgba(255, 255, 255, 0.7),
+    50rpx 1250rpx 0 0 rgba(255, 255, 255, 0.6),
+    320rpx 1300rpx 0 0 rgba(255, 255, 255, 0.7),
+    520rpx 1350rpx 0 0 rgba(255, 255, 255, 0.8),
+    720rpx 1280rpx 0 0 rgba(255, 255, 255, 0.6),
+    60rpx 60rpx 0 0 rgba(255, 255, 255, 0.7),
+    160rpx 240rpx 0 0 rgba(255, 255, 255, 0.6),
+    260rpx 340rpx 0 0 rgba(255, 255, 255, 0.8),
+    360rpx 440rpx 0 0 rgba(255, 255, 255, 0.6),
+    460rpx 540rpx 0 0 rgba(255, 255, 255, 0.7),
+    560rpx 640rpx 0 0 rgba(255, 255, 255, 0.6),
+    660rpx 740rpx 0 0 rgba(255, 255, 255, 0.8),
+    120rpx 840rpx 0 0 rgba(255, 255, 255, 0.7),
+    220rpx 940rpx 0 0 rgba(255, 255, 255, 0.6),
+    320rpx 1040rpx 0 0 rgba(255, 255, 255, 0.8),
+    420rpx 1140rpx 0 0 rgba(255, 255, 255, 0.6),
+    520rpx 1240rpx 0 0 rgba(255, 255, 255, 0.7),
+    620rpx 1340rpx 0 0 rgba(255, 255, 255, 0.6),
+    40rpx 180rpx 0 0 rgba(255, 255, 255, 0.8),
+    140rpx 280rpx 0 0 rgba(255, 255, 255, 0.7),
+    240rpx 580rpx 0 0 rgba(255, 255, 255, 0.6),
+    340rpx 780rpx 0 0 rgba(255, 255, 255, 0.8),
+    440rpx 880rpx 0 0 rgba(255, 255, 255, 0.6),
+    540rpx 980rpx 0 0 rgba(255, 255, 255, 0.7),
+    640rpx 1080rpx 0 0 rgba(255, 255, 255, 0.6),
+    90rpx 1200rpx 0 0 rgba(255, 255, 255, 0.8);
+  animation: twinkle-small 5s infinite ease-in-out;
+}
+
+/* 细小星星 - 稍亮 */
+.stars-medium {
+  width: 2rpx;
+  height: 2rpx;
+  border-radius: 50%;
+  box-shadow: 
+    140rpx 150rpx 0 0 rgba(125, 159, 244, 0.8),
+    340rpx 250rpx 0 0 rgba(125, 159, 244, 0.7),
+    540rpx 350rpx 0 0 rgba(125, 159, 244, 0.9),
+    210rpx 450rpx 0 0 rgba(125, 159, 244, 0.7),
+    410rpx 550rpx 0 0 rgba(125, 159, 244, 0.8),
+    610rpx 650rpx 0 0 rgba(125, 159, 244, 0.7),
+    310rpx 710rpx 0 0 rgba(125, 159, 244, 0.9),
+    510rpx 910rpx 0 0 rgba(125, 159, 244, 0.8),
+    110rpx 1010rpx 0 0 rgba(125, 159, 244, 0.7),
+    650rpx 810rpx 0 0 rgba(125, 159, 244, 0.9),
+    450rpx 1110rpx 0 0 rgba(125, 159, 244, 0.7),
+    260rpx 1220rpx 0 0 rgba(125, 159, 244, 0.8),
+    560rpx 1320rpx 0 0 rgba(125, 159, 244, 0.7),
+    680rpx 1150rpx 0 0 rgba(125, 159, 244, 0.9),
+    70rpx 70rpx 0 0 rgba(125, 159, 244, 0.8),
+    170rpx 170rpx 0 0 rgba(125, 159, 244, 0.7),
+    270rpx 270rpx 0 0 rgba(125, 159, 244, 0.9),
+    370rpx 570rpx 0 0 rgba(125, 159, 244, 0.7),
+    470rpx 670rpx 0 0 rgba(125, 159, 244, 0.8),
+    570rpx 770rpx 0 0 rgba(125, 159, 244, 0.7),
+    670rpx 870rpx 0 0 rgba(125, 159, 244, 0.9),
+    190rpx 890rpx 0 0 rgba(125, 159, 244, 0.8),
+    290rpx 990rpx 0 0 rgba(125, 159, 244, 0.7),
+    390rpx 1190rpx 0 0 rgba(125, 159, 244, 0.9),
+    490rpx 1290rpx 0 0 rgba(125, 159, 244, 0.7),
+    590rpx 190rpx 0 0 rgba(125, 159, 244, 0.8),
+    690rpx 390rpx 0 0 rgba(125, 159, 244, 0.7),
+    85rpx 585rpx 0 0 rgba(125, 159, 244, 0.9);
+  animation: twinkle-medium 6s infinite ease-in-out;
+}
+
+/* 稍亮星星 - 点缀 */
+.stars-large {
+  width: 3rpx;
+  height: 3rpx;
+  border-radius: 50%;
+  box-shadow: 
+    220rpx 280rpx 0 0 rgba(255, 255, 255, 0.95),
+    520rpx 480rpx 0 0 rgba(255, 255, 255, 0.9),
+    180rpx 580rpx 0 0 rgba(255, 255, 255, 0.95),
+    480rpx 180rpx 0 0 rgba(255, 255, 255, 0.9),
+    620rpx 730rpx 0 0 rgba(255, 255, 255, 0.95),
+    380rpx 930rpx 0 0 rgba(255, 255, 255, 0.9),
+    670rpx 430rpx 0 0 rgba(255, 255, 255, 0.95),
+    120rpx 1180rpx 0 0 rgba(255, 255, 255, 0.9),
+    420rpx 1280rpx 0 0 rgba(255, 255, 255, 0.95),
+    320rpx 380rpx 0 0 rgba(255, 255, 255, 0.9),
+    620rpx 280rpx 0 0 rgba(255, 255, 255, 0.95),
+    280rpx 680rpx 0 0 rgba(255, 255, 255, 0.9),
+    580rpx 880rpx 0 0 rgba(255, 255, 255, 0.95),
+    180rpx 1080rpx 0 0 rgba(255, 255, 255, 0.9),
+    480rpx 820rpx 0 0 rgba(255, 255, 255, 0.95);
+  animation: twinkle-large 7s infinite ease-in-out;
+}
+
+/* 星星闪烁动画 - 柔和自然 */
+@keyframes twinkle-small {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes twinkle-medium {
+  0%, 100% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.3);
+  }
+}
+
+@keyframes twinkle-large {
+  0%, 100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.5);
+  }
+}
+
+/* 流星效果 */
+.meteor {
+  position: fixed;
+  width: 150rpx;
+  height: 1rpx;
+  background: linear-gradient(to left, 
+    transparent 0%,
+    rgba(125, 159, 244, 0.1) 15%,
+    rgba(125, 159, 244, 0.4) 30%,
+    rgba(155, 189, 255, 0.7) 50%,
+    rgba(200, 220, 255, 0.9) 70%,
+    rgba(255, 255, 255, 0.95) 85%,
+    #ffffff 100%);
+  border-radius: 50%;
+  transform: rotate(-45deg);
+  box-shadow: 0 0 15rpx 2rpx rgba(125, 159, 244, 0.5),
+              0 0 30rpx 4rpx rgba(125, 159, 244, 0.2);
+  z-index: 9999;
+  filter: blur(0.3rpx);
+}
+
+/* 流星动画 */
+@keyframes shooting-star {
+  0% {
+    opacity: 0;
+    transform: translateX(0) translateY(0) rotate(-45deg) scale(0.8);
+  }
+  3% {
+    opacity: 1;
+    transform: translateX(-80rpx) translateY(80rpx) rotate(-45deg) scale(1);
+  }
+  97% {
+    opacity: 1;
+    transform: translateX(-620rpx) translateY(620rpx) rotate(-45deg) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-700rpx) translateY(700rpx) rotate(-45deg) scale(0.8);
+  }
+}
+
+/* 5颗流星的不同配置 - 从最右边一个个出现 */
+.meteor-1 {
+  top: 8%;
+  right: -200rpx;
+  animation: shooting-star 3s ease-out infinite;
+  animation-delay: 0.5s;
+}
+
+.meteor-2 {
+  top: 25%;
+  right: -200rpx;
+  animation: shooting-star 3.2s ease-out infinite;
+  animation-delay: 1.5s;
+}
+
+.meteor-3 {
+  top: 15%;
+  right: -200rpx;
+  animation: shooting-star 2.8s ease-out infinite;
+  animation-delay: 2.5s;
+}
+
+.meteor-4 {
+  top: 40%;
+  right: -200rpx;
+  animation: shooting-star 3.5s ease-out infinite;
+  animation-delay: 3.5s;
+}
+
+.meteor-5 {
+  top: 30%;
+  right: -200rpx;
+  animation: shooting-star 3.1s ease-out infinite;
+  animation-delay: 4.5s;
 }
 
 /* 头部Logo部分 */
 .header {
   width: 100%;
+  max-width: 600rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 100rpx;
+  margin-bottom: 80rpx;
+  transform: translateY(-40rpx);
 }
 
 .logo-container {
-  margin-bottom: 30rpx;
+  margin-bottom: 48rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+/* Logo 装饰圆环 */
+.logo-container::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300rpx;
+  height: 300rpx;
+  border: 2rpx solid rgba(125, 159, 244, 0.2);
+  border-radius: 50%;
+  animation: rotate 15s linear infinite;
+}
+
+.logo-container::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 260rpx;
+  height: 260rpx;
+  border: 2rpx solid rgba(125, 159, 244, 0.1);
+  border-top-color: rgba(125, 159, 244, 0.3);
+  border-radius: 50%;
+  animation: rotate 10s linear infinite reverse;
+}
+
+@keyframes rotate {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
 }
 
 .logo-avatar {
-  width: 180rpx;
-  height: 180rpx;
+  width: 200rpx;
+  height: 200rpx;
   border-radius: 50%;
-  background: linear-gradient(135deg, #3a4a9c, #7d97ff);
+  background-color: #7D9FF4;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 12rpx 40rpx rgba(125, 159, 244, 0.35),
+              0 0 0 1rpx rgba(255, 255, 255, 0.05);
   position: relative;
-  overflow: hidden;
-  box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.3);
+  z-index: 1;
+  animation: pulse 3s ease-in-out infinite;
 }
 
-.logo-avatar::before {
-  content: '';
-  position: absolute;
-  top: -20rpx;
-  left: -20rpx;
-  right: -20rpx;
-  bottom: -20rpx;
-  background: radial-gradient(circle at center, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
-  z-index: 1;
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 12rpx 40rpx rgba(125, 159, 244, 0.35),
+                0 0 0 1rpx rgba(255, 255, 255, 0.05);
+  }
+  50% {
+    box-shadow: 0 16rpx 50rpx rgba(125, 159, 244, 0.5),
+                0 0 0 1rpx rgba(255, 255, 255, 0.1);
+  }
 }
 
 .logo-text {
   color: #ffffff;
-  font-size: 100rpx;
+  font-size: 76rpx;
   font-weight: bold;
-  z-index: 2;
-  text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.3);
+  line-height: 1;
+}
+
+.logo-image {
+  width: 260rpx;
+  height: 260rpx;
+  border-radius: 50%;
 }
 
 .app-name {
   font-size: 48rpx;
   font-weight: bold;
   color: #ffffff;
-  margin-bottom: 15rpx;
+  margin-bottom: 20rpx;
+  text-align: center;
+  letter-spacing: 2rpx;
+  animation: fadeInUp 0.8s ease-out;
 }
 
 .app-slogan {
-  font-size: 28rpx;
-  color: rgba(255, 255, 255, 0.8);
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  letter-spacing: 1rpx;
+  animation: fadeInUp 1s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* 登录选项 */
 .login-options {
   width: 100%;
+  max-width: 800rpx;
   display: flex;
   flex-direction: column;
-  margin-bottom: 50rpx;
+  align-items: center;
+  gap: 24rpx;
+  margin-bottom: 48rpx;
 }
 
 .login-btn {
-  height: 100rpx;
-  border-radius: 50rpx;
+  width: 100%;
+  min-width: 600rpx;
+  height: 96rpx;
+  border-radius: 16rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 30rpx;
-  font-size: 28rpx;
+  font-size: 32rpx;
+  font-weight: 500;
+  border: none;
+  box-sizing: border-box;
   position: relative;
-  box-shadow: 0 6rpx 12rpx rgba(0, 0, 0, 0.15);
-  text-align: center;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.login-btn::after {
+  border: none;
+}
+
+/* 按钮光效 */
+.login-btn::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+  transform: rotate(45deg);
+  animation: shine 3s infinite;
+}
+
+@keyframes shine {
+  0% {
+    left: -200%;
+  }
+  100% {
+    left: 200%;
+  }
 }
 
 .wechat-login {
-  background: linear-gradient(to right, #3dc551, #42b853);
-  color: white;
+  background-color: #07C160;
+  color: #ffffff;
+  box-shadow: 0 8rpx 24rpx rgba(7, 193, 96, 0.25);
+  animation: slideInLeft 0.6s ease-out;
 }
 
 .phone-login {
-  background: linear-gradient(to right, #7d97ff, #5565d9);
-  color: white;
+  background-color: #7D9FF4;
+  color: #ffffff;
+  box-shadow: 0 8rpx 24rpx rgba(125, 159, 244, 0.3);
+  animation: slideInRight 0.6s ease-out;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .btn-icon {
   width: 40rpx;
   height: 40rpx;
-  margin-right: 10rpx;
-  flex-shrink: 0;
+  margin-right: 12rpx;
 }
 
 /* 隐私政策 */
 .privacy-policy {
+  width: 100%;
+  max-width: 680rpx;
   display: flex;
   align-items: center;
-  margin-bottom: 30rpx;
-  padding: 0 30rpx;
+  justify-content: center;
+  margin-bottom: 32rpx;
+  animation: fadeIn 1.2s ease-out;
+}
+
+.privacy-policy checkbox {
+  margin-top: 0;
+  flex-shrink: 0;
 }
 
 .policy-text {
-  font-size: 24rpx;
-  color: rgba(255, 255, 255, 0.6);
-  margin-left: 10rpx;
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 0;
+  margin-left: 12rpx;
+  line-height: 1.5;
+  text-align: left;
 }
 
 .policy-link {
@@ -136,10 +564,22 @@
 
 /* 游客模式 */
 .guest-login {
-  margin-top: 50rpx;
+  width: 100%;
+  max-width: 600rpx;
   font-size: 28rpx;
-  color: rgba(255, 255, 255, 0.5);
-  padding: 20rpx 40rpx;
-  border-radius: 40rpx;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-} 
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+  padding: 24rpx;
+  box-sizing: border-box;
+  animation: fadeIn 1.4s ease-out;
+  text-decoration: underline;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

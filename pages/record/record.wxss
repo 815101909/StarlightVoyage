@@ -57,11 +57,20 @@
 .login-btn, .create-btn {
   width: 60%;
   height: 80rpx;
-  line-height: 80rpx;
   background-color: #3a79fe;
   color: #ffffff;
   border-radius: 40rpx;
   font-size: 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.login-btn::after, .create-btn::after {
+  border: none;
 }
 
 /* 记录列表样式 */

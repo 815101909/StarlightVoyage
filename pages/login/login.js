@@ -3,14 +3,36 @@ Page({
    * 页面的初始数据
    */
   data: {
-    policyChecked: false
+    policyChecked: false,
+    logoUrl: '' // Logo图片临时链接
   },
 
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-    
+    // 获取Logo图片临时链接
+    this.getTempLogoUrl();
+  },
+
+  /**
+   * 获取Logo图片临时链接
+   */
+  getTempLogoUrl: function() {
+    wx.cloud.getTempFileURL({
+      fileList: ['cloud://cloud1-1gsyt78b92c539ef.636c-cloud1-1gsyt78b92c539ef-1370520707/icon/星河.png'],
+      success: res => {
+        if (res.fileList && res.fileList.length > 0) {
+          this.setData({
+            logoUrl: res.fileList[0].tempFileURL
+          });
+          console.log('Logo临时链接获取成功:', res.fileList[0].tempFileURL);
+        }
+      },
+      fail: err => {
+        console.error('获取Logo临时链接失败:', err);
+      }
+    });
   },
 
   /**
@@ -190,7 +212,7 @@ Page({
     
     // 确保用户信息完整
     const completeUserInfo = {
-      nickName: userInfo.nickName || "晓视界用户",
+      nickName: userInfo.nickName || "小舟摇星河用户",
       avatar: userInfo.avatarUrl || "",  // 修正字段名
       userId: userInfo.userId || Date.now().toString(),
       phoneNumber: userInfo.phoneNumber || "",

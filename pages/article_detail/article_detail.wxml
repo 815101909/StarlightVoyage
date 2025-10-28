@@ -18,74 +18,185 @@
   <!-- Star background animation -->
   <view class="star-bg"></view>
   
-  <!-- Article header with cover -->
-  <view class="article-header">
-    <view class="header-content">
-      <image class="article-cover" 
-             src="{{article.coverUrl}}" 
-             mode="aspectFill"
-             wx:if="{{article.coverUrl}}"
-             binderror="handleCoverError"
-             lazy-load="{{true}}"></image>
-      <view class="article-info">
-        <view class="article-title">{{article.title}}</view>
-        <view class="article-meta">
-          <text class="article-date">{{article.date}}</text>
-          <text class="article-tag" wx:if="{{article.category}}">{{article.category}}</text>
+  <!-- 整体滚动容器 -->
+  <scroll-view scroll-y class="main-scroll-view">
+    <!-- Article header with cover -->
+    <view class="article-header">
+      <view class="header-content">
+        <view class="cover-container">
+          <image class="article-cover" 
+                 src="{{article.coverUrl}}" 
+                 mode="aspectFill"
+                 wx:if="{{article.coverUrl}}"
+                 binderror="handleCoverError"
+                 lazy-load="{{true}}"></image>
+          <!-- 标题叠加在图片底部 -->
+          <view class="title-overlay">
+            <view class="article-title">{{article.title}}</view>
+          </view>
         </view>
-        <!-- Wavy line divider with 小舟摇星河 text -->
-        <view class="wavy-divider">
-          <view class="wavy-line left"></view>
-          <text class="divider-text">小舟摇星河</text>
-          <view class="wavy-line right"></view>
-        </view>
-      </view>
-    </view>
-  </view>
-  
-  <!-- Control bar -->
-  <view class="control-bar">
-    <view class="button-row">
-      <!-- 所有按钮统一放在一起 -->
-      <view class="left-buttons">
-        <view class="action-btn read-btn" bindtap="toggleBgm" hover-class="hover">
-          <text class="icon-read">🔊</text>
-        </view>
-        <view class="action-btn bookmark-btn {{isBookmarked ? 'bookmarked' : ''}}" bindtap="bookmarkArticle" hover-class="hover">
-          <text class="icon-bookmark">{{isBookmarked ? '★' : '☆'}}</text>
-        </view>
-        <view class="action-btn print-btn" bindtap="printArticle" hover-class="hover">
-          <text class="icon-print">🖨️</text>
-        </view>
-        <view class="action-btn exercise-btn" bindtap="showExercises" hover-class="hover">
-          <text class="icon-exercise">📝</text>
-        </view>
-        <view class="action-btn font-decrease-btn" bindtap="decreaseFontSize" hover-class="hover">
-          <text>A-</text>
-        </view>
-        <view class="action-btn font-increase-btn" bindtap="increaseFontSize" hover-class="hover">
-          <text>A+</text>
+        <view class="article-info">
+          <view class="article-meta">
+            <text class="article-date">{{article.date}}</text>
+          </view>
         </view>
       </view>
     </view>
-  </view>
+    
+    <!-- Control bar -->
+    <view class="control-bar">
+      <view class="button-row">
+        <!-- 所有按钮统一放在一起 -->
+        <view class="left-buttons">
+          <view class="action-btn read-btn" bindtap="toggleBgm" hover-class="hover">
+            <text class="icon-read">♪</text>
+          </view>
+          <view class="action-btn bookmark-btn {{isBookmarked ? 'bookmarked' : ''}}" bindtap="bookmarkArticle" hover-class="hover">
+            <text class="icon-bookmark">{{isBookmarked ? '★' : '☆'}}</text>
+          </view>
+          <view class="action-btn print-btn" bindtap="printArticle" hover-class="hover">
+            <text class="icon-print">🖨️</text>
+          </view>
+          <view class="action-btn exercise-btn" bindtap="showExercises" hover-class="hover">
+            <text class="icon-exercise">📝</text>
+          </view>
+          <view class="action-btn font-decrease-btn" bindtap="decreaseFontSize" hover-class="hover">
+            <text>A-</text>
+          </view>
+          <view class="action-btn font-increase-btn" bindtap="increaseFontSize" hover-class="hover">
+            <text>A+</text>
+          </view>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 思考题框 -->
+    <view class="thinking-question-box">
+      <view class="thinking-question-header">
+        <text class="thinking-icon">💭</text>
+        <text class="thinking-title">思考</text>
+      </view>
+      <view class="thinking-question-content">
+        <text class="question-text">{{article.thinkingQuestion || '通过阅读本文，你认为人类探索宇宙的意义是什么？未来的太空探索会给我们带来哪些改变？'}}</text>
+      </view>
+      <view class="thinking-question-tips">
+        <text class="tips-text">小提示: 思考这个问题可以帮助你更深入地理解文章内容</text>
+      </view>
+    </view>
+    
+          <!-- 翻页容器 - 3D书页堆叠 -->
+          <view class="content-swiper">
+            <!-- 页面3：结论（最底层）-->
+            <view 
+              wx:if="{{article.conclusionNodes || (article.conclusionImages && article.conclusionImages.length > 0)}}"
+              class="page-layer page-layer-3 {{currentPage > 2 ? 'flipped' : ''}} {{currentPage === 2 ? 'active-page' : 'inactive-page'}}"
+              style="{{page3Style}}"
+              bindtouchstart="onPageTouchStart"
+              bindtouchmove="onPageTouchMove"
+              bindtouchend="onPageTouchEnd">
+              <view class="page-content">
+                <view class="page-number-corner">3</view>
+                <view class="section-header-bar">
+                  <view class="section-badge">结论</view>
+                  <view class="section-line"></view>
+                </view>
+                <view class="content-box conclusion-box" wx:if="{{article.conclusionNodes}}">
+                  <rich-text nodes="{{article.conclusionNodes}}" class="rich-content"></rich-text>
+                </view>
+                <view class="image-group" wx:if="{{article.conclusionImages && article.conclusionImages.length > 0}}">
+                  <block wx:for="{{article.conclusionImages}}" wx:key="url">
+                    <image 
+                      src="{{item.url}}"
+                      mode="widthFix"
+                      class="content-image"
+                      lazy-load="true"
+                      bindtap="previewImage"
+                      data-url="{{item.url}}"
+                    ></image>
+                    <view class="image-desc-box">{{item.description}}</view>
+                  </block>
+                </view>
+                <!-- 底部占位，避免被音频播放器遮挡 -->
+                <view class="page-bottom-spacer"></view>
+              </view>
+            </view>
+
+            <!-- 页面2：正文（中间层）-->
+            <view 
+              wx:if="{{article.contentNodes || (article.contentImages && article.contentImages.length > 0)}}"
+              class="page-layer page-layer-2 {{currentPage > 1 ? 'flipped' : ''}} {{isFlipping && currentPage === 1 ? 'flipping' : ''}} {{currentPage === 1 ? 'active-page' : 'inactive-page'}}"
+              style="{{page2Style}}"
+              bindtouchstart="onPageTouchStart"
+              bindtouchmove="onPageTouchMove"
+              bindtouchend="onPageTouchEnd">
+              <view class="page-content">
+                <view class="page-number-corner">2</view>
+                <view class="section-header-bar">
+                  <view class="section-badge">正文</view>
+                  <view class="section-line"></view>
+                </view>
+                <view class="content-box main-content-box" wx:if="{{article.contentNodes}}">
+                  <rich-text nodes="{{article.contentNodes}}" class="rich-content"></rich-text>
+                </view>
+                <view class="image-group" wx:if="{{article.contentImages && article.contentImages.length > 0}}">
+                  <block wx:for="{{article.contentImages}}" wx:key="url">
+                    <image 
+                      src="{{item.url}}"
+                      mode="widthFix"
+                      class="content-image"
+                      lazy-load="true"
+                      bindtap="previewImage"
+                      data-url="{{item.url}}"
+                    ></image>
+                    <view class="image-desc-box">{{item.description}}</view>
+                  </block>
+                </view>
+                <!-- 底部占位，避免被音频播放器遮挡 -->
+                <view class="page-bottom-spacer"></view>
+              </view>
+            </view>
+
+            <!-- 页面1：引言（最上层，像封面）-->
+            <view 
+              wx:if="{{article.introNodes || (article.introImages && article.introImages.length > 0)}}"
+              class="page-layer page-layer-1 {{currentPage > 0 ? 'flipped' : ''}} {{isFlipping && currentPage === 0 ? 'flipping' : ''}} {{currentPage === 0 ? 'active-page' : 'inactive-page'}}"
+              style="{{page1Style}}"
+              bindtouchstart="onPageTouchStart"
+              bindtouchmove="onPageTouchMove"
+              bindtouchend="onPageTouchEnd">
+              <view class="page-content">
+                <view class="page-number-corner">1</view>
+                <view class="section-header-bar">
+                  <view class="section-badge">引言</view>
+                  <view class="section-line"></view>
+                </view>
+                <view class="content-box intro-box" wx:if="{{article.introNodes}}">
+                  <rich-text nodes="{{article.introNodes}}" class="rich-content"></rich-text>
+                </view>
+                <view class="image-group" wx:if="{{article.introImages && article.introImages.length > 0}}">
+                  <block wx:for="{{article.introImages}}" wx:key="url">
+                    <image 
+                      src="{{item.url}}"
+                      mode="widthFix"
+                      class="content-image"
+                      lazy-load="true"
+                      bindtap="previewImage"
+                      data-url="{{item.url}}"
+                    ></image>
+                    <view class="image-desc-box">{{item.description}}</view>
+                  </block>
+                </view>
+                <!-- 底部占位，避免被音频播放器遮挡 -->
+                <view class="page-bottom-spacer"></view>
+              </view>
+            </view>
+          </view>
+    
+    <view class="content-bottom-spacer"></view>
+  </scroll-view>
   
-  <!-- 思考题框 -->
-  <view class="thinking-question-box">
-    <view class="thinking-question-header">
-      <text class="thinking-icon">💭</text>
-      <text class="thinking-title">思考</text>
-    </view>
-    <view class="thinking-question-content">
-      <text class="question-text">{{article.thinkingQuestion || '通过阅读本文，你认为人类探索宇宙的意义是什么？未来的太空探索会给我们带来哪些改变？'}}</text>
-    </view>
-    <view class="thinking-question-tips">
-      <text class="tips-text">小提示: 思考这个问题可以帮助你更深入地理解文章内容</text>
-    </view>
-  </view>
-  
-  <!-- 朗读播放器 -->
-  <view class="audio-player" wx:if="{{article.voice}}">
+  <!-- 固定在底部的朗读播放器 -->
+  <view class="audio-player-fixed" wx:if="{{article.voice}}">
     <view class="audio-player-header">
       <text class="audio-title">🎧 文章朗读</text>
     </view>
@@ -102,95 +213,66 @@
         </view>
       </view>
     </view>
-    <!-- 进度条和时间显示 -->
-     <view class="audio-progress">
-       <text class="time-text">{{utils.formatTime(audioCurrentTime)}}</text>
-       <view class="progress-container">
-         <view class="progress-bar">
-           <view class="progress-bg"></view>
-           <view class="progress-fill" style="width: {{audioProgress}}%"></view>
-           <view class="progress-thumb" style="left: {{audioProgress}}%"></view>
-         </view>
-       </view>
-       <text class="time-text">{{utils.formatTime(audioDuration)}}</text>
-     </view>
+    <view class="audio-progress">
+      <text class="time-text">{{utils.formatTime(audioCurrentTime)}}</text>
+      <view class="progress-container">
+        <view class="progress-bar">
+          <view class="progress-bg"></view>
+          <view class="progress-fill" style="width: {{audioProgress}}%"></view>
+          <view class="progress-thumb" style="left: {{audioProgress}}%"></view>
+        </view>
+      </view>
+      <text class="time-text">{{utils.formatTime(audioDuration)}}</text>
+    </view>
   </view>
   
-  <!-- Article content -->
-  <view class="article-wrapper" style="position: relative;">
-    <scroll-view scroll-y="{{!showMemberLock}}" class="article-content {{showMemberLock ? 'locked' : ''}}" style="font-size: {{fontSize}}rpx">
-    <!-- 引言部分 -->
-    <view class="content-box intro-box" style="font-size: {{fontSize}}rpx;" wx:if="{{article.introNodes}}">
-      <rich-text nodes="{{article.introNodes}}" class="rich-content" bindtap="onRichTextTap"></rich-text>
+  <!-- 悬浮的亲子讨论宝箱按钮 -->
+  <view class="discussion-float-btn" bindtap="toggleDiscussionBox">
+    <view class="treasure-box-icon">
+      <image class="box-icon-img" src="icon/key.png" mode="aspectFit"></image>
     </view>
-    <!-- 引言图片 -->
-    <view class="image-group" wx:if="{{article.introImages && article.introImages.length > 0}}">
-      <block wx:for="{{article.introImages}}" wx:key="url">
-        <image 
-          src="{{item.url}}"
-          mode="widthFix"
-          class="content-image"
-          lazy-load="true"
-          bindtap="previewImage"
-          data-url="{{item.url}}"
-        ></image>
-        <view class="image-desc-box">{{item.description}}</view>
-      </block>
-    </view>
-    
-    <!-- 主要内容部分 -->
-    <view class="content-box main-content-box" style="font-size: {{fontSize}}rpx;" wx:if="{{article.contentNodes}}">
-      <rich-text nodes="{{article.contentNodes}}" class="rich-content" bindtap="onRichTextTap"></rich-text>
-    </view>
-    <!-- 主要内容图片 -->
-    <view class="image-group" wx:if="{{article.contentImages && article.contentImages.length > 0}}">
-      <block wx:for="{{article.contentImages}}" wx:key="url">
-        <image 
-          src="{{item.url}}"
-          mode="widthFix"
-          class="content-image"
-          lazy-load="true"
-          bindtap="previewImage"
-          data-url="{{item.url}}"
-        ></image>
-        <view class="image-desc-box">{{item.description}}</view>
-      </block>
-    </view>
-    
-    <!-- 结论部分 -->
-    <view class="content-box conclusion-box" style="font-size: {{fontSize}}rpx;" wx:if="{{article.conclusionNodes}}">
-      <rich-text nodes="{{article.conclusionNodes}}" class="rich-content" bindtap="onRichTextTap"></rich-text>
-    </view>
-    <!-- 结论图片 -->
-    <view class="image-group" wx:if="{{article.conclusionImages && article.conclusionImages.length > 0}}">
-      <block wx:for="{{article.conclusionImages}}" wx:key="url">
-        <image 
-          src="{{item.url}}"
-          mode="widthFix"
-          class="content-image"
-          lazy-load="true"
-          bindtap="previewImage"
-          data-url="{{item.url}}"
-        ></image>
-        <view class="image-desc-box">{{item.description}}</view>
-      </block>
-    </view>
-  </scroll-view>
-  
-  <!-- 会员锁定遮罩 -->
-  <view class="member-lock-overlay" wx:if="{{showMemberLock}}">
-    <view class="lock-content">
-      <text class="lock-icon">🔒</text>
-      <text class="lock-title">会员专享内容</text>
-      <text class="lock-desc">查看完整文章需要开通会员</text>
-      <view class="unlock-btn" bindtap="goToMemberCenter">
-        <text class="unlock-text">立即开通会员</text>
+    <text class="float-btn-text">讨论</text>
+  </view>
+
+  <!-- 亲子讨论弹窗 -->
+  <view class="discussion-overlay" wx:if="{{showDiscussionBox}}" catchtap="closeDiscussionBox">
+    <view class="discussion-content" catchtap="stopPropagation">
+      <view class="discussion-header">
+        <image class="discussion-icon" src="icon/treasure.png" mode="aspectFit"></image>
+        <text class="discussion-title">亲子讨论互动</text>
+        <view class="close-btn" bindtap="closeDiscussionBox">
+          <text>✕</text>
+        </view>
+      </view>
+      <view class="discussion-body">
+        <view class="discussion-subtitle">一起探索这些问题吧~</view>
+        <view class="discussion-questions">
+          <view class="question-item" wx:for="{{discussionQuestions}}" wx:key="index">
+            <view class="question-number">{{index + 1}}</view>
+            <text class="question-text">{{item}}</text>
+          </view>
+        </view>
+        <view class="discussion-tips">
+          <text class="tips-content">提示：没有标准答案，鼓励自由表达想法</text>
+        </view>
       </view>
     </view>
   </view>
-  
-  <!-- 播放器占位空白区域 -->
-  <view class="player-spacer"></view>
-  
+
+  <!-- 会员锁定遮罩 -->
+  <view class="member-lock-overlay" wx:if="{{showMemberLock}}" catchtap="handleLockOverlayTap">
+    <view class="lock-content" catchtap="stopPropagation">
+      <text class="lock-icon">🔒</text>
+      <text class="lock-title">会员专享内容</text>
+      <text class="lock-desc">后续内容需要开通会员才能查看</text>
+      <view class="lock-buttons">
+        <view class="unlock-btn secondary" bindtap="closeMemberLock">
+          <text class="unlock-text">继续看第一页</text>
+        </view>
+        <view class="unlock-btn primary" bindtap="goToMemberCenter">
+          <text class="unlock-text">立即开通会员</text>
+        </view>
+      </view>
+    </view>
   </view>
 </view>

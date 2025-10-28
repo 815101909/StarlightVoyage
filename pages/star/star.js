@@ -573,22 +573,43 @@ Page({
     
     this.setData({ loading: true });
     
-    videoAPI.getA4Content().then(result => {
+    videoAPI.getA4Content().then(async result => {
       if (result && result.data) {
         const sections = result.data
           .filter(item => ['universe-structure', 'celestial-types', 'energy-fields', 'where-we-are'].includes(item.category))
-          .sort((a, b) => a.order - b.order)
-          .map(item => ({
-            id: item.category,
-            title: item.title
-          }));
+          .sort((a, b) => a.order - b.order);
+        
+        // 转换云存储URL为临时链接
+        for (let item of sections) {
+          if (item.coverUrl && item.coverUrl.startsWith('cloud://')) {
+            try {
+              const res = await wx.cloud.getTempFileURL({
+                fileList: [item.coverUrl]
+              });
+              if (res.fileList && res.fileList.length > 0) {
+                item.coverUrl = res.fileList[0].tempFileURL;
+              }
+            } catch (error) {
+              console.error(`封面转换失败:`, error);
+              item.coverUrl = '';
+            }
+          }
+        }
+        
+        const sectionsData = sections.map(item => ({
+          id: item.category,
+          title: item.title,
+          coverUrl: item.coverUrl || '',
+          description: item.description || ''
+        }));
 
         self.setData({
-          sections: sections,
+          sections: sectionsData,
           loading: false
         });
       }
     }).catch(err => {
+      console.error('加载A4内容失败:', err);
       self.setData({ loading: false });
       wx.showToast({
         title: '加载失败，请重试',
@@ -623,12 +644,12 @@ Page({
 
   // 视频开始播放
   onVideoPlay: function(e) {
-    console.log('视频开始播放:', e);
+    // 视频开始播放
   },
 
   // 视频暂停
   onVideoPause: function(e) {
-    console.log('视频暂停:', e);
+    // 视频暂停
   },
 
   // 视频播放出错
@@ -638,17 +659,17 @@ Page({
 
   // 视频加载中
   onVideoWaiting: function(e) {
-    console.log('视频加载中:', e);
+    // 视频加载中
   },
 
   // 视频播放进度更新
   onVideoTimeUpdate: function(e) {
-    console.log('视频播放进度:', e.detail.currentTime);
+    // 视频播放进度更新
   },
 
   // 视频播放结束
   onVideoEnded: function(e) {
-    console.log('视频播放结束:', e);
+    // 视频播放结束
   },
 
   // 检查会员是否过期
@@ -661,8 +682,6 @@ Page({
         action: 'checkMemberExpiry'
       },
       success: function(res) {
-        console.log('会员过期检查结果:', res.result);
-        
         if (res.result.success) {
           if (res.result.expired) {
             // 会员已过期，更新全局用户信息
@@ -671,16 +690,12 @@ Page({
               app.globalData.userInfo.memberLevel = 0;
             }
             
-            console.log('会员已过期，已更新状态');
-            
             // 可以在这里添加提示用户续费的逻辑
             wx.showToast({
               title: '会员已过期',
               icon: 'none',
               duration: 2000
             });
-          } else {
-            console.log('会员状态正常或用户非会员');
           }
         } else {
           console.error('检查会员过期状态失败:', res.result.message);
