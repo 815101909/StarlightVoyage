@@ -47,7 +47,7 @@ async function addWish(data, openid) {
         starSize: data.starSize,
         createTime: db.serverDate(),
         updateTime: db.serverDate(),
-        isPublic: true,
+        isPublic: false,
         likes: 0,
         likedBy: []
       }
@@ -67,30 +67,20 @@ async function addWish(data, openid) {
 // 获取愿望列表
 async function getWishList(data, openid) {
   try {
-    const { isPublic } = data || {}
-    let query = {
-      status: 'active'
-    }
-    
-    // 如果指定了isPublic，则添加到查询条件
-    if (typeof isPublic === 'boolean') {
+    const { isPublic, onlyMine } = data || {}
+    let query = { status: 'active' }
+
+    if (onlyMine) {
+      query._openid = openid
+    } else if (typeof isPublic === 'boolean') {
       query.isPublic = isPublic
     }
 
-    const result = await wishesCollection
-      .where(query)
-      .orderBy('createTime', 'desc')
-      .get()
+    const result = await wishesCollection.where(query).orderBy('createTime', 'desc').get()
 
-    return {
-      success: true,
-      data: result.data
-    }
+    return { success: true, data: result.data }
   } catch (err) {
-    return {
-      success: false,
-      error: err
-    }
+    return { success: false, error: err }
   }
 }
 
@@ -178,4 +168,4 @@ async function likeWish(data, openid) {
       error: err
     }
   }
-} 
+}

@@ -941,11 +941,12 @@ page {
 
 /* 轮播组件样式 */
 .starmap-swiper {
-  width: 100%;
-  height: 400rpx;
+  width: 78%;
+  height: 380rpx;
   border-radius: 12rpx;
   overflow: hidden;
   box-shadow: 0 4rpx 15rpx rgba(0, 0, 0, 0.3);
+  margin: 0 auto;
 }
 
 /* 星图描述文本框样式 */
@@ -1001,11 +1002,12 @@ page {
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 16rpx;
+  padding: 16rpx 16rpx 40rpx 16rpx;
   background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
   display: flex;
   align-items: flex-end;
   height: 40%;
+  z-index: 2;
 }
 
 .starmap-title {
@@ -1013,6 +1015,11 @@ page {
   font-weight: bold;
   color: #ffffff;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+/* 调整华夏星空轮播指示点位置，避免遮挡标题 */
+.starmap-swiper .wx-swiper-dots {
+  bottom: 8rpx;
 }
 
 /* 按钮激活状态 */
@@ -2466,7 +2473,7 @@ page {
   padding: 12rpx 0;
   background-color: rgba(15, 26, 56, 0.6);
   border-radius: 12rpx;
-  margin-bottom: 16rpx;
+  margin-bottom: 6rpx;
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -2562,7 +2569,7 @@ page {
 
 .expression-header {
   text-align: center;
-  margin-bottom: 30rpx;
+  margin-bottom: 10rpx; /* 减少与轮播图的间距 */
 }
 
 .expression-title {
@@ -2590,6 +2597,7 @@ page {
   transition: all 0.3s ease;
   background: linear-gradient(135deg, rgba(15, 26, 56, 0.8), rgba(25, 42, 78, 0.8));
   border: 1px solid rgba(125, 159, 244, 0.2);
+  margin: 10rpx auto;
 }
 
 .expression-card:hover {
@@ -2601,12 +2609,13 @@ page {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: brightness(0.6);
+  filter: brightness(0.85);
   transition: all 0.3s ease;
 }
 
+/* 亮度调整 */
 .expression-card:hover .magazine-cover {
-  filter: brightness(0.8);
+  filter: brightness(1.0);
   transform: scale(1.05);
 }
 
@@ -4988,11 +4997,12 @@ page {
 
 /* 轮播组件样式 */
 .starmap-swiper {
-  width: 100%;
-  height: 400rpx;
+  width: 78%;
+  height: 380rpx;
   border-radius: 12rpx;
   overflow: hidden;
   box-shadow: 0 4rpx 15rpx rgba(0, 0, 0, 0.3);
+  margin: 0 auto;
 }
 
 /* 溯源和命名卡片样式 */
@@ -6272,6 +6282,18 @@ page {
   .detail-card-image {
     height: 300rpx;
   }
+}
+
+/* 星宿表达轮播样式调整 */
+.expression-panel .magazine-swiper {
+  height: 410rpx;
+  margin-top: -10rpx;
+}
+
+.expression-panel .magazine-card {
+  width: 88%;
+  height: 82%;
+  margin: 8rpx auto;
 }
 
 /* 星宿表达轮播图指示点样式 - 与星宿功能保持一致 */

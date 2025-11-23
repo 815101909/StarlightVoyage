@@ -35,7 +35,7 @@ exports.main = async (event, context) => {
  */
 async function getArticles(event) {
   try {
-    const { date, category, page = 1, limit = 10, status } = event
+    const { date, category, type, page = 1, limit = 10, status } = event
     console.log('获取文章列表参数:', event)
     
     // 构建查询条件
@@ -72,8 +72,16 @@ async function getArticles(event) {
       })
     }
     
+    // 严格按英文枚举过滤分类，避免混入其它类别
     if (category && category !== '全部') {
-      whereConditions.category = category
+      if (category === 'news' || category === 'review') {
+        whereConditions.category = category
+      } else {
+        whereConditions.category = category
+      }
+    }
+    if (type) {
+      whereConditions.type = type
     }
     
     console.log('最终查询条件:', whereConditions)
@@ -95,13 +103,33 @@ async function getArticles(event) {
       }
     }
     
-    // 查询文章
-    const result = await db.collection('star_articles')
-      .where(whereConditions)
-      .orderBy('publishTime', 'desc')  // 按发布时间倒序排列
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .get()
+    // 根据类别选择排序字段（回顾优先按策展分值）
+    let sortField = 'publishTime'
+    if (whereConditions.category === 'review') {
+      sortField = 'curationScore'
+    }
+
+    let result
+    try {
+      result = await db.collection('star_articles')
+        .where(whereConditions)
+        .orderBy(sortField, 'desc')
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .get()
+    } catch (err) {
+      // 如果按策展分值排序失败，回退到按发布时间排序
+      if (sortField !== 'publishTime') {
+        result = await db.collection('star_articles')
+          .where(whereConditions)
+          .orderBy('publishTime', 'desc')
+          .skip((page - 1) * limit)
+          .limit(limit)
+          .get()
+      } else {
+        throw err
+      }
+    }
 
     // 处理图片链接
     const articles = result.data
@@ -497,4 +525,4 @@ async function updateVideoDuration(event) {
       error: error.message
     }
   }
-} 
+}

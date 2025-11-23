@@ -75,7 +75,6 @@
           <image class="planet-icon-img" src="/pages/profile/images/星空打卡.jpg" mode="aspectFill"></image>
         </view>
         <view class="planet-glow {{hasCheckedInToday ? 'glow-blue' : 'glow-red'}}"></view>
-        <view class="checkin-badge-new" wx:if="{{!hasCheckedInToday}}">!</view>
       </view>
       <view class="planet-info">
         <view class="planet-title">星空打卡</view>

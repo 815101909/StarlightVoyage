@@ -576,7 +576,6 @@ Page({
     videoAPI.getA4Content().then(async result => {
       if (result && result.data) {
         const sections = result.data
-          .filter(item => ['universe-structure', 'celestial-types', 'energy-fields', 'where-we-are'].includes(item.category))
           .sort((a, b) => a.order - b.order);
         
         // 转换云存储URL为临时链接

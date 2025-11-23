@@ -15,6 +15,20 @@ Page({
     },
     isMember: false,
     showMemberLock: false,
+    // 悬浮讨论按钮拖拽
+    floatBtnX: 0,
+    floatBtnY: 0,
+    wasDrag: false,
+    isDragging: false,
+    dragStartX: 0,
+    dragStartY: 0,
+    dragOffsetX: 0,
+    dragOffsetY: 0,
+    dragStartTime: 0,
+    dragMoveDistance: 0,
+    windowWidth: 0,
+    windowHeight: 0,
+    floatBtnSize: 0,
     // 音频进度相关
     audioDuration: 0, // 音频总时长（秒）
     audioCurrentTime: 0, // 当前播放时间（秒）
@@ -75,8 +89,19 @@ Page({
     
     // 设置字体大小
     const savedFontSize = wx.getStorageSync('fontSize') || 32;
+    const sys = wx.getSystemInfoSync();
+    const ww = sys.windowWidth || 375;
+    const wh = sys.windowHeight || 667;
+    const rpx = ww / 750;
+    const btnSize = 100 * rpx;
+    const margin = 30 * rpx;
     this.setData({
       fontSize: savedFontSize,
+      windowWidth: ww,
+      windowHeight: wh,
+      floatBtnSize: btnSize,
+      floatBtnX: ww - margin - btnSize,
+      floatBtnY: (wh - btnSize) / 2,
       isBookmarked: false
     });
 
@@ -428,6 +453,62 @@ Page({
           processedContent = processedContent.replace(descMatches[index][0], '');
         }
       });
+
+      processedContent = processedContent
+        .replace(/<font([^>]*?)\scolor=['"]([^'\"]+)['"]([^>]*?)>/gi, (m, before, color, after) => {
+          const val = String(color).trim().toLowerCase();
+          const isBlack = (
+            val === 'black' ||
+            /^#0{3,8}$/.test(val) ||
+            /^rgb\s*\(\s*0\s*,\s*0\s*,\s*0\s*\)$/.test(val) ||
+            /^rgba\s*\(\s*0\s*,\s*0\s*,\s*0\s*,\s*(0|1|0?\.\d+)\s*\)$/.test(val) ||
+            /^hsl\s*\([\d\.]+\s*,\s*0%\s*,\s*0%\s*\)$/.test(val)
+          );
+          if (isBlack) {
+            return `<font${before}${after}>`;
+          }
+          return m;
+        })
+        .replace(/style\s*=\s*"(.*?)"/gi, (m, s) => {
+          const parts = s.split(';').map(p => p.trim()).filter(Boolean);
+          const filtered = parts.filter(p => {
+            const idx = p.indexOf(':');
+            if (idx === -1) return true;
+            const prop = p.slice(0, idx).trim().toLowerCase();
+            const val = p.slice(idx + 1).trim().toLowerCase();
+            if (prop !== 'color') return true;
+            const isBlack = (
+              val === 'black' ||
+              /^#0{3,8}$/.test(val) ||
+              /^rgb\s*\(\s*0\s*,\s*0\s*,\s*0\s*\)$/.test(val) ||
+              /^rgba\s*\(\s*0\s*,\s*0\s*,\s*0\s*,\s*(0|1|0?\.\d+)\s*\)$/.test(val) ||
+              /^hsl\s*\([\d\.]+\s*,\s*0%\s*,\s*0%\s*\)$/.test(val)
+            );
+            return !isBlack;
+          });
+          const result = filtered.join(';');
+          return result ? `style="${result}"` : '';
+        })
+        .replace(/style\s*=\s*'(.*?)'/gi, (m, s) => {
+          const parts = s.split(';').map(p => p.trim()).filter(Boolean);
+          const filtered = parts.filter(p => {
+            const idx = p.indexOf(':');
+            if (idx === -1) return true;
+            const prop = p.slice(0, idx).trim().toLowerCase();
+            const val = p.slice(idx + 1).trim().toLowerCase();
+            if (prop !== 'color') return true;
+            const isBlack = (
+              val === 'black' ||
+              /^#0{3,8}$/.test(val) ||
+              /^rgb\s*\(\s*0\s*,\s*0\s*,\s*0\s*\)$/.test(val) ||
+              /^rgba\s*\(\s*0\s*,\s*0\s*,\s*0\s*,\s*(0|1|0?\.\d+)\s*\)$/.test(val) ||
+              /^hsl\s*\([\d\.]+\s*,\s*0%\s*,\s*0%\s*\)$/.test(val)
+            );
+            return !isBlack;
+          });
+          const result = filtered.join(';');
+          return result ? `style='${result}'` : '';
+        });
 
       console.log('处理后的内容:', processedContent);
       console.log('提取的图片和描述:', images);
@@ -954,16 +1035,30 @@ Page({
 
 
   onUnload: function() {
-    // 页面卸载时停止音频播放和清理定时器
     this.stopProgressUpdate();
-    if (this.audioContext) {
-      this.audioContext.stop();
-      this.audioContext.destroy();
+    const ac = this.audioContext;
+    if (ac) {
+      try { ac.stop && ac.stop(); } catch (e) {}
+      try { ac.destroy && ac.destroy(); } catch (e) {}
+      this.audioContext = null;
     }
-    // 停止背景音乐
-    if (this.bgmContext) {
-      this.bgmContext.stop();
-      this.bgmContext.destroy();
+    const bc = this.bgmContext;
+    if (bc) {
+      try { bc.stop && bc.stop(); } catch (e) {}
+      try { bc.destroy && bc.destroy(); } catch (e) {}
+      this.bgmContext = null;
+    }
+  },
+
+  onHide: function() {
+    this.stopProgressUpdate();
+    const ac = this.audioContext;
+    if (ac) {
+      try { ac.pause && ac.pause(); } catch (e) {}
+    }
+    const bc = this.bgmContext;
+    if (bc) {
+      try { bc.pause && bc.pause(); } catch (e) {}
     }
   },
 
@@ -1341,7 +1436,42 @@ Page({
     this.setData({
       showDiscussionBox: false
     });
-  }
+  },
+  onFloatTouchStart: function(e) {
+    const t = e.touches[0];
+    this.setData({
+      isDragging: true,
+      wasDrag: false,
+      dragMoveDistance: 0,
+      dragStartTime: Date.now(),
+      dragStartX: t.clientX,
+      dragStartY: t.clientY,
+      dragOffsetX: t.clientX - this.data.floatBtnX,
+      dragOffsetY: t.clientY - this.data.floatBtnY
+    });
+  },
+  onFloatTouchMove: function(e) {
+    if (!this.data.isDragging) return;
+    const t = e.touches[0];
+    const nx = t.clientX - this.data.dragOffsetX;
+    const ny = t.clientY - this.data.dragOffsetY;
+    const maxX = this.data.windowWidth - this.data.floatBtnSize;
+    const maxY = this.data.windowHeight - this.data.floatBtnSize;
+    const cx = Math.max(0, Math.min(nx, maxX));
+    const cy = Math.max(0, Math.min(ny, maxY));
+    const dist = Math.abs(t.clientX - this.data.dragStartX) + Math.abs(t.clientY - this.data.dragStartY);
+    const moved = dist > 24; // 放大阈值，避免轻微抖动被判定为拖拽
+    this.setData({ floatBtnX: cx, floatBtnY: cy, wasDrag: moved, dragMoveDistance: dist });
+  },
+  onFloatTouchEnd: function() {
+    const duration = Date.now() - this.data.dragStartTime;
+    const dist = this.data.dragMoveDistance || 0;
+    this.setData({ isDragging: false });
+    if (dist <= 24 && duration <= 300) {
+      this.toggleDiscussionBox();
+    }
+  },
+  onFloatTap: function() {}
 }); 
 
 // 记录阅读活动

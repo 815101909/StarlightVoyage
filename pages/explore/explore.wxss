@@ -350,6 +350,7 @@
   font-weight: bold;
   color: #ffffff;
   line-height: 1.4;
+  margin-top: 30rpx;
   margin-bottom: 8rpx;
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -379,14 +380,11 @@
 
 .article-tags {
   display: flex;
-  gap: 12rpx;
   align-items: center;
 }
 
 .article-tag {
   font-size: 24rpx;
-  color: #7D9FF4;
-  background-color: rgba(125, 159, 244, 0.1);
   padding: 4rpx 12rpx;
   border-radius: 6rpx;
 }
@@ -780,4 +778,4 @@
 
 .category-item:active {
   transform: scale(0.95);
-} 
+}

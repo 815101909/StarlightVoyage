@@ -168,7 +168,10 @@
                 <view class="page-number-corner">1</view>
                 <view class="section-header-bar">
                   <view class="section-badge">引言</view>
-                  <view class="section-line"></view>
+                  <view class="section-line intro-line">
+                    <view class="intro-line-rail"></view>
+                    <text class="line-tip">向左滑翻页</text>
+                  </view>
                 </view>
                 <view class="content-box intro-box" wx:if="{{article.introNodes}}">
                   <rich-text nodes="{{article.introNodes}}" class="rich-content"></rich-text>
@@ -227,7 +230,11 @@
   </view>
   
   <!-- 悬浮的亲子讨论宝箱按钮 -->
-  <view class="discussion-float-btn" bindtap="toggleDiscussionBox">
+  <view class="discussion-float-btn"
+        style="left: {{floatBtnX}}px; top: {{floatBtnY}}px;"
+        catchtouchstart="onFloatTouchStart"
+        catchtouchmove="onFloatTouchMove"
+        catchtouchend="onFloatTouchEnd">
     <view class="treasure-box-icon">
       <image class="box-icon-img" src="icon/key.png" mode="aspectFit"></image>
     </view>

@@ -13,9 +13,10 @@
   <view class="section explore-section">
     <view class="section-header">
       <text class="section-title">探索不停歇</text>
-      <view class="date-picker-container">
+      <view class="date-filter-container">
+        <view class="date-filter-btn {{!articleFilterByDate ? 'active' : ''}}" bindtap="resetArticleDateFilter">全部</view>
         <picker mode="date" bindchange="dateChange">
-          <view class="date-picker">
+          <view class="date-picker {{articleFilterByDate ? 'active' : ''}}">
             <text class="date-picker-text">{{currentDate}}</text>
             <text class="date-picker-icon">▼</text>
           </view>
@@ -51,7 +52,7 @@
             <view class="article-info">
               <view class="article-title">{{item.title}}</view>
               <view class="article-meta">
-                  <text class="article-tag">{{item.category}}</text>
+                  <text class="article-tag"></text>
                   <text class="article-date">{{item.date}}</text>
               </view>
             </view>
@@ -190,4 +191,4 @@
       </view>
     </view>
   </view>
-</view> 
+</view>

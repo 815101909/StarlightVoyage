@@ -28,6 +28,7 @@ Page({
     // 文章相关
     articles: [],
     currentTab: 'news',
+    articleFilterByDate: false,
     
     // 视频相关
     videoList: [],
@@ -88,13 +89,20 @@ Page({
     this.setData({
       currentDate: dateStr,
       filterByDate: false,
+      articleFilterByDate: false,
+      // 文章与视频初始化
+      articles: [],
       videoList: [],
+      'page.article': 1,
       'page.video': 1,
+      'hasMore.article': true,
       'hasMore.video': true,
       isLoading: false
     }, () => {
-      // 设置完日期后立即加载数据
+      // 首次进入同时加载视频与文章（顺序执行，避免isLoading互斥）
       this.loadVideos()
+        .then(() => this.loadArticles())
+        .catch(() => this.loadArticles())
     })
   },
 
@@ -122,7 +130,8 @@ Page({
       currentTab: tab,
       articles: [],
       'page.article': 1,
-      'hasMore.article': true
+      'hasMore.article': true,
+      articleFilterByDate: false
     }, () => {
       this.loadArticles()
     })
@@ -135,9 +144,24 @@ Page({
     
     this.setData({
       currentDate: date,
+      articleFilterByDate: true,
       articles: [],
       'page.article': 1,
       'hasMore.article': true
+    }, () => {
+      this.loadArticles()
+    })
+  },
+
+  // 重置文章日期筛选（全部）
+  resetArticleDateFilter() {
+    if (!this.data.articleFilterByDate) return
+    this.setData({
+      articleFilterByDate: false,
+      articles: [],
+      'page.article': 1,
+      'hasMore.article': true,
+      isLoading: false
     }, () => {
       this.loadArticles()
     })
@@ -197,7 +221,8 @@ Page({
         name: 'explore',
         data: {
           action: 'getArticles',
-          date: this.data.currentTab === 'news' ? this.data.currentDate : null, // 只在天文时事标签下使用日期筛选
+          date: this.data.articleFilterByDate ? this.data.currentDate : null,
+          category: this.data.currentTab === 'news' ? 'news' : 'review',
           page: this.data.page.article,
           limit: 10,
           status: 'published'
@@ -439,7 +464,21 @@ Page({
           videoId: videoId
         }
       })
-      console.log('视频观看次数已更新')
+      const updatedList = this.data.videoList.map(v => {
+        if (v.id === videoId) {
+          const views = typeof v.views === 'number' ? v.views + 1 : 1
+          return { ...v, views }
+        }
+        return v
+      })
+      const currentViews = this.data.currentVideo && this.data.currentVideo.id === videoId
+        ? (typeof this.data.currentVideo.views === 'number' ? this.data.currentVideo.views + 1 : 1)
+        : null
+      if (currentViews !== null) {
+        this.setData({ videoList: updatedList, 'currentVideo.views': currentViews })
+      } else {
+        this.setData({ videoList: updatedList })
+      }
     } catch (error) {
       console.error('更新视频观看次数失败:', error)
     }
