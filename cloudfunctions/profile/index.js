@@ -320,58 +320,16 @@ async function doCheckin(userId, data = {}) {
     // Step 5: 计算新的连续打卡天数
     const updatedStreak = await calculateStreak(userId);
     const updatedTotalCheckins = totalCheckins + 1;
-
-    // Step 6: 检查连续打卡奖励
-    let memberReward = null;
-    if (updatedStreak === 10) {
-      memberReward = { days: 3, description: '连续打卡10天奖励3天会员' };
-    } else if (updatedStreak === 20) {
-      memberReward = { days: 7, description: '连续打卡20天奖励7天会员' };
-    } else if (updatedStreak === 30) {
-      memberReward = { days: 15, description: '连续打卡30天奖励15天会员' };
-    }
-
-    // Step 7: 如果有会员奖励，更新用户会员状态
-    if (memberReward) {
-      const currentUser = userInfo.data[0];
-      const now = new Date();
-      let newExpireDate;
-      
-      // 如果用户已有会员且未过期，在现有基础上延长
-      if (currentUser.memberExpireDate && new Date(currentUser.memberExpireDate) > now) {
-        newExpireDate = new Date(currentUser.memberExpireDate);
-        newExpireDate.setDate(newExpireDate.getDate() + memberReward.days);
-      } else {
-        // 如果用户没有会员或已过期，从今天开始计算
-        newExpireDate = new Date(now);
-        newExpireDate.setDate(newExpireDate.getDate() + memberReward.days);
+    await db.collection('users').where({
+      _openid: userId
+    }).update({
+      data: {
+        lastCheckinDate: today,
+        streak: updatedStreak,
+        totalCheckins: updatedTotalCheckins,
+        updatedAt: db.serverDate()
       }
-
-      await db.collection('users').where({
-        _openid: userId
-      }).update({
-        data: {
-          lastCheckinDate: today,
-          streak: updatedStreak,
-          totalCheckins: updatedTotalCheckins,
-          memberLevel: 1,
-          memberExpireDate: newExpireDate,
-          expireDate: newExpireDate.toISOString().split('T')[0],
-          updatedAt: db.serverDate()
-        }
-      });
-    } else {
-      // Step 8: 更新用户信息（无会员奖励）
-      await db.collection('users').where({
-        _openid: userId
-      }).update({
-        data: {
-          lastCheckinDate: today,
-          streak: updatedStreak,
-          totalCheckins: updatedTotalCheckins
-        }
-      });
-    }
+    });
 
     // 获取本月打卡记录用于返回
     const yearMonth = today.substring(0, 7);
@@ -396,19 +354,18 @@ async function doCheckin(userId, data = {}) {
       monthlyCheckins: checkinDays
     });
 
-    return {
-      success: true,
-      data: {
-        totalDays: updatedTotalCheckins,
-        continuousDays: updatedStreak,
-        todayChecked: true,
-        monthlyCheckins: {
-          year_month: yearMonth,
-          number: checkinDays
-        },
-        memberReward: memberReward // 添加会员奖励信息
-      }
-    };
+      return {
+        success: true,
+        data: {
+          totalDays: updatedTotalCheckins,
+          continuousDays: updatedStreak,
+          todayChecked: true,
+          monthlyCheckins: {
+            year_month: yearMonth,
+            number: checkinDays
+          },
+        }
+      };
 
   } catch (error) {
     console.error('打卡失败:', error);

@@ -30,25 +30,6 @@
           <text class="btn-desc" wx:else>每日打卡解锁星体</text>
         </view>
       </view>
-      
-      <!-- 连续打卡奖励说明 -->
-      <view class="reward-info">
-        <view class="reward-title">🎁 连续打卡奖励</view>
-        <view class="reward-list">
-          <view class="reward-item">
-            <text class="reward-days">10天</text>
-            <text class="reward-desc">奖励3天会员</text>
-          </view>
-          <view class="reward-item">
-            <text class="reward-days">20天</text>
-            <text class="reward-desc">奖励7天会员</text>
-          </view>
-          <view class="reward-item">
-            <text class="reward-days">30天</text>
-            <text class="reward-desc">奖励15天会员</text>
-          </view>
-        </view>
-      </view>
     </view>
     
     <!-- 日历区域 -->

@@ -753,11 +753,12 @@ Page({
         throw new Error(res.result.message || '打卡失败');
       }
 
-      // 更新基本信息
+      const totalDays = (res.result && res.result.data && (res.result.data.totalCheckins ?? res.result.data.totalDays)) ?? (this.data.checkinInfo.totalDays + 1);
+      const continuousDays = (res.result && res.result.data && (res.result.data.streak ?? res.result.data.continuousDays)) ?? (this.data.checkinInfo.continuousDays + 1);
       this.setData({
         'checkinInfo.todayChecked': true,
-        'checkinInfo.totalDays': res.result.data.totalCheckins || (this.data.checkinInfo.totalDays + 1),
-        'checkinInfo.continuousDays': res.result.data.streak || (this.data.checkinInfo.continuousDays + 1),
+        'checkinInfo.totalDays': totalDays,
+        'checkinInfo.continuousDays': continuousDays,
         currentCelestial: {
           ...celestial,
           checkinDate: checkinDate,
@@ -770,28 +771,10 @@ Page({
       await this.loadMonthlyCheckins(this.data.year, this.data.month);
 
       wx.hideLoading();
-      
-      // 检查是否有会员奖励
-      if (res.result.data.memberReward) {
-        const reward = res.result.data.memberReward;
-        wx.showModal({
-          title: '🎉 连续打卡奖励',
-          content: `恭喜您${reward.description}！`,
-          showCancel: false,
-          confirmText: '太棒了',
-          success: () => {
-            wx.showToast({
-              title: '打卡成功',
-              icon: 'success'
-            });
-          }
-        });
-      } else {
-        wx.showToast({
-          title: '打卡成功',
-          icon: 'success'
-        });
-      }
+      wx.showToast({
+        title: '打卡成功',
+        icon: 'success'
+      });
     } catch (error) {
       console.error('打卡失败:', error);
       wx.hideLoading();
