@@ -212,7 +212,10 @@
           <text class="speed-text">{{playbackRate}}x</text>
         </view>
         <view class="play-btn {{isReading ? 'playing' : ''}}" bindtap="toggleReading">
-          <text class="play-icon">{{isReading ? '❚❚' : '▶'}}</text>
+          <view class="play-icon {{isReading ? 'pause' : 'triangle'}}">
+            <view class="bar left"></view>
+            <view class="bar right"></view>
+          </view>
         </view>
       </view>
     </view>

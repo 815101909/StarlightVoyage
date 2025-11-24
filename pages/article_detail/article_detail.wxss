@@ -758,9 +758,49 @@
 }
 
 .play-icon {
-  font-size: 32rpx;
-  color: #ffffff;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  width: 28rpx;
+  height: 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.play-icon.triangle {
+  width: 0;
+  height: 0;
+  border-top: 14rpx solid transparent;
+  border-bottom: 14rpx solid transparent;
+  border-left: 22rpx solid #ffffff;
+  transform: translateX(2rpx);
+}
+
+.play-icon .bar {
+  display: none;
+}
+
+.play-icon.pause {
+  position: relative;
+  width: 22rpx;
+  height: 24rpx;
+}
+
+.play-icon.pause .bar {
+  display: block;
+  position: absolute;
+  top: 0;
+  width: 6rpx;
+  height: 100%;
+  background-color: #ffffff;
+  border-radius: 1rpx;
+  box-shadow: 0 1rpx 2rpx rgba(0, 0, 0, 0.25);
+}
+
+.play-icon.pause .bar.left {
+  left: 0;
+}
+
+.play-icon.pause .bar.right {
+  right: 0;
 }
 
 .audio-info {
